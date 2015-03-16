@@ -1,16 +1,14 @@
 //
-//  Check_list.m
+//  Job.m
 //  comress
 //
 //  Created by Diffy Romano on 16/3/15.
 //  Copyright (c) 2015 Combuilder. All rights reserved.
 //
 
-#import "Check_list.h"
+#import "Job.h"
 
-@implementation Check_list
-
-
+@implementation Job
 - (id)init {
     if (self = [super init]) {
         myDatabase = [Database sharedMyDbManager];
@@ -26,11 +24,11 @@
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:unixTime];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-        FMResultSet *rs = [theDb executeQuery:@"select * from ro_checklist_last_req_date"];
+        FMResultSet *rs = [theDb executeQuery:@"select * from ro_job_last_req_date"];
         
         if(![rs next])
         {
-            BOOL qIns = [theDb executeUpdate:@"insert into ro_checklist_last_req_date(date) values(?)",date];
+            BOOL qIns = [theDb executeUpdate:@"insert into ro_job_last_req_date(date) values(?)",date];
             
             if(!qIns)
             {
@@ -40,7 +38,7 @@
         }
         else
         {
-            BOOL qUp = [theDb executeUpdate:@"update ro_checklist_last_req_date set date = ? ",date];
+            BOOL qUp = [theDb executeUpdate:@"update ro_job_last_req_date set date = ? ",date];
             
             if(!qUp)
             {
@@ -52,5 +50,4 @@
     
     return YES;
 }
-
 @end

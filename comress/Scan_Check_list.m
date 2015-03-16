@@ -1,15 +1,14 @@
 //
-//  Check_list.m
+//  Scan_Check_list.m
 //  comress
 //
 //  Created by Diffy Romano on 16/3/15.
 //  Copyright (c) 2015 Combuilder. All rights reserved.
 //
 
-#import "Check_list.h"
+#import "Scan_Check_list.h"
 
-@implementation Check_list
-
+@implementation Scan_Check_list
 
 - (id)init {
     if (self = [super init]) {
@@ -26,11 +25,11 @@
     NSDate *date = [NSDate dateWithTimeIntervalSince1970:unixTime];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-        FMResultSet *rs = [theDb executeQuery:@"select * from ro_checklist_last_req_date"];
+        FMResultSet *rs = [theDb executeQuery:@"select * from ro_scanchecklist_last_req_date"];
         
         if(![rs next])
         {
-            BOOL qIns = [theDb executeUpdate:@"insert into ro_checklist_last_req_date(date) values(?)",date];
+            BOOL qIns = [theDb executeUpdate:@"insert into ro_scanchecklist_last_req_date(date) values(?)",date];
             
             if(!qIns)
             {
@@ -40,7 +39,7 @@
         }
         else
         {
-            BOOL qUp = [theDb executeUpdate:@"update ro_checklist_last_req_date set date = ? ",date];
+            BOOL qUp = [theDb executeUpdate:@"update ro_scanchecklist_last_req_date set date = ? ",date];
             
             if(!qUp)
             {

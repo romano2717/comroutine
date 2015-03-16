@@ -1253,11 +1253,110 @@
                     </view>
                     <connections>
                         <outlet property="processLabel" destination="SIO-fp-lsN" id="30Z-uC-I04"/>
+                        <segue destination="qpq-Vl-gnL" kind="presentation" identifier="modal_ro_init" id="Ynq-Ky-ai0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZBp-NN-mok" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-3506" y="-2166"/>
+        </scene>
+        <!--Rou Initializer View Controller-->
+        <scene sceneID="Rmq-03-x5O">
+            <objects>
+                <viewController id="qpq-Vl-gnL" customClass="RouInitializerViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="qjD-EW-bIM"/>
+                        <viewControllerLayoutGuide type="bottom" id="y5E-wU-0eu"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Yej-qt-cwO">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Initializing..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="O3e-Uf-lv4">
+                                <rect key="frame" x="16" y="28" width="568" height="35"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="35" id="nRg-U6-ILa"/>
+                                    <constraint firstAttribute="height" constant="135" id="uBv-tC-jHy"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="uBv-tC-jHy"/>
+                                    </mask>
+                                </variation>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <mask key="constraints">
+                                        <exclude reference="nRg-U6-ILa"/>
+                                        <include reference="uBv-tC-jHy"/>
+                                    </mask>
+                                </variation>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Please wait..." textAlignment="center" lineBreakMode="middleTruncation" baselineAdjustment="alignBaselines" minimumFontSize="8" translatesAutoresizingMaskIntoConstraints="NO" id="lae-nf-Tyb">
+                                <rect key="frame" x="16" y="289" width="568" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="Pfd-R2-8Cb"/>
+                                    <constraint firstAttribute="height" constant="21" id="ek2-dG-rLg"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                                <variation key="default">
+                                    <mask key="constraints">
+                                        <exclude reference="Pfd-R2-8Cb"/>
+                                    </mask>
+                                </variation>
+                                <variation key="heightClass=regular-widthClass=compact">
+                                    <mask key="constraints">
+                                        <include reference="Pfd-R2-8Cb"/>
+                                        <exclude reference="ek2-dG-rLg"/>
+                                    </mask>
+                                </variation>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="lae-nf-Tyb" firstAttribute="leading" secondItem="Yej-qt-cwO" secondAttribute="leadingMargin" id="1bW-Y1-2SK"/>
+                            <constraint firstItem="lae-nf-Tyb" firstAttribute="trailing" secondItem="Yej-qt-cwO" secondAttribute="trailingMargin" id="BRP-XZ-ttF"/>
+                            <constraint firstItem="lae-nf-Tyb" firstAttribute="trailing" secondItem="Yej-qt-cwO" secondAttribute="trailingMargin" id="DRD-Wc-08d"/>
+                            <constraint firstItem="O3e-Uf-lv4" firstAttribute="top" secondItem="qjD-EW-bIM" secondAttribute="bottom" constant="8" symbolic="YES" id="Fao-ds-K1x"/>
+                            <constraint firstItem="lae-nf-Tyb" firstAttribute="leading" secondItem="Yej-qt-cwO" secondAttribute="leadingMargin" id="Hve-Hp-1sk"/>
+                            <constraint firstItem="y5E-wU-0eu" firstAttribute="top" secondItem="lae-nf-Tyb" secondAttribute="bottom" constant="290" id="aia-Pj-Hct">
+                                <variation key="heightClass=regular-widthClass=regular" constant="390"/>
+                            </constraint>
+                            <constraint firstItem="y5E-wU-0eu" firstAttribute="top" secondItem="lae-nf-Tyb" secondAttribute="bottom" constant="290" id="bLS-6t-8vD">
+                                <variation key="heightClass=compact" constant="190"/>
+                                <variation key="heightClass=regular" constant="390"/>
+                                <variation key="heightClass=compact-widthClass=compact" constant="190"/>
+                                <variation key="heightClass=regular-widthClass=compact" constant="390"/>
+                            </constraint>
+                            <constraint firstItem="O3e-Uf-lv4" firstAttribute="trailing" secondItem="lae-nf-Tyb" secondAttribute="trailing" id="hkm-rK-mGs"/>
+                            <constraint firstItem="lae-nf-Tyb" firstAttribute="leading" secondItem="O3e-Uf-lv4" secondAttribute="leading" id="itk-oI-qjI"/>
+                        </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="aia-Pj-Hct"/>
+                            </mask>
+                        </variation>
+                        <variation key="widthClass=regular">
+                            <mask key="constraints">
+                                <include reference="aia-Pj-Hct"/>
+                            </mask>
+                        </variation>
+                        <variation key="heightClass=compact-widthClass=regular">
+                            <mask key="constraints">
+                                <exclude reference="aia-Pj-Hct"/>
+                            </mask>
+                        </variation>
+                    </view>
+                    <connections>
+                        <outlet property="processLabel" destination="lae-nf-Tyb" id="bvu-Cf-WEd"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="0Jc-IM-dc2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2650.5" y="-2160"/>
         </scene>
         <!--Tab bar-->
         <scene sceneID="yl2-sM-qoP">
@@ -1350,8 +1449,8 @@
         <image name="settings.png" width="27" height="27"/>
     </resources>
     <inferredMetricsTieBreakers>
+        <segue reference="wel-of-2Aw"/>
         <segue reference="SMc-XH-H8D"/>
         <segue reference="q2U-TG-uMs"/>
-        <segue reference="wel-of-2Aw"/>
     </inferredMetricsTieBreakers>
 </document>

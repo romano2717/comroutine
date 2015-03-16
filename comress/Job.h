@@ -1,5 +1,5 @@
 //
-//  Check_list.h
+//  Job.h
 //  comress
 //
 //  Created by Diffy Romano on 16/3/15.
@@ -9,12 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "Database.h"
 
-@interface Check_list : NSObject
-
+@interface Job : NSObject
 {
     Database *myDatabase;
 }
 
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString;
-
 @end

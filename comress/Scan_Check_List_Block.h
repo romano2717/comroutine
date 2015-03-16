@@ -1,5 +1,5 @@
 //
-//  Check_list.h
+//  Scan_Check_List_Block.h
 //  comress
 //
 //  Created by Diffy Romano on 16/3/15.
@@ -9,12 +9,10 @@
 #import <Foundation/Foundation.h>
 #import "Database.h"
 
-@interface Check_list : NSObject
-
+@interface Scan_Check_List_Block : NSObject
 {
     Database *myDatabase;
 }
 
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString;
-
 @end

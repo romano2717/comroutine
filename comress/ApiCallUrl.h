@@ -53,6 +53,15 @@ static NSString *api_update_post_status = @"Messaging/Post.svc/UpdatePostActionS
 
 static NSString *api_download_checklist = @"Job/Setup.svc/GetCheckLists";
 
+static NSString *api_download_checkarea = @"Job/Setup.svc/GetCheckAreas";
+
+static NSString *api_download_scan_checklist_blk =  @"Job/Setup.svc/GetScanCheckListBlks";
+
+static NSString *api_download_scan_checklist = @"PublicSetup.svc/GetScanCheckLists";
+
+static NSString *api_download_jobs = @"/Job/Setup.svc/GetJobs";
+
+
 #endif
 
 

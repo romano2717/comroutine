@@ -34,30 +34,29 @@
     imagesArr = [[NSMutableArray alloc] init];
     
     imageDownloadComplete = NO;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(rouInitDone) name:@"rouInitDone" object:nil];
 
     [self checkBlockCount];
 }
 
+- (void)rouInitDone
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 - (void)initializingCompleteWithUi:(BOOL)withUi
 {
-    //if(withUi == YES)
-        myDatabase.initializingComplete = 1;
-        myDatabase.userBlocksInitComplete = 1;
+    [self performSegueWithIdentifier:@"modal_ro_init" sender:self];
+}
+
+
+ #pragma mark - Navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     
-    [self dismissViewControllerAnimated:YES completion:^{
-       
-        //if(withUi == YES)
-        //{
-            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-                BOOL upClient = [db executeUpdate:@"update client set initialise = ?",[NSNumber numberWithInt:1]];
-                if(!upClient)
-                {
-                    *rollback = YES;
-                    return;
-                }
-            }];
-        //}
-    }];
+    //go directly
+    [segue destinationViewController];
+    
 }
 
 
@@ -427,16 +426,6 @@
         }];
     }];
 }
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 
 - (void)startDownloadCommentNotiForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi

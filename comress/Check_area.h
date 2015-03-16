@@ -1,5 +1,5 @@
 //
-//  Check_list.h
+//  Check_area.h
 //  comress
 //
 //  Created by Diffy Romano on 16/3/15.
@@ -9,8 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "Database.h"
 
-@interface Check_list : NSObject
 
+@interface Check_area : NSObject
 {
     Database *myDatabase;
 }

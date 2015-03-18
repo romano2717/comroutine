@@ -59,7 +59,21 @@ static NSString *api_download_scan_checklist_blk =  @"Job/Setup.svc/GetScanCheck
 
 static NSString *api_download_scan_checklist = @"PublicSetup.svc/GetScanCheckLists";
 
-static NSString *api_download_jobs = @"/Job/Setup.svc/GetJobs";
+static NSString *api_download_jobs = @"Job/Setup.svc/GetJobs";
+
+static NSString *api_download_sup_sked = @"Job/Schedule.svc/GetSUPSchedules";
+
+static NSString *api_download_spo_sked = @"Job/Schedule.svc/GetSPOSchedules";
+
+static NSString *api_updated_sup_sked = @"Job/Schedule.svc/UpdateSchedulesBySUP";
+
+static NSString *api_update_spo_sked = @"Job/Schedule.svc/UpdateSchedulesBySPO";
+
+static NSString *api_upload_scan_blk = @"Job/ScanBlock.svc/UploadScanBlock";
+
+static NSString *api_upload_scan_inspection = @"Job/ScanInspection.svc/UploadScanInspection";
+
+static NSString *api_upload_inspection_res = @"Job/InspectionResult.svc/UploadInspectionResult";
 
 
 #endif

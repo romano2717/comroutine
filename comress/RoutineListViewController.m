@@ -17,14 +17,29 @@
 
 @implementation RoutineListViewController
 
+@synthesize scheduleArray;
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
     myDatabase = [Database sharedMyDbManager];
     
+    schedule = [[Schedule alloc] init];
+    
+    //for qr code scanning
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(waitingForLocation) name:@"waitingForLocation" object:self];
+    
+    
+    //when unlock/lock/report button is tapped
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tappedUnlockButton:) name:@"tappedUnlockButton" object:nil];
 }
+
+- (void)tappedUnlockButton:(NSNotification *)notif
+{
+    DDLogVerbose(@"sched %@",[[notif userInfo] valueForKey:@"scheduleId"]);
+}
+
 
 - (void)waitingForLocation
 {
@@ -43,6 +58,22 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    self.tabBarController.tabBar.hidden = NO;
+    self.navigationController.navigationBar.hidden = YES;
+    self.hidesBottomBarWhenPushed = NO;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    [self fetchSchedule];
 }
 
 - (void)scanningQrCodeComplete:(NSNotification *)notif
@@ -92,5 +123,78 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+
+- (IBAction)segmentControlChange:(id)sender
+{
+    UISegmentedControl *segment = (UISegmentedControl *)sender;
+    self.segment = segment;
+    
+    [self fetchSchedule];
+}
+
+- (void)fetchSchedule
+{
+    if(self.segment.selectedSegmentIndex == 0)
+        scheduleArray = [schedule fetchScheduleForMe];
+    else
+        scheduleArray = [schedule fetchScheduleForOthersAtPage:[NSNumber numberWithInt:0]];
+    
+    [self.routineTableView reloadData];
+}
+
+#pragma mark - uitableview delegate and datasource
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return scheduleArray.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    RoutineTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
+    
+    NSDictionary *dict;
+    
+    dict = (NSDictionary *)[scheduleArray objectAtIndex:indexPath.row];
+    
+    [cell initCellWithResultSet:dict];
+    
+    return cell;
+}
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if(decelerate)
+    {
+        if(self.routineTableView.contentOffset.y<0){
+            //it means table view is pulled down like refresh
+            return;
+        }
+        else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
+            NSLog(@"scrollViewDidEndDragging bottom!");
+        }
+    }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+    if(self.routineTableView.contentOffset.y<0){
+        //it means table view is pulled down like refresh
+        return;
+    }
+    else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
+        NSLog(@"scrollViewDidEndDecelerating bottom!");
+    }
+}
+
+
 
 @end

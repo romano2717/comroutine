@@ -86,20 +86,75 @@
         {
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 
-                //new user, clear user blocks
+                //clear user blocks
                 BOOL clearUserBLk = [db executeUpdate:@"delete from blocks_user"];
                 if(!clearUserBLk)
                 {
                     *rollback = YES;
                     return;
                 }
-                
                 BOOL clearUserBlkLrd = [db executeUpdate:@"delete from blocks_user_last_request_date"];
                 if(!clearUserBlkLrd)
                 {
                     *rollback = YES;
                     return;
                 }
+                
+                
+                /* clear
+                ro_checkarea,ro_checkarea_last_req_date,
+                ro_scanchecklist_blk,ro_scanchecklist_blk_last_req_date,
+                ro_job,ro_job_last_req_date,
+                ro_schedule,ro_schedule_last_req_date, */
+                
+                if([db executeUpdate:@"delete from ro_checkarea"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_checkarea_last_req_date"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_scanchecklist_blk"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_scanchecklist_blk_last_req_date"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_job"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_job_last_req_date"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_schedule"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                if([db executeUpdate:@"delete from ro_schedule_last_req_date"] == NO)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
                 
                 BOOL q;
                 NSNumber *isActiveNo = [NSNumber numberWithInt:0];

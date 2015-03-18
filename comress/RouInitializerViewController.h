@@ -13,6 +13,7 @@
 #import "Scan_Check_list.h"
 #import "Scan_Check_List_Block.h"
 #import "Job.h"
+#import "Schedule.h"
 
 @interface RouInitializerViewController : UIViewController
 {
@@ -23,6 +24,7 @@
     Scan_Check_list *scan_check_list;
     Scan_Check_List_Block *scan_check_list_block;
     Job *job;
+    Schedule *schedule;
 }
 
 @property (nonatomic, weak) IBOutlet UILabel *processLabel;

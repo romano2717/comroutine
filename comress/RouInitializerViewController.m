@@ -27,6 +27,7 @@
     scan_check_list         = [[Scan_Check_list alloc] init];
     scan_check_list_block   = [[Scan_Check_List_Block alloc] init];
     job                     = [[Job alloc] init];
+    schedule                = [[Schedule alloc] init];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -70,6 +71,8 @@
             }
         }];
         //}
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"rouInitDone" object:nil];
     }];
 }
 
@@ -636,7 +639,10 @@
                 [self startDownloadJobsForPage:1 totalPage:0 requestDate:nil withUi:YES];
             else
             {
-                [self initializingCompleteWithUi:YES];
+                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
+                    [self checkSupSkedCount];
+                else
+                    [self checkSpoSkedCount];
             }
             
             
@@ -703,6 +709,301 @@
             
             self.processLabel.text = @"Download complete";
             
+            if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
+                [self checkSupSkedCount];
+            else
+                [self checkSpoSkedCount];
+        }
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        [self initializingCompleteWithUi:NO];
+    }];
+}
+
+
+#pragma mark - check sup sked
+- (void)checkSupSkedCount
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSDate *last_request_date = nil;
+        
+        FMResultSet *rs = [db executeQuery:@"select date from ro_schedule_last_req_date"];
+        while ([rs next]) {
+            last_request_date = [rs dateForColumn:@"date"];
+        }
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+        
+        NSString *jsonDate = @"/Date(1388505600000+0800)/";
+        
+        if(last_request_date != nil)
+        {
+            jsonDate = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [last_request_date timeIntervalSince1970],[formatter stringFromDate:last_request_date]];
+        }
+        
+        NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
+        
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_sup_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
+            
+            int totalRows = [[dict valueForKey:@"TotalRows"] intValue];
+            __block BOOL needToDownloadBlocks = NO;
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rsBlockCount = [theDb executeQuery:@"select count(*) as total from ro_schedule"];
+                
+                while ([rsBlockCount next]) {
+                    int total = [rsBlockCount intForColumn:@"total"];
+                    
+                    if(total < totalRows)
+                    {
+                        needToDownloadBlocks = YES;
+                    }
+                }
+            }];
+            
+            if(needToDownloadBlocks)
+                [self startDownloadSupSkedForPage:1 totalPage:0 requestDate:nil withUi:YES];
+            else
+            {
+                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
+                    [self checkSupSkedCount];
+                else
+                    [self checkSpoSkedCount];
+            }
+            
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            [self initializingCompleteWithUi:NO];
+        }];
+        
+    }];
+}
+
+
+- (void)startDownloadSupSkedForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading schedule page... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadSupSkedForPage %@",[myDatabase toJsonString:params]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_sup_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        NSArray *dictArray = [dict objectForKey:@"ScheduleList"];
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictList = [dictArray objectAtIndex:i];
+            NSString *Area          = [dictList valueForKey:@"Area"];
+            NSNumber *BlkId         = [NSNumber numberWithInt:[[dictList valueForKey:@"BlkId"] intValue]];
+            NSNumber *JobId         = [NSNumber numberWithInt:[[dictList valueForKey:@"JobId"] intValue]];
+            NSNumber *JobType       = [NSNumber numberWithInt:[[dictList valueForKey:@"JobType"] intValue]];
+            NSNumber *JobTypeId     = [NSNumber numberWithInt:[[dictList valueForKey:@"JobTypeId"] intValue]];
+            NSDate *ScheduleDate    = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ScheduleDate"]];
+            NSNumber *ScheduleId    = [NSNumber numberWithInt:[[dictList valueForKey:@"ScheduleId"] intValue]];
+            NSDate *ActEndTime      = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ActEndTime"]];
+            NSDate *ActStartTime    = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ActStartTime"]];
+            NSDate *ActualDate      = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ActualDate"]];
+            NSNumber *SUPFlag       = [NSNumber numberWithInt:[[dictList valueForKey:@"SUPFlag"] intValue]];
+            NSDate *SupChk          = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"SupChk"]];
+
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rs = [theDb executeQuery:@"select w_scheduleid from ro_schedule where w_scheduleid = ?",ScheduleId];
+                
+                if([rs next] == NO)//does not exist
+                {
+                    BOOL ins = [theDb executeUpdate:@"insert into ro_schedule (w_area,w_blkid,w_jobid,w_jobtype,w_jobtypeId,w_scheduledate,w_scheduleid,w_actendtime,w_actstarttime,w_actualdate,w_flag,w_supchk) values(?,?,?,?,?,?,?,?,?,?,?,?)",Area,BlkId,JobId,JobType,JobTypeId,ScheduleDate,ScheduleId,ActEndTime,ActStartTime,ActualDate,SUPFlag,SupChk];
+                    
+                    if(!ins)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+                
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadSupSkedForPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:withUi];
+        }
+        else
+        {
+            if(dictArray.count > 0)
+                [schedule updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
+            
+            self.processLabel.text = @"Download complete";
+            
+            if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
+                [self checkSupSkedCount];
+            else
+                [self checkSpoSkedCount];
+        }
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        [self initializingCompleteWithUi:NO];
+    }];
+}
+
+
+
+#pragma mark - check spo sked
+- (void)checkSpoSkedCount
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSDate *last_request_date = nil;
+        
+        FMResultSet *rs = [db executeQuery:@"select date from ro_schedule_last_req_date"];
+        while ([rs next]) {
+            last_request_date = [rs dateForColumn:@"date"];
+        }
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+        
+        NSString *jsonDate = @"/Date(1388505600000+0800)/";
+        
+        if(last_request_date != nil)
+        {
+            jsonDate = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [last_request_date timeIntervalSince1970],[formatter stringFromDate:last_request_date]];
+        }
+        
+        NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
+        
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_spo_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
+            
+            int totalRows = [[dict valueForKey:@"TotalRows"] intValue];
+            __block BOOL needToDownloadBlocks = NO;
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rsBlockCount = [theDb executeQuery:@"select count(*) as total from ro_schedule"];
+                
+                while ([rsBlockCount next]) {
+                    int total = [rsBlockCount intForColumn:@"total"];
+                    
+                    if(total < totalRows)
+                    {
+                        needToDownloadBlocks = YES;
+                    }
+                }
+            }];
+            
+            if(needToDownloadBlocks)
+                [self startDownloadSpoSkedForPage:1 totalPage:0 requestDate:nil withUi:YES];
+            else
+            {
+                [self initializingCompleteWithUi:YES];
+            }
+            
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            [self initializingCompleteWithUi:NO];
+        }];
+        
+    }];
+}
+
+
+- (void)startDownloadSpoSkedForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading schedule page... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadSpoSkedForPage %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_spo_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        NSArray *dictArray = [dict objectForKey:@"ScheduleList"];
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictList = [dictArray objectAtIndex:i];
+            NSString *Area          = [dictList valueForKey:@"Area"];
+            NSNumber *BlkId         = [NSNumber numberWithInt:[[dictList valueForKey:@"BlkId"] intValue]];
+            NSNumber *JobId         = [NSNumber numberWithInt:[[dictList valueForKey:@"JobId"] intValue]];
+            NSString *JobType       = [dictList valueForKey:@"JobType"];
+            NSNumber *JobTypeId     = [NSNumber numberWithInt:[[dictList valueForKey:@"JobTypeId"] intValue]];
+            NSDate *ScheduleDate    = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ScheduleDate"]];
+            NSNumber *ScheduleId    = [NSNumber numberWithInt:[[dictList valueForKey:@"ScheduleId"] intValue]];
+            NSNumber *Flag          = [NSNumber numberWithInt:[[dictList valueForKey:@"Flag"] intValue]];
+            NSDate *SPOChk          = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"SPOChk"]];
+            DDLogVerbose(@"ScheduleId %@",ScheduleId);
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rs = [theDb executeQuery:@"select w_scheduleid from ro_schedule where w_scheduleid = ?",ScheduleId];
+                
+                if([rs next] == NO)//does not exist
+                {
+                    BOOL ins = [theDb executeUpdate:@"insert into ro_schedule (w_area,w_blkid,w_jobid,w_jobtype,w_jobtypeId,w_scheduledate,w_scheduleid,w_flag,w_spochk) values(?,?,?,?,?,?,?,?,?)",Area,BlkId,JobId,JobType,JobTypeId,ScheduleDate,ScheduleId,Flag,SPOChk];
+                    
+                    if(!ins)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+                
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadSpoSkedForPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:withUi];
+        }
+        else
+        {
+            if(dictArray.count > 0)
+                [schedule updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
+            
+            self.processLabel.text = @"Download complete";
+            
             [self initializingCompleteWithUi:YES];
         }
         
@@ -713,5 +1014,6 @@
         [self initializingCompleteWithUi:NO];
     }];
 }
+
 
 @end

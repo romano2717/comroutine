@@ -60,16 +60,16 @@
     return skedArr;
 }
 
-- (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)row
+- (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)limit
 {
-    NSNumber *limit = [NSNumber numberWithInt:20];
+    NSNumber *start = [NSNumber numberWithInt:0];
     
     NSMutableArray *skedArr = [[NSMutableArray alloc] init];
     
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         db.traceExecution = YES;
-        FMResultSet *rsblk = [db executeQuery:@"select b.block_id,b.block_no,b.street_name rs.* from blocks b, ro_schedule rs, blocks_user bu where b.block_id = rs.w_blkid and rs.w_blkid != bu.block_id group by rs.w_blkid"];
+        FMResultSet *rsblk = [db executeQuery:@"select b.block_id,b.block_no,b.street_name, rs.* from blocks b, ro_schedule rs, blocks_user bu where b.block_id = rs.w_blkid and rs.w_blkid != bu.block_id group by rs.w_blkid"];
         
         while ([rsblk next]) {
             
@@ -79,7 +79,7 @@
         }
         
         //add the rest of the blocks that are not found in blocks_users
-        FMResultSet *rsAllBlk = [db executeQuery:@"select * from blocks where block_id not in(select block_id from blocks_user) limit ?, ?",row,limit];
+        FMResultSet *rsAllBlk = [db executeQuery:@"select * from blocks where block_id not in(select block_id from blocks_user) limit ?, ?",start,limit];
         
         while ([rsAllBlk next]) {
             NSDictionary *blockDict = [NSDictionary dictionaryWithObject:[rsAllBlk resultDictionary] forKey:[NSString stringWithFormat:@"%d",[rsAllBlk intForColumn:@"block_id"]]];

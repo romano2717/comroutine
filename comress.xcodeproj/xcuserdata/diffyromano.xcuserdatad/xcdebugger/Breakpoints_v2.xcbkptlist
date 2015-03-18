@@ -4544,11 +4544,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448280342.146237"
+            timestampString = "448365613.261073"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "87"
-            endingLineNumber = "87"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
             landmarkName = "-locatingComplete:"
             landmarkType = "5">
          </BreakpointContent>
@@ -6336,11 +6336,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448350479.336019"
+            timestampString = "448367394.294152"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "140"
-            endingLineNumber = "140"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
             landmarkName = "-fetchSchedule"
             landmarkType = "5">
          </BreakpointContent>
@@ -6352,11 +6352,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448350479.336019"
+            timestampString = "448367394.294152"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "160"
-            endingLineNumber = "160"
+            startingLineNumber = "170"
+            endingLineNumber = "170"
             landmarkName = "-tableView:cellForRowAtIndexPath:"
             landmarkType = "5">
          </BreakpointContent>
@@ -6368,11 +6368,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448280342.146237"
+            timestampString = "448365613.261073"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "46"
-            endingLineNumber = "46"
+            startingLineNumber = "48"
+            endingLineNumber = "48"
             landmarkName = "-waitingForLocation"
             landmarkType = "5">
          </BreakpointContent>
@@ -6384,11 +6384,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448280342.146237"
+            timestampString = "448365613.261073"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "81"
-            endingLineNumber = "81"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
             landmarkName = "-scanningQrCodeComplete:"
             landmarkType = "5">
          </BreakpointContent>
@@ -6400,11 +6400,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448280342.146237"
+            timestampString = "448365613.261073"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "88"
-            endingLineNumber = "88"
+            startingLineNumber = "92"
+            endingLineNumber = "92"
             landmarkName = "-locatingComplete:"
             landmarkType = "5">
          </BreakpointContent>
@@ -6416,11 +6416,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/RoutineListViewController.m"
-            timestampString = "448280342.146237"
+            timestampString = "448365613.261073"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "95"
-            endingLineNumber = "95"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
             landmarkName = "-passQrCodeAndLocation:"
             landmarkType = "5">
          </BreakpointContent>
@@ -6512,7 +6512,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/Schedule.m"
-            timestampString = "448350976.981379"
+            timestampString = "448362976.025748"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "73"
@@ -6528,7 +6528,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/Schedule.m"
-            timestampString = "448351046.191133"
+            timestampString = "448362976.025748"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "71"
@@ -6544,7 +6544,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/Schedule.m"
-            timestampString = "448351716.764067"
+            timestampString = "448362976.025748"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "76"
@@ -6560,7 +6560,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/Schedule.m"
-            timestampString = "448352285.854386"
+            timestampString = "448362976.025748"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "82"
@@ -6576,12 +6576,44 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "comress/Schedule.m"
-            timestampString = "448352542.229763"
+            timestampString = "448362976.025748"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "91"
             endingLineNumber = "91"
             landmarkName = "-fetchScheduleForOthersAtPage:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "comress/Schedule.m"
+            timestampString = "448362976.025748"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "65"
+            endingLineNumber = "65"
+            landmarkName = "-fetchScheduleForOthersAtPage:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "comress/RoutineListViewController.m"
+            timestampString = "448367394.294152"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "148"
+            endingLineNumber = "148"
+            landmarkName = "-fetchSchedule"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

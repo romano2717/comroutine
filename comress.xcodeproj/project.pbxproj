@@ -19,6 +19,11 @@
 		4D0C2F8C1A7B4C98009E5E53 /* Post.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F8B1A7B4C98009E5E53 /* Post.m */; };
 		4D0C2F8F1A7B4CA2009E5E53 /* PostImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F8E1A7B4CA2009E5E53 /* PostImage.m */; };
 		4D0C2F921A7B4CAC009E5E53 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F911A7B4CAC009E5E53 /* Users.m */; };
+		4D118A9C1AB988810062C129 /* MNMBottomPullToRefresh.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */; };
+		4D118A9D1AB988810062C129 /* MNMBottomPullToRefreshArrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */; };
+		4D118A9E1AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */; };
+		4D118A9F1AB988810062C129 /* MNMBottomPullToRefreshManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */; };
+		4D118AA01AB988810062C129 /* MNMBottomPullToRefreshView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */; };
 		4D37BDB81A9C2271006B414A /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D37BDB71A9C2271006B414A /* back.png */; };
 		4D4CB52A1A89D76F008AFD00 /* IssuesChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4CB5291A89D76F008AFD00 /* IssuesChatViewController.m */; };
 		4D4CB52D1A89D7DA008AFD00 /* MessageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4CB52C1A89D7DA008AFD00 /* MessageData.m */; };
@@ -214,6 +219,13 @@
 		4D0C2F8E1A7B4CA2009E5E53 /* PostImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PostImage.m; sourceTree = "<group>"; };
 		4D0C2F901A7B4CAC009E5E53 /* Users.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Users.h; sourceTree = "<group>"; };
 		4D0C2F911A7B4CAC009E5E53 /* Users.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Users.m; sourceTree = "<group>"; };
+		4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = MNMBottomPullToRefresh.strings; sourceTree = "<group>"; };
+		4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MNMBottomPullToRefreshArrow.png; sourceTree = "<group>"; };
+		4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MNMBottomPullToRefreshArrow@2x.png"; sourceTree = "<group>"; };
+		4D118A981AB988810062C129 /* MNMBottomPullToRefreshManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMBottomPullToRefreshManager.h; sourceTree = "<group>"; };
+		4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNMBottomPullToRefreshManager.m; sourceTree = "<group>"; };
+		4D118A9A1AB988810062C129 /* MNMBottomPullToRefreshView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMBottomPullToRefreshView.h; sourceTree = "<group>"; };
+		4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNMBottomPullToRefreshView.m; sourceTree = "<group>"; };
 		4D37BDB71A9C2271006B414A /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
 		4D4CB5281A89D76F008AFD00 /* IssuesChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IssuesChatViewController.h; sourceTree = "<group>"; };
 		4D4CB5291A89D76F008AFD00 /* IssuesChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IssuesChatViewController.m; sourceTree = "<group>"; };
@@ -592,6 +604,20 @@
 			name = Data;
 			sourceTree = "<group>";
 		};
+		4D118A941AB988770062C129 /* load more */ = {
+			isa = PBXGroup;
+			children = (
+				4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */,
+				4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */,
+				4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */,
+				4D118A981AB988810062C129 /* MNMBottomPullToRefreshManager.h */,
+				4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */,
+				4D118A9A1AB988810062C129 /* MNMBottomPullToRefreshView.h */,
+				4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */,
+			);
+			name = "load more";
+			sourceTree = "<group>";
+		};
 		4D4CB5251A89D703008AFD00 /* Listing */ = {
 			isa = PBXGroup;
 			children = (
@@ -792,6 +818,7 @@
 		4DA203EA1A79CC2B00C7E5C7 /* Libs */ = {
 			isa = PBXGroup;
 			children = (
+				4D118A941AB988770062C129 /* load more */,
 				4D8AC98C1AAFE4B0008F7652 /* barcode scanner */,
 				4DF666B11AA9612B00C3B0FF /* navbar title/sub */,
 				4DAC7D7F1AA69C66001A0317 /* hud */,
@@ -1349,6 +1376,7 @@
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
 				4D81D45A1AB7D86C00A403C9 /* comress.sqlite in Resources */,
+				4D118A9E1AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png in Resources */,
 				4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */,
 				4D8AC95F1AAD8AE3008F7652 /* crm.png in Resources */,
 				4DA204221A79CF8800C7E5C7 /* btn_small.png in Resources */,
@@ -1365,6 +1393,7 @@
 				4DA207DA1A79DA0A00C7E5C7 /* JSQMessagesAssets.bundle in Resources */,
 				4DA203D31A79CBA100C7E5C7 /* LaunchScreen.xib in Resources */,
 				4DA204211A79CF8800C7E5C7 /* btn_large.png in Resources */,
+				4D118A9C1AB988810062C129 /* MNMBottomPullToRefresh.strings in Resources */,
 				4DA203D01A79CBA100C7E5C7 /* Images.xcassets in Resources */,
 				4D8AC9691AAD8CD4008F7652 /* issue@2x.png in Resources */,
 				4DA204201A79CF8800C7E5C7 /* arrow.png in Resources */,
@@ -1376,6 +1405,7 @@
 				4D81D4681AB8352300A403C9 /* report@2x.png in Resources */,
 				4DAEA6B71A83505E00A6EFBE /* Localizable.strings in Resources */,
 				4D37BDB81A9C2271006B414A /* back.png in Resources */,
+				4D118A9D1AB988810062C129 /* MNMBottomPullToRefreshArrow.png in Resources */,
 				4D8AC9671AAD8CD4008F7652 /* routine@2x.png in Resources */,
 				4DA207DB1A79DA0A00C7E5C7 /* JSQMessages.strings in Resources */,
 				4D81D4691AB8352300A403C9 /* unlocked@2x.png in Resources */,
@@ -1483,6 +1513,7 @@
 				4DA203FC1A79CC5200C7E5C7 /* FMDatabaseQueue.m in Sources */,
 				4DD6FEB91A88954800CBBE1D /* Synchronize.m in Sources */,
 				4D91D5B71A8DC40900A21DBA /* Device_token.m in Sources */,
+				4D118AA01AB988810062C129 /* MNMBottomPullToRefreshView.m in Sources */,
 				4DA203C51A79CBA100C7E5C7 /* main.m in Sources */,
 				4DA207F31A79DA0A00C7E5C7 /* JSQVideoMediaItem.m in Sources */,
 				4D4CB52D1A89D7DA008AFD00 /* MessageData.m in Sources */,
@@ -1520,6 +1551,7 @@
 				4DA203FA1A79CC5200C7E5C7 /* FMDatabaseAdditions.m in Sources */,
 				4DD6FEAB1A884CFF00CBBE1D /* UIImageView+HighlightedWebCache.m in Sources */,
 				4DAC7D821AA69C74001A0317 /* MBProgressHUD.m in Sources */,
+				4D118A9F1AB988810062C129 /* MNMBottomPullToRefreshManager.m in Sources */,
 				4DA208071A79DC0900C7E5C7 /* JSQSystemSoundPlayer.m in Sources */,
 				4DA207ED1A79DA0A00C7E5C7 /* JSQLocationMediaItem.m in Sources */,
 			);

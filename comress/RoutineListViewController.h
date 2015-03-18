@@ -13,12 +13,16 @@
 #import "MBProgressHUD.h"
 #import "Schedule.h"
 #import "RoutineTableViewCell.h"
+#import "MNMBottomPullToRefreshManager.h"
 
-@interface RoutineListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
+@interface RoutineListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate,MNMBottomPullToRefreshManagerClient>
 
 {
     Database *myDatabase;
     Schedule *schedule;
+    
+@private
+        MNMBottomPullToRefreshManager *pullToRefreshManager_;
 }
 
 @property (nonatomic, strong) NSArray *scheduleArray;

@@ -10,7 +10,9 @@
 
 
 @interface RoutineListViewController ()
-
+{
+    int currentNumberOfRows;
+}
 
 
 @end
@@ -73,6 +75,8 @@
 {
     [super viewDidAppear:animated];
     
+    currentNumberOfRows = 20;
+    
     [self fetchSchedule];
 }
 
@@ -129,7 +133,13 @@
 {
     UISegmentedControl *segment = (UISegmentedControl *)sender;
     self.segment = segment;
-    
+    if(segment.selectedSegmentIndex == 1)
+    {
+        //if(pullToRefreshManager_ == nil)
+        //{
+            pullToRefreshManager_ = [[MNMBottomPullToRefreshManager alloc] initWithPullToRefreshViewHeight:20.0f tableView:self.routineTableView withClient:self];
+        //}
+    }
     [self fetchSchedule];
 }
 
@@ -138,7 +148,7 @@
     if(self.segment.selectedSegmentIndex == 0)
         scheduleArray = [schedule fetchScheduleForMe];
     else
-        scheduleArray = [schedule fetchScheduleForOthersAtPage:[NSNumber numberWithInt:0]];
+        scheduleArray = [schedule fetchScheduleForOthersAtPage:[NSNumber numberWithInt:currentNumberOfRows]];
     
     [self.routineTableView reloadData];
 }
@@ -162,39 +172,65 @@
     
     [cell initCellWithResultSet:dict];
     
+    self.routineTableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+    
     return cell;
 }
 
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
 
+//- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+//{
+//    if(decelerate)
+//    {
+//        if(self.routineTableView.contentOffset.y < 0){
+//            //it means table view is pulled down like refresh
+//            return;
+//        }
+//        else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
+//            if(self.segment.selectedSegmentIndex == 1)
+//            {
+//                UILabel *loadMore = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 300, 30)];
+//                
+//                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//                    currentNumberOfRows += 20;
+//                    [self fetchSchedule];
+//                });
+//            }
+//        }
+//    }
+//}
+
+
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    [pullToRefreshManager_ tableViewScrolled];
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    if(decelerate)
-    {
-        if(self.routineTableView.contentOffset.y<0){
-            //it means table view is pulled down like refresh
-            return;
-        }
-        else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
-            NSLog(@"scrollViewDidEndDragging bottom!");
-        }
-    }
+/**
+ * This is the same delegate method as UIScrollView but required in MNMBottomPullToRefreshClient protocol
+ * to warn about its implementation. Here you have to call [MNMBottomPullToRefreshManager tableViewReleased]
+ *
+ * Tells the delegate when dragging ended in the scroll view.
+ *
+ * @param scrollView: The scroll-view object that finished scrolling the content view.
+ * @param decelerate: YES if the scrolling movement will continue, but decelerate, after a touch-up gesture during a dragging operation.
+ */
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
+    [pullToRefreshManager_ tableViewReleased];
 }
 
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    if(self.routineTableView.contentOffset.y<0){
-        //it means table view is pulled down like refresh
-        return;
-    }
-    else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
-        NSLog(@"scrollViewDidEndDecelerating bottom!");
-    }
+/**
+ * Tells client that refresh has been triggered
+ * After reloading is completed must call [MNMBottomPullToRefreshManager tableViewReloadFinished]
+ *
+ * @param manager PTR manager
+ */
+
+- (void)bottomPullToRefreshTriggered:(MNMBottomPullToRefreshManager *)manager {
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        currentNumberOfRows += 20;
+        [self fetchSchedule];
+    });
 }
-
-
 
 @end

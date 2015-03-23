@@ -142,8 +142,6 @@
         [locationManager requestWhenInUseAuthorization];
     });
     
-    
-    
     NavigationBarTitleWithSubtitleView *navigationBarTitleView = [[NavigationBarTitleWithSubtitleView alloc] init];
     [self.navigationItem setTitleView: navigationBarTitleView];
     [navigationBarTitleView setTitleText:[[self.postInfoDict objectForKey:@"post"] valueForKey:@"post_topic"]];

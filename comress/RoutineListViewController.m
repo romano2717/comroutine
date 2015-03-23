@@ -12,6 +12,8 @@
 @interface RoutineListViewController ()
 {
     int currentNumberOfRows;
+    int per_page;
+    CGPoint currentPoint;
 }
 
 
@@ -35,6 +37,8 @@
     
     //when unlock/lock/report button is tapped
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tappedUnlockButton:) name:@"tappedUnlockButton" object:nil];
+    
+    self.scrollToTopBtn.hidden = YES;
 }
 
 - (void)tappedUnlockButton:(NSNotification *)notif
@@ -66,6 +70,10 @@
 {
     [super viewWillAppear:animated];
     
+    //add tap gestuer to the navbar for the pop-over post info
+    UITapGestureRecognizer *tapNavBar = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(popSkedInformation)];
+    tapNavBar.numberOfTapsRequired = 1;
+    
     self.tabBarController.tabBar.hidden = NO;
     self.navigationController.navigationBar.hidden = YES;
     self.hidesBottomBarWhenPushed = NO;
@@ -75,9 +83,35 @@
 {
     [super viewDidAppear:animated];
     
-    currentNumberOfRows = 20;
+    currentNumberOfRows = 30;
+    per_page = 30;
     
     [self fetchSchedule];
+    
+}
+
+- (void)addLoadMoreView:(BOOL)moreRows
+{
+    NSString *msg = @"Drag to load more";
+    
+    if(!moreRows)
+        msg = @"Last row";
+
+    //remove previously added load more view
+    for (UIView *view in [self.routineTableView subviews]) {
+        if(view.tag == 27)
+        {
+            [view removeFromSuperview];
+        }
+    }
+    
+    //add the view
+    UILabel *loadMore = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, self.routineTableView.contentSize.height, 320.0f, 60)];
+    loadMore.text = msg;
+    loadMore.backgroundColor = [UIColor lightGrayColor];
+    loadMore.tag = 27;
+    
+    [self.routineTableView addSubview:loadMore];
 }
 
 - (void)scanningQrCodeComplete:(NSNotification *)notif
@@ -118,28 +152,48 @@
     }
 }
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+
+    self.tabBarController.tabBar.hidden = YES;
+    self.hidesBottomBarWhenPushed = YES;
+    self.navigationController.navigationBar.hidden = NO;
+    
+    
+    if([segue.identifier isEqualToString:@"push_chat_routine"])
+    {
+        if([sender isKindOfClass:[NSIndexPath class]])
+        {
+            NSIndexPath *indexPath = (NSIndexPath *)sender;
+            
+            NSDictionary *skedDict = [scheduleArray objectAtIndex:indexPath.row];
+            
+            NSString *key = [[skedDict allKeys] objectAtIndex:0];
+            
+            NSDictionary *blockDict = [skedDict objectForKey:key];
+            
+            NSString *blockNo = [blockDict valueForKey:@"block_no"];
+            NSNumber *blockId = [NSNumber numberWithInt:[key intValue]];
+            
+            RoutineChatViewController *rtc = [segue destinationViewController];
+            rtc.blockNo = blockNo;
+            rtc.blockId = blockId;
+            rtc = segue.destinationViewController;
+            
+        }
+    }
 }
-*/
+
 
 
 - (IBAction)segmentControlChange:(id)sender
 {
     UISegmentedControl *segment = (UISegmentedControl *)sender;
     self.segment = segment;
-    if(segment.selectedSegmentIndex == 1)
-    {
-        //if(pullToRefreshManager_ == nil)
-        //{
-            pullToRefreshManager_ = [[MNMBottomPullToRefreshManager alloc] initWithPullToRefreshViewHeight:20.0f tableView:self.routineTableView withClient:self];
-        //}
-    }
+    
     [self fetchSchedule];
 }
 
@@ -151,6 +205,14 @@
         scheduleArray = [schedule fetchScheduleForOthersAtPage:[NSNumber numberWithInt:currentNumberOfRows]];
     
     [self.routineTableView reloadData];
+    
+    if(self.segment.selectedSegmentIndex == 1)
+    {
+        [self addLoadMoreView:YES];
+        self.scrollToTopBtn.hidden = NO;
+    }
+    else
+        self.scrollToTopBtn.hidden = YES;
 }
 
 #pragma mark - uitableview delegate and datasource
@@ -173,64 +235,78 @@
     [cell initCellWithResultSet:dict];
     
     self.routineTableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-    
+    DDLogVerbose(@"row %ld",(long)indexPath.row);
     return cell;
 }
 
-
-//- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-//{
-//    if(decelerate)
-//    {
-//        if(self.routineTableView.contentOffset.y < 0){
-//            //it means table view is pulled down like refresh
-//            return;
-//        }
-//        else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
-//            if(self.segment.selectedSegmentIndex == 1)
-//            {
-//                UILabel *loadMore = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 300, 30)];
-//                
-//                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-//                    currentNumberOfRows += 20;
-//                    [self fetchSchedule];
-//                });
-//            }
-//        }
-//    }
-//}
-
-
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
-    [pullToRefreshManager_ tableViewScrolled];
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [self performSegueWithIdentifier:@"push_chat_routine" sender:indexPath];
 }
 
-/**
- * This is the same delegate method as UIScrollView but required in MNMBottomPullToRefreshClient protocol
- * to warn about its implementation. Here you have to call [MNMBottomPullToRefreshManager tableViewReleased]
- *
- * Tells the delegate when dragging ended in the scroll view.
- *
- * @param scrollView: The scroll-view object that finished scrolling the content view.
- * @param decelerate: YES if the scrolling movement will continue, but decelerate, after a touch-up gesture during a dragging operation.
- */
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate {
-    [pullToRefreshManager_ tableViewReleased];
-}
-
-/**
- * Tells client that refresh has been triggered
- * After reloading is completed must call [MNMBottomPullToRefreshManager tableViewReloadFinished]
- *
- * @param manager PTR manager
- */
-
-- (void)bottomPullToRefreshTriggered:(MNMBottomPullToRefreshManager *)manager {
+-(void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        currentNumberOfRows += 20;
-        [self fetchSchedule];
-    });
+    if(self.segment.selectedSegmentIndex == 1)
+        currentPoint = scrollView.contentOffset;
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView {
+
+    if(self.segment.selectedSegmentIndex == 1)
+    {
+        if (scrollView.contentOffset.y < currentPoint.y) {
+            self.scrollToTopBtn.hidden = NO;
+        }
+        else if (scrollView.contentOffset.y > currentPoint.y) {
+            self.scrollToTopBtn.hidden = YES;
+        }
+    }
+}
+
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if(decelerate)
+    {
+        if(self.routineTableView.contentOffset.y < 0){
+            //it means table view is pulled down like refresh
+            return;
+        }
+        else if(self.routineTableView.contentOffset.y >= (self.routineTableView.contentSize.height - self.routineTableView.bounds.size.height)) {
+            if(self.segment.selectedSegmentIndex == 1)
+            {
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    int lastRow = currentNumberOfRows;
+                    currentNumberOfRows += per_page;
+                    [self fetchSchedule];
+                    
+                    int scrollToRow = lastRow + 2;
+                    
+                    if(scrollToRow > scheduleArray.count) //last row
+                    {
+                        [self addLoadMoreView:NO];
+                        return;
+                    }
+                    
+                    else
+                    {
+                        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:scrollToRow inSection:0];
+                        
+                        [self.routineTableView scrollToRowAtIndexPath:newIndexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
+                    }
+                });
+            }
+        }
+    }
+}
+
+- (IBAction)scrollTableToTop:(id)sender
+{
+    NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    
+    [self.routineTableView scrollToRowAtIndexPath:newIndexPath atScrollPosition:UITableViewScrollPositionTop animated:YES];
+    
+    self.scrollToTopBtn.hidden = YES;
 }
 
 @end

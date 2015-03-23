@@ -635,6 +635,7 @@
                 }
             }];
             
+
             if(needToDownloadBlocks)
                 [self startDownloadJobsForPage:1 totalPage:0 requestDate:nil withUi:YES];
             else
@@ -670,7 +671,8 @@
     self.processLabel.text = [NSString stringWithFormat:@"Downloading jobs page... %d/%d",currentPage,totPage];
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
-    
+    DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_jobs] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
         NSDictionary *dict = [responseObject objectForKey:@"JobContainer"];
@@ -898,7 +900,8 @@
         }
         
         NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
-        
+        DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"guid"]);
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_spo_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
@@ -918,7 +921,7 @@
                     }
                 }
             }];
-            
+
             if(needToDownloadBlocks)
                 [self startDownloadSpoSkedForPage:1 totalPage:0 requestDate:nil withUi:YES];
             else

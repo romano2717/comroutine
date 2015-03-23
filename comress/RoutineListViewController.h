@@ -13,20 +13,18 @@
 #import "MBProgressHUD.h"
 #import "Schedule.h"
 #import "RoutineTableViewCell.h"
-#import "MNMBottomPullToRefreshManager.h"
+#import "RoutineChatViewController.h"
 
-@interface RoutineListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate,MNMBottomPullToRefreshManagerClient>
+@interface RoutineListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
 {
     Database *myDatabase;
     Schedule *schedule;
-    
-@private
-        MNMBottomPullToRefreshManager *pullToRefreshManager_;
 }
 
 @property (nonatomic, strong) NSArray *scheduleArray;
 
 @property (nonatomic, weak) IBOutlet UITableView *routineTableView;
 @property (nonatomic, weak) IBOutlet UISegmentedControl *segment;
+@property (nonatomic, weak) IBOutlet UIButton *scrollToTopBtn;
 @end

@@ -68,6 +68,52 @@ seen;
     return posClienttId;
 }
 
+
+- (long long)savePostWithDictionary:(NSDictionary *)dict forBlockId:(NSNumber *)blockId
+{
+    __block BOOL postSaved;
+    __block long long posClienttId = 0;
+    
+    client_post_id  = [[dict valueForKey:@"client_post_id"] intValue];
+    post_id         = [[dict valueForKey:@"post_id"] intValue];
+    post_topic      = [dict valueForKey:@"post_topic"];
+    post_by         = [dict valueForKey:@"post_by"];
+    post_date       = [dict valueForKey:@"post_date"];
+    post_type       = [dict valueForKey:@"post_type"];
+    severity        = [dict valueForKey:@"severity"];
+    address         = [dict valueForKey:@"address"];
+    status          = [dict valueForKey:@"status"];
+    level           = [dict valueForKey:@"level"];
+    block_id        = [dict valueForKey:@"block_id"];
+    postal_code     = [dict valueForKey:@"postal_code"];
+    updated_on      = [dict valueForKey:@"updated_on"];
+    seen            = [dict valueForKey:@"seen"];
+    
+    if(blockId == nil)
+        return 0;
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSNumber *postTypeRoutine = [NSNumber numberWithInt:2];
+        
+        FMResultSet *rs = [db executeQuery:@"select block_id, post_type from post where post_type = ? and block_id = ?",postTypeRoutine, blockId];
+        
+        if([rs next] == NO) //does not exist, create!
+        {
+            postSaved = [db executeUpdate:@"insert into post (post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,isUpdated,postal_code,updated_on,seen) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,[NSNumber numberWithBool:YES],postal_code,updated_on,seen];
+            
+            if(!postSaved)
+            {
+                *rollback = YES;
+                DDLogVerbose(@"%@ [%@-%@]",[db lastError],THIS_FILE,THIS_METHOD);
+            }
+            posClienttId = [db lastInsertRowId];
+        }
+    }];
+    
+    return posClienttId;
+}
+
 - (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst
 {
     
@@ -93,7 +139,7 @@ seen;
         NSMutableString *q;
         
         if(postId == nil)
-            q = [[NSMutableString alloc] initWithString:@"select * from post "];
+            q = [[NSMutableString alloc] initWithString:@"select * from post where post_type = 1 "]; //post_type = 1 is ISSUES
         else
             q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where client_post_id = %@ ",postId]];
         

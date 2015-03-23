@@ -15,6 +15,11 @@
     Database *myDatabase;
 }
 
+
+- (NSArray *)fetchCheckListForBlockId:(NSNumber *)blkId;
+
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString;
+
+- (NSArray *)checklistForJobTypeId:(NSNumber *)jobTypeId;
 
 @end

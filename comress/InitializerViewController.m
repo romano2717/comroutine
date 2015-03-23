@@ -869,9 +869,11 @@
             NSNumber *IsOwnBlk = [NSNumber numberWithInt:[[dictBlock valueForKey:@"IsOwnBlk"] intValue]];
             NSString *PostalCode = [dictBlock valueForKey:@"PostalCode"];
             NSString *StreetName = [dictBlock valueForKey:@"StreetName"];
+            NSNumber *lat = [dictBlock valueForKey:@"Latitude"];
+            NSNumber *lon = [dictBlock valueForKey:@"Latitude"];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-                BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name) values (?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName];
+                BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name, latitude, longitude) values (?,?,?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName,lat,lon];
                 
                 if(!qBlockIns)
                 {

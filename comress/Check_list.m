@@ -19,6 +19,47 @@
     return self;
 }
 
+- (NSArray *)fetchCheckListForBlockId:(NSNumber *)blkId
+{
+    NSMutableArray *skedAdrr = [[NSMutableArray alloc] init];
+
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? order by w_scheduledate asc",blkId];
+
+        while ([rsSked next]) {
+            [skedAdrr addObject:[rsSked resultDictionary]];
+        }
+    }];
+    
+    return skedAdrr;
+}
+
+- (NSArray *)checklistForJobTypeId:(NSNumber *)jobTypeId
+{
+    NSMutableArray *checkListArr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        FMResultSet *rsChkL = [db executeQuery:@"select * from ro_checklist where w_jobtypeid = ?",jobTypeId];
+        
+        while ([rsChkL next]) {
+            NSNumber *w_chkareaid = [NSNumber numberWithInt:[rsChkL intForColumn:@"w_chkareaid"]];
+            
+            if([w_chkareaid intValue] == 0)
+                [checkListArr addObject:[rsChkL resultDictionary]];
+            else
+            {
+                FMResultSet *rsChkArea = [db executeQuery:@"select * from ro_checkarea where w_chkareaid = ?",w_chkareaid];
+                while ([rsChkArea next]) {
+                    [checkListArr addObject:[rsChkL resultDictionary]];
+                }
+            }
+        }
+    }];
+    
+    return checkListArr;
+}
+
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString
 {
     NSInteger startPosition = [dateString rangeOfString:@"("].location + 1; //start of the date value

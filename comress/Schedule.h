@@ -20,4 +20,6 @@
 
 - (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)row;
 
+- (NSDictionary *)scheduleForBlockId:(NSNumber *)blockId;
+
 @end

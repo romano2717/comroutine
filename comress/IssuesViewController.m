@@ -290,7 +290,7 @@
             [self.issuesTable reloadData];
         });
         
-        
+        //bulb icon toggle
         if(myDatabase.allPostWasSeen == NO)
         {
             dispatch_async(dispatch_get_main_queue(), ^{

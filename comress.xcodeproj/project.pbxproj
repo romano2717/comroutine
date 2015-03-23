@@ -19,11 +19,14 @@
 		4D0C2F8C1A7B4C98009E5E53 /* Post.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F8B1A7B4C98009E5E53 /* Post.m */; };
 		4D0C2F8F1A7B4CA2009E5E53 /* PostImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F8E1A7B4CA2009E5E53 /* PostImage.m */; };
 		4D0C2F921A7B4CAC009E5E53 /* Users.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F911A7B4CAC009E5E53 /* Users.m */; };
-		4D118A9C1AB988810062C129 /* MNMBottomPullToRefresh.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */; };
-		4D118A9D1AB988810062C129 /* MNMBottomPullToRefreshArrow.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */; };
-		4D118A9E1AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */; };
-		4D118A9F1AB988810062C129 /* MNMBottomPullToRefreshManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */; };
-		4D118AA01AB988810062C129 /* MNMBottomPullToRefreshView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */; };
+		4D118AB41ABA9B130062C129 /* RoutineChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AB31ABA9B130062C129 /* RoutineChatViewController.m */; };
+		4D118AB71ABA9B840062C129 /* MessageDataRoutine.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AB61ABA9B840062C129 /* MessageDataRoutine.m */; };
+		4D118ABA1ABA9FD80062C129 /* CheckListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AB91ABA9FD80062C129 /* CheckListViewController.m */; };
+		4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118ABB1ABAA9AD0062C129 /* checked@2x.png */; };
+		4D118ABE1ABAA9AD0062C129 /* check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D118ABC1ABAA9AD0062C129 /* check@2x.png */; };
+		4D118AC11ABACE690062C129 /* CheckListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */; };
+		4D118AC91ABBF96D0062C129 /* CheckListHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AC71ABBF96D0062C129 /* CheckListHeader.m */; };
+		4D118AD11ABFC57B0062C129 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D118AD01ABFC57B0062C129 /* comress.sqlite */; };
 		4D37BDB81A9C2271006B414A /* back.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D37BDB71A9C2271006B414A /* back.png */; };
 		4D4CB52A1A89D76F008AFD00 /* IssuesChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4CB5291A89D76F008AFD00 /* IssuesChatViewController.m */; };
 		4D4CB52D1A89D7DA008AFD00 /* MessageData.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D4CB52C1A89D7DA008AFD00 /* MessageData.m */; };
@@ -34,7 +37,6 @@
 		4D81D4501AB6D3DB00A403C9 /* Scan_Check_List_Block.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D81D44F1AB6D3DB00A403C9 /* Scan_Check_List_Block.m */; };
 		4D81D4531AB6D56000A403C9 /* Job.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D81D4521AB6D56000A403C9 /* Job.m */; };
 		4D81D4561AB7CCAA00A403C9 /* Schedule.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D81D4551AB7CCAA00A403C9 /* Schedule.m */; };
-		4D81D45A1AB7D86C00A403C9 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4591AB7D86C00A403C9 /* comress.sqlite */; };
 		4D81D4601AB804B700A403C9 /* RoutineTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D81D45F1AB804B700A403C9 /* RoutineTableViewCell.m */; };
 		4D81D4641AB80EC500A403C9 /* qr@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4631AB80EC500A403C9 /* qr@2x.png */; };
 		4D81D4681AB8352300A403C9 /* report@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4651AB8352300A403C9 /* report@2x.png */; };
@@ -219,13 +221,19 @@
 		4D0C2F8E1A7B4CA2009E5E53 /* PostImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PostImage.m; sourceTree = "<group>"; };
 		4D0C2F901A7B4CAC009E5E53 /* Users.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Users.h; sourceTree = "<group>"; };
 		4D0C2F911A7B4CAC009E5E53 /* Users.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Users.m; sourceTree = "<group>"; };
-		4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = MNMBottomPullToRefresh.strings; sourceTree = "<group>"; };
-		4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = MNMBottomPullToRefreshArrow.png; sourceTree = "<group>"; };
-		4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "MNMBottomPullToRefreshArrow@2x.png"; sourceTree = "<group>"; };
-		4D118A981AB988810062C129 /* MNMBottomPullToRefreshManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMBottomPullToRefreshManager.h; sourceTree = "<group>"; };
-		4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNMBottomPullToRefreshManager.m; sourceTree = "<group>"; };
-		4D118A9A1AB988810062C129 /* MNMBottomPullToRefreshView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMBottomPullToRefreshView.h; sourceTree = "<group>"; };
-		4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MNMBottomPullToRefreshView.m; sourceTree = "<group>"; };
+		4D118AB21ABA9B130062C129 /* RoutineChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoutineChatViewController.h; sourceTree = "<group>"; };
+		4D118AB31ABA9B130062C129 /* RoutineChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoutineChatViewController.m; sourceTree = "<group>"; };
+		4D118AB51ABA9B840062C129 /* MessageDataRoutine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessageDataRoutine.h; sourceTree = "<group>"; };
+		4D118AB61ABA9B840062C129 /* MessageDataRoutine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessageDataRoutine.m; sourceTree = "<group>"; };
+		4D118AB81ABA9FD80062C129 /* CheckListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListViewController.h; sourceTree = "<group>"; };
+		4D118AB91ABA9FD80062C129 /* CheckListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckListViewController.m; sourceTree = "<group>"; };
+		4D118ABB1ABAA9AD0062C129 /* checked@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checked@2x.png"; sourceTree = "<group>"; };
+		4D118ABC1ABAA9AD0062C129 /* check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check@2x.png"; sourceTree = "<group>"; };
+		4D118ABF1ABACE690062C129 /* CheckListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListTableViewCell.h; sourceTree = "<group>"; };
+		4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckListTableViewCell.m; sourceTree = "<group>"; };
+		4D118AC71ABBF96D0062C129 /* CheckListHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckListHeader.m; sourceTree = "<group>"; };
+		4D118AC81ABBF96D0062C129 /* CheckListHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListHeader.h; sourceTree = "<group>"; };
+		4D118AD01ABFC57B0062C129 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D37BDB71A9C2271006B414A /* back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = back.png; sourceTree = "<group>"; };
 		4D4CB5281A89D76F008AFD00 /* IssuesChatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IssuesChatViewController.h; sourceTree = "<group>"; };
 		4D4CB5291A89D76F008AFD00 /* IssuesChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IssuesChatViewController.m; sourceTree = "<group>"; };
@@ -245,7 +253,6 @@
 		4D81D4521AB6D56000A403C9 /* Job.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Job.m; sourceTree = "<group>"; };
 		4D81D4541AB7CCAA00A403C9 /* Schedule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Schedule.h; sourceTree = "<group>"; };
 		4D81D4551AB7CCAA00A403C9 /* Schedule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Schedule.m; sourceTree = "<group>"; };
-		4D81D4591AB7D86C00A403C9 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D81D45E1AB804B700A403C9 /* RoutineTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RoutineTableViewCell.h; sourceTree = "<group>"; };
 		4D81D45F1AB804B700A403C9 /* RoutineTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoutineTableViewCell.m; sourceTree = "<group>"; };
 		4D81D4631AB80EC500A403C9 /* qr@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "qr@2x.png"; sourceTree = "<group>"; };
@@ -557,6 +564,7 @@
 		4D0717A91AB2ADD90055191A /* ROUTINE */ = {
 			isa = PBXGroup;
 			children = (
+				4D118AB11ABA9A6D0062C129 /* Chat */,
 				4D81D4421AB6B91A00A403C9 /* Initializer */,
 				4D78EAA01AB6A0C4006627C5 /* Data */,
 				4D8AC9881AAFE474008F7652 /* Listing */,
@@ -607,15 +615,25 @@
 		4D118A941AB988770062C129 /* load more */ = {
 			isa = PBXGroup;
 			children = (
-				4D118A951AB988810062C129 /* MNMBottomPullToRefresh.strings */,
-				4D118A961AB988810062C129 /* MNMBottomPullToRefreshArrow.png */,
-				4D118A971AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png */,
-				4D118A981AB988810062C129 /* MNMBottomPullToRefreshManager.h */,
-				4D118A991AB988810062C129 /* MNMBottomPullToRefreshManager.m */,
-				4D118A9A1AB988810062C129 /* MNMBottomPullToRefreshView.h */,
-				4D118A9B1AB988810062C129 /* MNMBottomPullToRefreshView.m */,
 			);
 			name = "load more";
+			sourceTree = "<group>";
+		};
+		4D118AB11ABA9A6D0062C129 /* Chat */ = {
+			isa = PBXGroup;
+			children = (
+				4D118AB21ABA9B130062C129 /* RoutineChatViewController.h */,
+				4D118AB31ABA9B130062C129 /* RoutineChatViewController.m */,
+				4D118AB51ABA9B840062C129 /* MessageDataRoutine.h */,
+				4D118AB61ABA9B840062C129 /* MessageDataRoutine.m */,
+				4D118AB81ABA9FD80062C129 /* CheckListViewController.h */,
+				4D118AB91ABA9FD80062C129 /* CheckListViewController.m */,
+				4D118ABF1ABACE690062C129 /* CheckListTableViewCell.h */,
+				4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */,
+				4D118AC81ABBF96D0062C129 /* CheckListHeader.h */,
+				4D118AC71ABBF96D0062C129 /* CheckListHeader.m */,
+			);
+			name = Chat;
 			sourceTree = "<group>";
 		};
 		4D4CB5251A89D703008AFD00 /* Listing */ = {
@@ -894,6 +912,8 @@
 		4DA2041A1A79CF7400C7E5C7 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4D118ABB1ABAA9AD0062C129 /* checked@2x.png */,
+				4D118ABC1ABAA9AD0062C129 /* check@2x.png */,
 				4D81D4651AB8352300A403C9 /* report@2x.png */,
 				4D81D4661AB8352300A403C9 /* unlocked@2x.png */,
 				4D81D4671AB8352300A403C9 /* locked@2x.png */,
@@ -925,7 +945,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4D81D4591AB7D86C00A403C9 /* comress.sqlite */,
+				4D118AD01ABFC57B0062C129 /* comress.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1127,7 +1147,7 @@
 				4D0C2F681A7B205A009E5E53 /* LoginViewController.m */,
 				4D99E7E61A80CA78005EDDAE /* ImagePreviewViewController.h */,
 				4D99E7E71A80CA78005EDDAE /* ImagePreviewViewController.m */,
-				4DA22FB61A7F334F00A7AAEC /* Settings */,
+				4DA22FB61A7F334F00A7AAEC /* SETTINGS */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -1150,13 +1170,13 @@
 			name = ddlog;
 			sourceTree = "<group>";
 		};
-		4DA22FB61A7F334F00A7AAEC /* Settings */ = {
+		4DA22FB61A7F334F00A7AAEC /* SETTINGS */ = {
 			isa = PBXGroup;
 			children = (
 				4DA22FB31A7F332D00A7AAEC /* SettingsViewController.h */,
 				4DA22FB41A7F332D00A7AAEC /* SettingsViewController.m */,
 			);
-			name = Settings;
+			name = SETTINGS;
 			sourceTree = "<group>";
 		};
 		4DA41DF51A80805700184A18 /* Issues */ = {
@@ -1373,10 +1393,10 @@
 			files = (
 				4D8AC9601AAD8AE3008F7652 /* routine.png in Resources */,
 				4DA207E41A79DA0A00C7E5C7 /* JSQMessagesViewController.xib in Resources */,
+				4D118AD11ABFC57B0062C129 /* comress.sqlite in Resources */,
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
-				4D81D45A1AB7D86C00A403C9 /* comress.sqlite in Resources */,
-				4D118A9E1AB988810062C129 /* MNMBottomPullToRefreshArrow@2x.png in Resources */,
+				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,
 				4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */,
 				4D8AC95F1AAD8AE3008F7652 /* crm.png in Resources */,
 				4DA204221A79CF8800C7E5C7 /* btn_small.png in Resources */,
@@ -1386,6 +1406,7 @@
 				4D91D6061A91CAA900A21DBA /* pin2.png in Resources */,
 				4DA203E91A79CBF900C7E5C7 /* Main.storyboard in Resources */,
 				4D8AC95A1AAD8AB3008F7652 /* settings.png in Resources */,
+				4D118ABE1ABAA9AD0062C129 /* check@2x.png in Resources */,
 				4D91D6041A91CA3C00A21DBA /* pin.png in Resources */,
 				4D81D4641AB80EC500A403C9 /* qr@2x.png in Resources */,
 				4D8AC9711AAD91A4008F7652 /* bulb_on@2x.png in Resources */,
@@ -1393,7 +1414,6 @@
 				4DA207DA1A79DA0A00C7E5C7 /* JSQMessagesAssets.bundle in Resources */,
 				4DA203D31A79CBA100C7E5C7 /* LaunchScreen.xib in Resources */,
 				4DA204211A79CF8800C7E5C7 /* btn_large.png in Resources */,
-				4D118A9C1AB988810062C129 /* MNMBottomPullToRefresh.strings in Resources */,
 				4DA203D01A79CBA100C7E5C7 /* Images.xcassets in Resources */,
 				4D8AC9691AAD8CD4008F7652 /* issue@2x.png in Resources */,
 				4DA204201A79CF8800C7E5C7 /* arrow.png in Resources */,
@@ -1405,7 +1425,6 @@
 				4D81D4681AB8352300A403C9 /* report@2x.png in Resources */,
 				4DAEA6B71A83505E00A6EFBE /* Localizable.strings in Resources */,
 				4D37BDB81A9C2271006B414A /* back.png in Resources */,
-				4D118A9D1AB988810062C129 /* MNMBottomPullToRefreshArrow.png in Resources */,
 				4D8AC9671AAD8CD4008F7652 /* routine@2x.png in Resources */,
 				4DA207DB1A79DA0A00C7E5C7 /* JSQMessages.strings in Resources */,
 				4D81D4691AB8352300A403C9 /* unlocked@2x.png in Resources */,
@@ -1432,6 +1451,7 @@
 				4DA204191A79CC5B00C7E5C7 /* AFURLSessionManager.m in Sources */,
 				4DA207F01A79DA0A00C7E5C7 /* JSQMessagesAvatarImage.m in Sources */,
 				4DA204161A79CC5B00C7E5C7 /* AFURLConnectionOperation.m in Sources */,
+				4D118AB41ABA9B130062C129 /* RoutineChatViewController.m in Sources */,
 				4DA207FC1A79DA0A00C7E5C7 /* JSQMessagesInputToolbar.m in Sources */,
 				4DD6FE9F1A884CFF00CBBE1D /* NSData+ImageContentType.m in Sources */,
 				4DA207EC1A79DA0A00C7E5C7 /* JSQMessagesCollectionViewLayoutAttributes.m in Sources */,
@@ -1457,6 +1477,7 @@
 				4DA207DD1A79DA0A00C7E5C7 /* NSString+JSQMessages.m in Sources */,
 				4DA203FB1A79CC5200C7E5C7 /* FMDatabasePool.m in Sources */,
 				4DD6FEA51A884CFF00CBBE1D /* SDWebImageManager.m in Sources */,
+				4D118ABA1ABA9FD80062C129 /* CheckListViewController.m in Sources */,
 				4DD6FEA01A884CFF00CBBE1D /* SDImageCache.m in Sources */,
 				4DA207E11A79DA0A00C7E5C7 /* UIView+JSQMessages.m in Sources */,
 				4DA2090E1A7A09A000C7E5C7 /* DDTTYLogger.m in Sources */,
@@ -1482,6 +1503,7 @@
 				4DD6FEA71A884CFF00CBBE1D /* UIButton+WebCache.m in Sources */,
 				4DD6FE9E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m in Sources */,
 				4DA207E01A79DA0A00C7E5C7 /* UIImage+JSQMessages.m in Sources */,
+				4D118AC11ABACE690062C129 /* CheckListTableViewCell.m in Sources */,
 				4D0C2F831A7B4C6F009E5E53 /* Client.m in Sources */,
 				4DD6FEA61A884CFF00CBBE1D /* SDWebImagePrefetcher.m in Sources */,
 				4DA208001A79DA0A00C7E5C7 /* JSQMessagesMediaPlaceholderView.m in Sources */,
@@ -1513,7 +1535,6 @@
 				4DA203FC1A79CC5200C7E5C7 /* FMDatabaseQueue.m in Sources */,
 				4DD6FEB91A88954800CBBE1D /* Synchronize.m in Sources */,
 				4D91D5B71A8DC40900A21DBA /* Device_token.m in Sources */,
-				4D118AA01AB988810062C129 /* MNMBottomPullToRefreshView.m in Sources */,
 				4DA203C51A79CBA100C7E5C7 /* main.m in Sources */,
 				4DA207F31A79DA0A00C7E5C7 /* JSQVideoMediaItem.m in Sources */,
 				4D4CB52D1A89D7DA008AFD00 /* MessageData.m in Sources */,
@@ -1537,6 +1558,8 @@
 				4DA207EF1A79DA0A00C7E5C7 /* JSQMessage.m in Sources */,
 				4DA204181A79CC5B00C7E5C7 /* AFURLResponseSerialization.m in Sources */,
 				4DACAF571A8C59F5005973E3 /* InitializerViewController.m in Sources */,
+				4D118AB71ABA9B840062C129 /* MessageDataRoutine.m in Sources */,
+				4D118AC91ABBF96D0062C129 /* CheckListHeader.m in Sources */,
 				4D99E7E81A80CA78005EDDAE /* ImagePreviewViewController.m in Sources */,
 				4D4CB52A1A89D76F008AFD00 /* IssuesChatViewController.m in Sources */,
 				4DA207EB1A79DA0A00C7E5C7 /* JSQMessagesCollectionViewFlowLayoutInvalidationContext.m in Sources */,
@@ -1551,7 +1574,6 @@
 				4DA203FA1A79CC5200C7E5C7 /* FMDatabaseAdditions.m in Sources */,
 				4DD6FEAB1A884CFF00CBBE1D /* UIImageView+HighlightedWebCache.m in Sources */,
 				4DAC7D821AA69C74001A0317 /* MBProgressHUD.m in Sources */,
-				4D118A9F1AB988810062C129 /* MNMBottomPullToRefreshManager.m in Sources */,
 				4DA208071A79DC0900C7E5C7 /* JSQSystemSoundPlayer.m in Sources */,
 				4DA207ED1A79DA0A00C7E5C7 /* JSQLocationMediaItem.m in Sources */,
 			);

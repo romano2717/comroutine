@@ -85,74 +85,20 @@
         if([[dict valueForKey:@"Result"] intValue] == 1)
         {
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                db.traceExecution = YES;
                 
-                //clear user blocks
-                BOOL clearUserBLk = [db executeUpdate:@"delete from blocks_user"];
-                if(!clearUserBLk)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                BOOL clearUserBlkLrd = [db executeUpdate:@"delete from blocks_user_last_request_date"];
-                if(!clearUserBlkLrd)
-                {
-                    *rollback = YES;
-                    return;
-                }
+                NSArray *tableToDelete = @[@"blocks_user",@"blocks_user_last_request_date",@"ro_checkarea",@"ro_checkarea_last_req_date",@"ro_checklist",@"ro_checklist_last_req_date",@"ro_job",@"ro_job_last_req_date",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanchecklist_blk",@"ro_scanchecklist_blk_last_req_date",@"ro_scanchecklist_last_req_date",@"ro_schedule",@"ro_schedule_last_req_date",@"ro_user_blk",@"ro_user_blk_last_req_date"];
                 
-                
-                /* clear
-                ro_checkarea,ro_checkarea_last_req_date,
-                ro_scanchecklist_blk,ro_scanchecklist_blk_last_req_date,
-                ro_job,ro_job_last_req_date,
-                ro_schedule,ro_schedule_last_req_date, */
-                
-                if([db executeUpdate:@"delete from ro_checkarea"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_checkarea_last_req_date"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_scanchecklist_blk"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_scanchecklist_blk_last_req_date"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_job"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_job_last_req_date"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_schedule"] == NO)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                if([db executeUpdate:@"delete from ro_schedule_last_req_date"] == NO)
-                {
-                    *rollback = YES;
-                    return;
+                //clear tables
+                for (int i = 0; i < tableToDelete.count; i++) {
+                    NSString *tbl = [NSString stringWithFormat:@"delete from %@",[tableToDelete objectAtIndex:i]] ;
+                    BOOL del = [db executeUpdate:tbl];
+                    
+                    if(!del)
+                    {
+                        *rollback = YES;
+                        return ;
+                    }
                 }
                 
                 

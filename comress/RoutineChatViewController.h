@@ -16,8 +16,9 @@
 #import "CheckListViewController.h"
 #import "FPPopoverKeyboardResponsiveController.h"
 #import "Post.h"
-#import "Schedule.h"
+#import "Blocks.h"
 #import "Database.h"
+#import "Synchronize.h"
 
 @class RoutineChatViewController;
 
@@ -31,7 +32,7 @@
 {
     FPPopoverKeyboardResponsiveController *popover;
     Post *post;
-    Schedule *schedule;
+    Blocks *blocks;
     Database *myDatabase;
 }
 

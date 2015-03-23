@@ -24,7 +24,7 @@
 
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        db.traceExecution = YES;
+
         FMResultSet *rsblk = [db executeQuery:@"select b.block_id, b.block_no,b.street_name from blocks b, blocks_user bu where b.block_id = bu.block_id group by b.block_id"];
         
         while ([rsblk next]) {
@@ -36,8 +36,6 @@
             [skedArr addObject:blockDictMutable];
         }
         
-        DDLogVerbose(@"skedArr count %lu",(unsigned long)skedArr.count);
-        DDLogVerbose(@"skedArr %@",skedArr);
         
         //move the blocks with current schedule on top
         for (int i = 0; i < skedArr.count; i++) {
@@ -65,8 +63,6 @@
         }
     }];
     
-    DDLogVerbose(@"%@",skedArr);
-
     return skedArr;
 }
 
@@ -78,7 +74,7 @@
     
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        db.traceExecution = YES;
+
         FMResultSet *rsblk = [db executeQuery:@"select b.block_id,b.block_no,b.street_name, rs.* from blocks b, ro_schedule rs, blocks_user bu where b.block_id = rs.w_blkid and rs.w_blkid != bu.block_id group by rs.w_blkid"];
         
         while ([rsblk next]) {
@@ -152,4 +148,9 @@
     return dict;
 }
 
+
+- (BOOL)saveOrFinishScheduleWithId:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId
+{
+    return NO;
+}
 @end

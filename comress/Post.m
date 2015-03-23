@@ -89,11 +89,11 @@ seen;
     updated_on      = [dict valueForKey:@"updated_on"];
     seen            = [dict valueForKey:@"seen"];
     
-    if(blockId == nil)
+    if(block_id == nil)
         return 0;
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        
+        db.traceExecution = YES;
         NSNumber *postTypeRoutine = [NSNumber numberWithInt:2];
         
         FMResultSet *rs = [db executeQuery:@"select block_id, post_type from post where post_type = ? and block_id = ?",postTypeRoutine, blockId];

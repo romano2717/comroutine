@@ -711,7 +711,7 @@
             
             self.processLabel.text = @"Download complete";
             
-            if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
+            if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"CT_NU"])
                 [self checkSupSkedCount];
             else
                 [self checkSpoSkedCount];
@@ -821,7 +821,7 @@
             NSString *Area          = [dictList valueForKey:@"Area"];
             NSNumber *BlkId         = [NSNumber numberWithInt:[[dictList valueForKey:@"BlkId"] intValue]];
             NSNumber *JobId         = [NSNumber numberWithInt:[[dictList valueForKey:@"JobId"] intValue]];
-            NSNumber *JobType       = [NSNumber numberWithInt:[[dictList valueForKey:@"JobType"] intValue]];
+            NSString *JobType       = [dictList valueForKey:@"JobType"];;
             NSNumber *JobTypeId     = [NSNumber numberWithInt:[[dictList valueForKey:@"JobTypeId"] intValue]];
             NSDate *ScheduleDate    = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ScheduleDate"]];
             NSNumber *ScheduleId    = [NSNumber numberWithInt:[[dictList valueForKey:@"ScheduleId"] intValue]];
@@ -830,9 +830,9 @@
             NSDate *ActualDate      = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ActualDate"]];
             NSNumber *SUPFlag       = [NSNumber numberWithInt:[[dictList valueForKey:@"SUPFlag"] intValue]];
             NSDate *SupChk          = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"SupChk"]];
-
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                theDb.traceExecution = YES;
                 FMResultSet *rs = [theDb executeQuery:@"select w_scheduleid from ro_schedule where w_scheduleid = ?",ScheduleId];
                 
                 if([rs next] == NO)//does not exist

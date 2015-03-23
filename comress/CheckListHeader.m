@@ -35,6 +35,8 @@
     NSString *datestring = [format stringFromDate:scheduleDate];
     
     self.scheduleDate.text = datestring;
+    
+    
 }
 
 @end

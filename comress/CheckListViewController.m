@@ -27,6 +27,7 @@
     self.checkListArray = [[NSMutableArray alloc] init];
     
     selectedJobTypes = [[NSMutableArray alloc] init];
+    selectedCheckList = [[NSMutableArray alloc] init];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -56,39 +57,31 @@
     self.scheduleArray = [check_list fetchCheckListForBlockId:blockId];
     scheduleArrayRaw = self.scheduleArray;
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //create a default slots for checklist based on number of schedule
-        selectedCheckList = [[NSMutableArray alloc] initWithCapacity:scheduleArrayRaw.count];
-        for (int i = 0; i < scheduleArrayRaw.count; i++) {
-            [selectedCheckList addObject:@[@"temp"]];
-        }
+    //create sections array and group it!
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < self.scheduleArray.count; i++) {
+        NSDictionary *dict = [self.scheduleArray objectAtIndex:i];
+        [self.sectionsArray addObject:[dict valueForKey:@"w_jobtype"]];
         
-        //create sections array and group it!
-        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        NSNumber *jobTypeId = [NSNumber numberWithInt:[[dict valueForKey:@"w_jobtypeId"] intValue]];
         
-        for (int i = 0; i < self.scheduleArray.count; i++) {
-            NSDictionary *dict = [self.scheduleArray objectAtIndex:i];
-            [self.sectionsArray addObject:[dict valueForKey:@"w_jobtype"]];
-            
-            NSNumber *jobTypeId = [NSNumber numberWithInt:[[dict valueForKey:@"w_jobtypeId"] intValue]];
-            
-            [arr addObject:[check_list checklistForJobTypeId:jobTypeId]];
-        }
-        
-        self.scheduleArray = arr;
-        
-        
-        //set the area
-        
-        NSString *area = [NSString stringWithFormat:@"Area: %@",[[self.scheduleArrayRaw lastObject] valueForKey:@"w_area"]];
-        
-        if(self.scheduleArray.count == 0)
-            area = @"No Schedule for today.";
-        
-        self.areaLabel.text = area;
-        
-        [self.checkListTable reloadData];
-    });
+        [arr addObject:[check_list checklistForJobTypeId:jobTypeId]];
+    }
+    
+    self.scheduleArray = arr;
+    
+    
+    //set the area
+    
+    NSString *area = [NSString stringWithFormat:@"Area: %@",[[self.scheduleArrayRaw lastObject] valueForKey:@"w_area"]];
+    
+    if(self.scheduleArray.count == 0)
+        area = @"No Schedule for today.";
+    
+    self.areaLabel.text = area;
+    
+    [self.checkListTable reloadData];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -123,11 +116,11 @@
     
     if([selectedJobTypes containsObject:[NSNumber numberWithInt:(int)section]])
     {
-        [ch.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x.png"] forState:UIControlStateNormal];
+        [ch.checkBoxBtn setSelected:YES];
     }
     else
     {
-        [ch.checkBoxBtn setImage:[UIImage imageNamed:@"check@2x.png"] forState:UIControlStateNormal];
+        [ch.checkBoxBtn setSelected:NO];
     }
 
 
@@ -145,8 +138,9 @@
 {
     UIButton *btn = (UIButton *)sender;
 
-    DDLogVerbose(@"save %ld",(long)btn.tag);
-    
+    DDLogVerbose(@"save checklist %@",selectedCheckList);
+    DDLogVerbose(@"save job type %@",selectedJobTypes);
+    DDLogVerbose(@"job type section %d",(int)btn.tag);
     
     [btn setSelected:!btn.selected];
 }
@@ -155,7 +149,9 @@
 {
     UIButton *btn = (UIButton *)sender;
     
-    DDLogVerbose(@"finish %ld",(long)btn.tag);
+    DDLogVerbose(@"finish checklist %@",selectedCheckList);
+    DDLogVerbose(@"save job type %@",selectedJobTypes);
+    DDLogVerbose(@"job type section %d",(int)btn.tag);
     
     [btn setSelected:!btn.selected];
 }
@@ -176,27 +172,27 @@
         NSNumber *jobTypeId = [NSNumber numberWithInt:[[[scheduleArrayRaw objectAtIndex:btn.tag] valueForKey:@"w_jobtypeId"] intValue]] ;
         NSArray *checkList = [check_list checklistForJobTypeId:jobTypeId];
 
-        
-        NSMutableArray *rowsOfCheckList = [[NSMutableArray alloc] init];
+        //check all checklist under this section
         for (int i = 0; i < checkList.count; i++) {
-            [rowsOfCheckList addObject:[NSNumber numberWithInt:i]];
+            NSDictionary *dict = [checkList objectAtIndex:i];
+            [selectedCheckList addObject:[NSNumber numberWithInt:[[dict valueForKey:@"id"] intValue]]];
         }
-        
-        [selectedCheckList replaceObjectAtIndex:btn.tag withObject:rowsOfCheckList];
-        
     }
     
     else
     {
         [selectedJobTypes removeObject:tag];
         
-        [selectedCheckList replaceObjectAtIndex:btn.tag withObject:@[@"temp"]];
+        NSNumber *jobTypeId = [NSNumber numberWithInt:[[[scheduleArrayRaw objectAtIndex:btn.tag] valueForKey:@"w_jobtypeId"] intValue]] ;
+        NSArray *checkList = [check_list checklistForJobTypeId:jobTypeId];
+        
+        //un-check all checklist under this section
+        for (int i = 0; i < checkList.count; i++) {
+            NSDictionary *dict = [checkList objectAtIndex:i];
+            [selectedCheckList removeObject:[NSNumber numberWithInt:[[dict valueForKey:@"id"] intValue]]];
+        }
     }
     
-    DDLogVerbose(@"selectedJobTypes %@",selectedJobTypes);
-    DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
-
-
     [self.checkListTable reloadData];
 }
 
@@ -209,10 +205,57 @@
     
     [btn setSelected:!btn.selected];
     
+    CGPoint buttonOriginInTableView = [sender convertPoint:CGPointZero toView:self.checkListTable];
+    NSIndexPath *indexPath = [self.checkListTable indexPathForRowAtPoint:buttonOriginInTableView];
+    
     if([selectedCheckList containsObject:tag] == NO)
+    {
         [selectedCheckList addObject:tag];
+        
+        //mark check this section if all contents of checkList is found inside
+        NSNumber *jobTypeId = [NSNumber numberWithInt:[[[scheduleArrayRaw objectAtIndex:indexPath.section] valueForKey:@"w_jobtypeId"] intValue]] ;
+        NSArray *checkList = [check_list checklistForJobTypeId:jobTypeId];
+        NSMutableArray *checkedIds = [[NSMutableArray alloc] init];
+        
+        //save the only ids
+        for (int i = 0; i < checkList.count; i++) {
+            NSNumber *ids = [NSNumber numberWithInt:[[[checkList objectAtIndex:i] valueForKey:@"id"] intValue]];
+            [checkedIds addObject:ids];
+        }
+        
+        BOOL found = YES;
+        for (int i = 0; i < checkedIds.count; i++) {
+            NSNumber *chklst = [checkedIds objectAtIndex:i];
+            DDLogVerbose(@"chklst %@",chklst);
+            DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
+            if([selectedCheckList containsObject:chklst] == NO)
+            {
+                found = NO;
+                break;
+            }
+            
+        }
+        
+        if(found)
+        {
+            [selectedJobTypes addObject:[NSNumber numberWithInt:(int)indexPath.section]];
+        }
+    }
     else
+    {
         [selectedCheckList removeObject:tag];
+        
+        //un-check the section of this checklist
+        CGPoint buttonOriginInTableView = [sender convertPoint:CGPointZero toView:self.checkListTable];
+        NSIndexPath *indexPath = [self.checkListTable indexPathForRowAtPoint:buttonOriginInTableView];
+        
+        [selectedJobTypes removeObject:[NSNumber numberWithInt:(int)indexPath.section]];
+    }
+    
+    
+    
+    DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
+
     
     [self.checkListTable reloadData];
 }
@@ -227,15 +270,16 @@
     
     //add method to checkbox
     [cell.checkBoxBtn addTarget:self action:@selector(toggleCheckList:) forControlEvents:UIControlEventTouchUpInside];
-    cell.checkBoxBtn.tag = indexPath.row;
     
-    if([[selectedCheckList objectAtIndex:indexPath.section] containsObject:[NSNumber numberWithInt:(int)indexPath.row]])
+    NSNumber *tag = [NSNumber numberWithInt:(int)cell.checkBoxBtn.tag];
+    
+    if([selectedCheckList containsObject:tag] ==  YES)
     {
-        [cell.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x.png"] forState:UIControlStateNormal];
+        [cell.checkBoxBtn setSelected:YES];
     }
     else
     {
-        [cell.checkBoxBtn setImage:[UIImage imageNamed:@"check@2x.png"] forState:UIControlStateNormal];
+        [cell.checkBoxBtn setSelected:NO];
     }
     
     return cell;

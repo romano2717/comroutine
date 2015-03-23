@@ -23,28 +23,30 @@
     
     //save this routine as a post with type = 2
     post = [[Post alloc] init];
-    schedule = [[Schedule alloc] init];
+    blocks = [[Blocks alloc] init];
     myDatabase = [Database sharedMyDbManager];
-    
-    NSDictionary *schedDict = [schedule scheduleForBlockId:blockId];
+
+    NSDictionary *blockInfo = [[blocks fetchBlocksWithBlockId:blockId] lastObject];
     NSDate *post_date = [NSDate date];
     NSNumber *post_type = [NSNumber numberWithInt:2];
     NSNumber *severityNumber = [NSNumber numberWithInt:2];
-    NSString *location = [NSString stringWithFormat:@"%@ %@",[schedDict valueForKey:@"block_no"],[schedDict valueForKey:@"street_name"]];
+    NSString *location = [NSString stringWithFormat:@"%@ %@",[blockInfo valueForKey:@"block_no"],[blockInfo valueForKey:@"street_name"]];
     
-    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:[schedDict valueForKey:@"w_area"],@"post_topic",[myDatabase.userDictionary valueForKey:@"user_id"],@"post_by",post_date,@"post_date",post_type,@"post_type",severityNumber,@"severity",@"0",@"status",location,@"address",@"nil",@"level",[schedDict valueForKey:@"postal_code"],@"postal_code",blockId,@"block_id",post_date,@"updated_on",[NSNumber numberWithBool:YES],@"seen", nil];
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:[blockInfo valueForKey:@"block_no"],@"post_topic",[myDatabase.userDictionary valueForKey:@"user_id"],@"post_by",post_date,@"post_date",post_type,@"post_type",severityNumber,@"severity",@"0",@"status",location,@"address",@"na",@"level",[blockInfo valueForKey:@"postal_code"],@"postal_code",blockId,@"block_id",post_date,@"updated_on",[NSNumber numberWithBool:YES],@"seen", nil];
     
     long long postId = [post savePostWithDictionary:dict forBlockId:blockId];
     
     if(postId > 0)
     {
         DDLogVerbose(@"post saved for routine");
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            Synchronize *sync = [Synchronize sharedManager];
+            [sync uploadPostFromSelf:NO];
+        });
     }
     else
         DDLogVerbose(@"post already exist");
-    
-    
-    //fetch comments for this post
 }
 
 - (void)didReceiveMemoryWarning {

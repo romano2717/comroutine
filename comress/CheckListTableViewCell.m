@@ -23,6 +23,7 @@
 - (void)initCellWithResultSet:(NSDictionary *)dict
 {
     self.checkList.text = [dict valueForKey:@"w_item"];
+    self.checkBoxBtn.tag = [[dict valueForKey:@"id"] intValue];
 }
 
 @end

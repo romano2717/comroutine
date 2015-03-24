@@ -10,11 +10,12 @@
 #import "Check_list.h"
 #import "CheckListTableViewCell.h"
 #import "CheckListHeader.h"
-
+#import "Schedule.h"
 
 @interface CheckListViewController : UIViewController<UITableViewDelegate,UITableViewDataSource>
 {
     Check_list *check_list;
+    Schedule *schedule;
 }
 
 @property (nonatomic, weak) IBOutlet UITableView *checkListTable;
@@ -23,7 +24,7 @@
 @property (nonatomic, strong) NSArray *scheduleArray;
 @property (nonatomic, strong) NSArray *scheduleArrayRaw;
 
-@property (nonatomic, strong) NSArray *checkListArray;
+@property (nonatomic, strong) NSMutableArray *finishedInspectionResultArray;
 
 @property (nonatomic, strong) NSMutableArray *sectionsArray;
 

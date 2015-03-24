@@ -19,6 +19,7 @@
 @property (nonatomic, weak) IBOutlet UILabel *scheduleDate;
 @property (nonatomic, weak) IBOutlet UIButton *saveBtn;
 @property (nonatomic, weak) IBOutlet UIButton *finishBtn;
+@property (nonatomic, weak) IBOutlet UILabel *scheduleFinishedLabel;
 
 - (void)initCellWithResultSet:(NSDictionary *)dict;
 

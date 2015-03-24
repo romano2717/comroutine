@@ -22,4 +22,8 @@
 
 - (NSArray *)checklistForJobTypeId:(NSNumber *)jobTypeId;
 
+- (NSArray *)updatedChecklist;
+
+- (NSArray *)inspectionResultCheckListForStatus:(NSNumber *)status;
+
 @end

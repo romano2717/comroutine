@@ -148,9 +148,128 @@
     return dict;
 }
 
-
-- (BOOL)saveOrFinishScheduleWithId:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId
+//NOTE: checkListId is the auto increment id of the local db and NOT the w_chklistid id from server db
+- (BOOL)saveOrFinishScheduleWithId:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId withStatus:(NSNumber *)status
 {
-    return NO;
+    __block BOOL ok = YES;
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        db.traceExecution = YES;
+
+        NSDate *now = [NSDate date];
+        
+        if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SPO"])
+        {
+            FMResultSet *rsChk = [db executeQuery:@"select * from ro_checklist where id = ?",checkListId];
+            while ([rsChk next]) {
+                NSNumber *w_checklistid = [NSNumber numberWithInt:[[rsChk valueForKey:@"w_chklistid"] intValue]];
+                
+                //delete entry for same w_scheduleid and w_checklistid
+                BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ? and w_checklistid = ?",scheduleId,w_checklistid];
+                if(!del)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                //insert!
+                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_spochecked,w_status,w_created_on) values(?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now];
+                
+                if(!ok)
+                {
+                    ok = NO;
+                    *rollback = YES;
+                    return;
+                }
+                
+                else
+                {
+                    //update ro_schedule table
+                    if([status intValue] == 2) //(updated when SPO finished the schedule)
+                    {
+                        BOOL up =  [db executeUpdate:@"update ro_schedule set w_spochk = ? where w_scheduleid = ?",now,scheduleId];
+                        if(!up)
+                        {
+                            ok = NO;
+                            *rollback = YES;
+                            return;
+                        }
+                    }
+                    
+                    BOOL up2 = [db executeUpdate:@"update ro_schedule set w_flag = ? where w_scheduleid",status,scheduleId];
+                    if(!up2)
+                    {
+                        ok = NO;
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }
+        }
+        else
+        {
+            FMResultSet *rsChk = [db executeQuery:@"select * from ro_checklist where id = ?",checkListId];
+            while ([rsChk next]) {
+                NSNumber *w_checklistid = [NSNumber numberWithInt:[rsChk intForColumn:@"w_chklistid"]];
+                
+                //delete entry for same w_scheduleid and w_checklistid
+                BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ? and w_checklistid = ?",scheduleId,w_checklistid];
+                if(!del)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                //insert!
+                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_checked,w_status,w_created_on) values(?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now];
+                
+                if(!ok)
+                {
+                    ok = NO;
+                    *rollback = YES;
+                    return;
+                }
+                else
+                {
+                    //update ro_schedule table
+                    if([status intValue] == 2)
+                    {
+                        BOOL up = [db executeUpdate:@"update ro_schedule set w_actendtime = ?, w_supchk = ?, w_actualdate = ? where w_scheduleid = ?",now,now,now,scheduleId];
+                        if(!up)
+                        {
+                            ok = NO;
+                            *rollback = YES;
+                            return;
+                        }
+                    }
+                    
+                    BOOL up2 = [db executeUpdate:@"update ro_schedule set w_supflag = ? where w_scheduleid = ?",status,scheduleId];
+                    if(!up2)
+                    {
+                        ok = NO;
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }
+        }
+    }];
+    
+    return ok;
+}
+
+- (NSArray *)checkListForScheduleId:(NSNumber *)checklistId
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select rs.w_jobtypeid, rs.w_scheduleid, rc.* from ro_schedule rs, ro_checklist rc where rs.w_scheduleid = ? and rs.w_jobtypeId = rc.w_jobtypeid",checklistId];
+        
+        while ([rs next]) {
+            [arr addObject:[rs resultDictionary]];
+        }
+    }];
+    
+    return arr;
 }
 @end

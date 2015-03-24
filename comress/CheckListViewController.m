@@ -14,20 +14,41 @@
 
 @implementation CheckListViewController
 
-@synthesize blockId,scheduleArrayRaw,selectedCheckList,selectedJobTypes;
+@synthesize blockId,scheduleArrayRaw,selectedCheckList,selectedJobTypes,finishedInspectionResultArray;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
     check_list = [[Check_list alloc] init];
+    schedule = [[Schedule alloc] init];
     
     self.sectionsArray = [[NSMutableArray alloc] init];
     self.scheduleArray = [[NSMutableArray alloc] init];
-    self.checkListArray = [[NSMutableArray alloc] init];
     
     selectedJobTypes = [[NSMutableArray alloc] init];
     selectedCheckList = [[NSMutableArray alloc] init];
+    
+    finishedInspectionResultArray = [[NSMutableArray alloc] init];
+    
+    NSArray *arr = [check_list inspectionResultCheckListForStatus:[NSNumber numberWithInt:2]];
+    for (int i = 0; i < arr.count; i++) {
+        NSDictionary *dict = [arr objectAtIndex:i];
+        
+        NSNumber *w_checklistid = [NSNumber numberWithInt:[[dict valueForKey:@"w_checklistid"] intValue]];
+
+        [finishedInspectionResultArray addObject:w_checklistid];
+    }
+    
+    NSArray *updateChecklist = [check_list updatedChecklist];
+    
+    for (int i = 0; i < updateChecklist.count; i++) {
+        NSDictionary *dict = [updateChecklist objectAtIndex:i];
+        
+        NSNumber *ids = [NSNumber numberWithInt:[[dict valueForKey:@"id"] intValue]];
+        
+        [selectedCheckList addObject:ids];
+    }
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -131,6 +152,14 @@
     ch.finishBtn.tag = [[dict valueForKey:@"w_scheduleid"] integerValue];
     [ch.finishBtn addTarget:self action:@selector(finishCheckList:) forControlEvents:UIControlEventTouchUpInside];
     
+    
+    //check if this section was finished, if so, gray out the checkbox and disable user interaction
+    if([[dict valueForKey:@"w_supflag"] intValue] == 1) //finished
+    {
+        ch.checkBoxBtn.enabled = NO;
+    }
+    
+    
     return ch;
 }
 
@@ -140,9 +169,35 @@
 
     DDLogVerbose(@"save checklist %@",selectedCheckList);
     DDLogVerbose(@"save job type %@",selectedJobTypes);
-    DDLogVerbose(@"job type section %d",(int)btn.tag);
+    DDLogVerbose(@"schedule id %d",(int)btn.tag);
+    
+    NSNumber *tappedScheduleId = [NSNumber numberWithInt:(int)btn.tag];
+    
+    NSArray *arr = [schedule checkListForScheduleId:tappedScheduleId];
+    
+    for (int i = 0; i < arr.count; i++) {
+        NSDictionary *dict = [arr objectAtIndex:i];
+        NSNumber *scheduleId = [NSNumber numberWithInt:[[dict valueForKey:@"w_scheduleid"] intValue]];
+        NSNumber *checklistId = [NSNumber numberWithInt:[[dict valueForKey:@"id"] intValue]];
+        NSNumber *checkAreaId = [NSNumber numberWithInt:[[dict valueForKey:@"w_checkareaid"] intValue]];
+        
+        if([selectedCheckList containsObject:checklistId] == YES && tappedScheduleId == scheduleId)
+        {
+            BOOL save = [schedule saveOrFinishScheduleWithId:scheduleId checklistId:checklistId checkAreaId:checkAreaId withStatus:[NSNumber numberWithInt:1]];
+            
+            if(!save)
+            {
+                DDLogVerbose(@"saveCheckList failed");
+            }
+            else
+                DDLogVerbose(@"saveCheckList ok");
+        }
+        
+    }
     
     [btn setSelected:!btn.selected];
+    
+    [self fetchCheckList];
 }
 
 - (IBAction)finishCheckList:(id)sender
@@ -151,9 +206,36 @@
     
     DDLogVerbose(@"finish checklist %@",selectedCheckList);
     DDLogVerbose(@"save job type %@",selectedJobTypes);
-    DDLogVerbose(@"job type section %d",(int)btn.tag);
+    DDLogVerbose(@"schedule id %d",(int)btn.tag);
+    
+    
+    NSNumber *tappedScheduleId = [NSNumber numberWithInt:(int)btn.tag];
+    
+    NSArray *arr = [schedule checkListForScheduleId:tappedScheduleId];
+    
+    for (int i = 0; i < arr.count; i++) {
+        NSDictionary *dict = [arr objectAtIndex:i];
+        NSNumber *scheduleId = [NSNumber numberWithInt:[[dict valueForKey:@"w_scheduleid"] intValue]];
+        NSNumber *checklistId = [NSNumber numberWithInt:[[dict valueForKey:@"id"] intValue]];
+        NSNumber *checkAreaId = [NSNumber numberWithInt:[[dict valueForKey:@"w_checkareaid"] intValue]];
+        
+        if([selectedCheckList containsObject:checklistId] == YES && tappedScheduleId == scheduleId)
+        {
+            BOOL save = [schedule saveOrFinishScheduleWithId:scheduleId checklistId:checklistId checkAreaId:checkAreaId withStatus:[NSNumber numberWithInt:2]];
+            
+            if(!save)
+            {
+                DDLogVerbose(@"finishCheckList failed");
+            }
+            else
+                DDLogVerbose(@"finishCheckList ok");
+        }
+        
+    }
     
     [btn setSelected:!btn.selected];
+    
+    [self fetchCheckList];
 }
 
 - (IBAction)toggleJobTypeCheckBox:(id)sender
@@ -217,7 +299,7 @@
         NSArray *checkList = [check_list checklistForJobTypeId:jobTypeId];
         NSMutableArray *checkedIds = [[NSMutableArray alloc] init];
         
-        //save the only ids
+        //save only the ids
         for (int i = 0; i < checkList.count; i++) {
             NSNumber *ids = [NSNumber numberWithInt:[[[checkList objectAtIndex:i] valueForKey:@"id"] intValue]];
             [checkedIds addObject:ids];
@@ -252,8 +334,6 @@
         [selectedJobTypes removeObject:[NSNumber numberWithInt:(int)indexPath.section]];
     }
     
-    
-    
     DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
 
     
@@ -265,7 +345,8 @@
     CheckListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
 
     NSDictionary *dict = [[self.scheduleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
-    
+    NSDictionary *dictRaw = [self.scheduleArrayRaw objectAtIndex:indexPath.section];
+
     [cell initCellWithResultSet:dict];
     
     //add method to checkbox
@@ -280,6 +361,14 @@
     else
     {
         [cell.checkBoxBtn setSelected:NO];
+    }
+    
+    
+    //check if this section was finished, if so, gray out the checkbox and disable user interaction
+    if([[dictRaw valueForKey:@"w_supflag"] intValue] == 2) //finished
+    {
+        DDLogVerbose(@"%@",dict);
+        cell.checkBoxBtn.enabled = NO;
     }
     
     return cell;

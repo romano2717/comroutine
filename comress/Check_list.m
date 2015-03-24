@@ -60,6 +60,21 @@
     return checkListArr;
 }
 
+- (NSArray *)updatedChecklist
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from ro_inspectionresult ri, ro_checklist rc where ri.w_checklistid = rc.w_chklistid"];
+        
+        while ([rs next]) {
+            [arr addObject:[rs resultDictionary]];
+        }
+    }];
+    
+    return arr;
+}
+
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString
 {
     NSInteger startPosition = [dateString rangeOfString:@"("].location + 1; //start of the date value
@@ -92,6 +107,21 @@
     }];
     
     return YES;
+}
+
+- (NSArray *)inspectionResultCheckListForStatus:(NSNumber *)status
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from ro_inspectionresult where w_status = ?",status];
+        
+        while ([rs next]) {
+            [arr addObject:[rs resultDictionary]];
+        }
+    }];
+    DDLogVerbose(@"%@",arr);
+    return arr;
 }
 
 @end

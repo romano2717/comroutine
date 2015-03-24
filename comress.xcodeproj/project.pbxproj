@@ -159,7 +159,7 @@
 		4DAEA6B41A834D7600A6EFBE /* NSDate+HumanizedTime.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B31A834D7600A6EFBE /* NSDate+HumanizedTime.m */; };
 		4DAEA6B71A83505E00A6EFBE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B51A83505E00A6EFBE /* Localizable.strings */; };
 		4DAEA6B81A83505E00A6EFBE /* Localizable_full.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B61A83505E00A6EFBE /* Localizable_full.strings */; };
-		4DBA3B4A1AC0144C008F7733 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4DBA3B491AC0144C008F7733 /* comress.sqlite */; };
+		4DBA3B5C1AC14B36008F7733 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4DBA3B5B1AC14B36008F7733 /* comress.sqlite */; };
 		4DD6FE9E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE7E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m */; };
 		4DD6FE9F1A884CFF00CBBE1D /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE801A884CFF00CBBE1D /* NSData+ImageContentType.m */; };
 		4DD6FEA01A884CFF00CBBE1D /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE821A884CFF00CBBE1D /* SDImageCache.m */; };
@@ -485,7 +485,7 @@
 		4DAEA6B31A834D7600A6EFBE /* NSDate+HumanizedTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+HumanizedTime.m"; sourceTree = "<group>"; };
 		4DAEA6B51A83505E00A6EFBE /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		4DAEA6B61A83505E00A6EFBE /* Localizable_full.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable_full.strings; sourceTree = "<group>"; };
-		4DBA3B491AC0144C008F7733 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
+		4DBA3B5B1AC14B36008F7733 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4DD6FE7D1A884CFF00CBBE1D /* MKAnnotationView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MKAnnotationView+WebCache.h"; sourceTree = "<group>"; };
 		4DD6FE7E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MKAnnotationView+WebCache.m"; sourceTree = "<group>"; };
 		4DD6FE7F1A884CFF00CBBE1D /* NSData+ImageContentType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+ImageContentType.h"; sourceTree = "<group>"; };
@@ -945,7 +945,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4DBA3B491AC0144C008F7733 /* comress.sqlite */,
+				4DBA3B5B1AC14B36008F7733 /* comress.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1393,7 +1393,7 @@
 			files = (
 				4D8AC9601AAD8AE3008F7652 /* routine.png in Resources */,
 				4DA207E41A79DA0A00C7E5C7 /* JSQMessagesViewController.xib in Resources */,
-				4DBA3B4A1AC0144C008F7733 /* comress.sqlite in Resources */,
+				4DBA3B5C1AC14B36008F7733 /* comress.sqlite in Resources */,
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
 				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,

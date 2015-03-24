@@ -36,7 +36,18 @@
     
     self.scheduleDate.text = datestring;
     
+    if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SPO"])
+    {
     
+    }
+    else
+    {
+        if([[dict valueForKey:@"w_supflag"] intValue] == 2) //finished
+        {
+            saveBtn.hidden = YES;
+            finishBtn.hidden = YES;
+        }
+    }
 }
 
 @end

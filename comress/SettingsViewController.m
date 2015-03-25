@@ -87,7 +87,7 @@
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 db.traceExecution = YES;
                 
-                NSArray *tableToDelete = @[@"blocks_user",@"blocks_user_last_request_date",@"ro_checkarea",@"ro_checkarea_last_req_date",@"ro_checklist",@"ro_checklist_last_req_date",@"ro_job",@"ro_job_last_req_date",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanchecklist_blk",@"ro_scanchecklist_blk_last_req_date",@"ro_scanchecklist_last_req_date",@"ro_schedule",@"ro_schedule_last_req_date",@"ro_user_blk",@"ro_user_blk_last_req_date",@"ro_inspectionresult"];
+                NSArray *tableToDelete = @[@"blocks",@"blocks_last_request_date",@"blocks_user",@"blocks_user_last_request_date",@"ro_checkarea",@"ro_checkarea_last_req_date",@"ro_checklist",@"ro_checklist_last_req_date",@"ro_job",@"ro_job_last_req_date",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanchecklist_blk",@"ro_scanchecklist_blk_last_req_date",@"ro_scanchecklist_last_req_date",@"ro_schedule",@"ro_schedule_last_req_date",@"ro_user_blk",@"ro_user_blk_last_req_date",@"ro_inspectionresult"];
                 
                 //clear tables
                 for (int i = 0; i < tableToDelete.count; i++) {

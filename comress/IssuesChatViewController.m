@@ -343,6 +343,7 @@
     {
         [self sendLocationAsMessageWithUrl:mapImageUrl];
         [locationManager stopUpdatingLocation];
+        [MBProgressHUD hideHUDForView:self.view animated:YES];        
     }
 }
 
@@ -364,8 +365,6 @@
         [self saveCommentForMessage:dict];
         
         [self finishReceivingMessageAnimated:YES];
-        
-        [MBProgressHUD hideHUDForView:self.view animated:YES];
     }];
 }
 

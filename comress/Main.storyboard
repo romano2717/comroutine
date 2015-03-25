@@ -1833,6 +1833,7 @@
                     </navigationItem>
                     <connections>
                         <segue destination="Wk5-x8-fHb" kind="presentation" identifier="modal_routine_info" id="a5b-vh-sV1"/>
+                        <segue destination="1tC-jd-mh6" kind="presentation" identifier="push_view_image" id="dIz-fg-pc3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uqr-l9-OF1" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -1855,6 +1856,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="SMc-XH-H8D"/>
-        <segue reference="Olt-rM-pEr"/>
+        <segue reference="dIz-fg-pc3"/>
     </inferredMetricsTieBreakers>
 </document>

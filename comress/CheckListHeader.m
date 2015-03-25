@@ -42,11 +42,11 @@
     }
     else
     {
-        if([[dict valueForKey:@"w_supflag"] intValue] == 2) //finished
-        {
-            saveBtn.hidden = YES;
-            finishBtn.hidden = YES;
-        }
+//        if([[dict valueForKey:@"w_supflag"] intValue] == 2) //finished
+//        {
+//            saveBtn.hidden = YES;
+//            finishBtn.hidden = YES;
+//        }
     }
 }
 

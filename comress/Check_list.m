@@ -65,9 +65,10 @@
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select * from ro_inspectionresult ri, ro_checklist rc where ri.w_checklistid = rc.w_chklistid"];
+        FMResultSet *rs = [db executeQuery:@"select * from ro_inspectionresult"];
         
         while ([rs next]) {
+            DDLogVerbose(@"w_scheduleid %d",[rs intForColumn:@"w_scheduleid"]);
             [arr addObject:[rs resultDictionary]];
         }
     }];
@@ -120,7 +121,6 @@
             [arr addObject:[rs resultDictionary]];
         }
     }];
-    DDLogVerbose(@"%@",arr);
     return arr;
 }
 

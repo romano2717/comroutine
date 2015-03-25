@@ -19,6 +19,11 @@
 #import "Blocks.h"
 #import "Database.h"
 #import "Synchronize.h"
+#import "Users.h"
+#import "Comment.h"
+#import "NSDate+HumanizedTime.h"
+#import "ImagePreviewViewController.h"
+#import "MBProgressHUD.h"
 
 @class RoutineChatViewController;
 
@@ -28,15 +33,26 @@
 
 @end
 
-@interface RoutineChatViewController : JSQMessagesViewController
+@interface RoutineChatViewController : JSQMessagesViewController<UIActionSheetDelegate,CLLocationManagerDelegate,UIImagePickerControllerDelegate,UINavigationControllerDelegate,UIPopoverPresentationControllerDelegate>
 {
     FPPopoverKeyboardResponsiveController *popover;
     Post *post;
     Blocks *blocks;
     Database *myDatabase;
+    Users *user;
+    Comment *comment;
+    ImageOptions *imgOpts;
+    CLLocationManager *locationManager;    
 }
 
 @property (nonatomic, strong) NSString *blockNo;
 @property (nonatomic, strong) NSNumber *blockId;
+@property (nonatomic, strong) MessageDataRoutine *messageData;
+@property (nonatomic) int postId;
+@property (nonatomic) int ServerPostId;
+@property (nonatomic, strong) NSDictionary *postDict;
+@property (nonatomic, strong) NSDictionary *postInfoDict;
+@property (nonatomic, strong) UIImagePickerController *imagePicker;
+@property (nonatomic, strong) NSArray *commentsArray;
 
 @end

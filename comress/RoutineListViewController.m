@@ -70,10 +70,6 @@
 {
     [super viewWillAppear:animated];
     
-    //add tap gestuer to the navbar for the pop-over post info
-    UITapGestureRecognizer *tapNavBar = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(popSkedInformation)];
-    tapNavBar.numberOfTapsRequired = 1;
-    
     self.tabBarController.tabBar.hidden = NO;
     self.navigationController.navigationBar.hidden = YES;
     self.hidesBottomBarWhenPushed = NO;
@@ -171,12 +167,8 @@
             
             NSDictionary *skedDict = [scheduleArray objectAtIndex:indexPath.row];
             
-            NSString *key = [[skedDict allKeys] objectAtIndex:0];
-            
-            NSDictionary *blockDict = [skedDict objectForKey:key];
-            
-            NSString *blockNo = [blockDict valueForKey:@"block_no"];
-            NSNumber *blockId = [NSNumber numberWithInt:[key intValue]];
+            NSString *blockNo = [skedDict valueForKey:@"block_no"];
+            NSNumber *blockId = [NSNumber numberWithInt:[[skedDict valueForKey:@"block_id"] intValue]];
             
             RoutineChatViewController *rtc = [segue destinationViewController];
             rtc.blockNo = blockNo;
@@ -186,7 +178,6 @@
         }
     }
 }
-
 
 
 - (IBAction)segmentControlChange:(id)sender
@@ -202,7 +193,7 @@
     if(self.segment.selectedSegmentIndex == 0)
         scheduleArray = [schedule fetchScheduleForMe];
     else
-        scheduleArray = [schedule fetchScheduleForOthersAtPage:[NSNumber numberWithInt:currentNumberOfRows]];
+        scheduleArray = [schedule fetchScheduleForOthersAtPage2:[NSNumber numberWithInt:currentNumberOfRows]];
     
     [self.routineTableView reloadData];
     

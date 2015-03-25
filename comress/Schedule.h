@@ -19,11 +19,12 @@
 - (NSArray *)fetchScheduleForMe;
 
 - (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)row;
+- (NSArray *)fetchScheduleForOthersAtPage2:(NSNumber *)limit;
 
 - (NSDictionary *)scheduleForBlockId:(NSNumber *)blockId;
 
 - (BOOL)saveOrFinishScheduleWithId:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId withStatus:(NSNumber *)status;
 
-- (NSArray *)checkListForScheduleId:(NSNumber *)checklistId;
+- (NSArray *)checkListForScheduleId:(NSNumber *)scheduleId;
 
 @end

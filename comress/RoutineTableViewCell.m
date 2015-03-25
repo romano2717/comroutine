@@ -22,21 +22,15 @@
 
 - (void)initCellWithResultSet:(NSDictionary *)dict
 {
-    NSString *key = [[dict allKeys] objectAtIndex:0];
-    
-    NSDictionary *blockDict = [dict objectForKey:key];
-    
-    NSString *blockNo = [blockDict valueForKey:@"block_no"];
-    NSString *streetName = [blockDict valueForKey:@"street_name"];
+    NSString *blockNo = [dict valueForKey:@"block_no"];
+    NSString *streetName = [dict valueForKey:@"street_name"];
 
     self.blockNoLabel.text = blockNo;
     
     self.streetLabel.text = streetName;
     
-    self.unlockButton.tag = [key intValue];
+    self.unlockButton.tag = [[dict valueForKey:@"block_id"] intValue];
     [self.unlockButton addTarget:self action:@selector(tappedUnlockButton:) forControlEvents:UIControlEventTouchUpInside];
-    
-    
     
     self.lastMsgLabel.hidden = YES;
     self.lastMsgByLabel.hidden = YES;

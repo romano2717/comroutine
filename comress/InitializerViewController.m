@@ -89,7 +89,8 @@
         }
         
         NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
-
+        DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"guid"]);
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_blocks] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *dict = [responseObject objectForKey:@"BlockContainer"];
@@ -873,12 +874,17 @@
             NSNumber *lon = [dictBlock valueForKey:@"Latitude"];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-                BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name, latitude, longitude) values (?,?,?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName,lat,lon];
                 
-                if(!qBlockIns)
+                FMResultSet *blockIsExist = [theDb executeQuery:@"select block_id from blocks where block_id = ?",BlkId];
+                if([blockIsExist next] == NO)
                 {
-                    *rollback = YES;
-                    return;
+                    BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name, latitude, longitude) values (?,?,?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName,lat,lon];
+                    
+                    if(!qBlockIns)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
                 }
             }];
         }

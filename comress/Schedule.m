@@ -21,50 +21,45 @@
 - (NSArray *)fetchScheduleForMe
 {
     NSMutableArray *skedArr = [[NSMutableArray alloc] init];
-
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-
-        FMResultSet *rsblk = [db executeQuery:@"select b.block_id, b.block_no,b.street_name from blocks b, blocks_user bu where b.block_id = bu.block_id group by b.block_id"];
         
-        while ([rsblk next]) {
+        FMResultSet *rsSked = [db executeQuery:@"select * from ro_schedule group by w_blkid order by w_scheduledate asc"];
+        
+        while ([rsSked next]) {
+            FMResultSet *blockInfo = [db executeQuery:@"select * from blocks where block_id = ? group by block_id", [NSNumber numberWithInt:[rsSked intForColumn:@"w_blkid"]]];
             
-            NSDictionary *blockDict = [NSDictionary dictionaryWithObject:[rsblk resultDictionary] forKey:[NSString stringWithFormat:@"%d",[rsblk intForColumn:@"block_id"]]];
-            
-            NSMutableDictionary *blockDictMutable = [[NSMutableDictionary alloc] initWithDictionary:blockDict];
-            
-            [skedArr addObject:blockDictMutable];
+            while ([blockInfo next]) {
+                [skedArr addObject:[blockInfo resultDictionary]];
+            }
         }
         
+        //get all the blocks of this user
+        FMResultSet *blocksUser = [db executeQuery:@"select * from blocks_user"];
+        NSMutableArray *blocksUserArr = [[NSMutableArray alloc] init];
+        while ([blocksUser next]) {
+            NSNumber *blockId = [NSNumber numberWithInt:[blocksUser intForColumn:@"block_id"]];
+            
+            [blocksUserArr addObject:blockId];
+        }
         
-        //move the blocks with current schedule on top
+        //remove blocks from matchBlocksForSked that doesn't belong to blocks_user
         for (int i = 0; i < skedArr.count; i++) {
-            NSDictionary *topDict = [skedArr objectAtIndex:i];
-            int key = [[[topDict allKeys] objectAtIndex:0] intValue];
+            NSDictionary *dict = [skedArr objectAtIndex:i];
             
-            NSMutableDictionary *blockDict = [[NSMutableDictionary alloc] initWithDictionary:[topDict objectForKey:[NSString stringWithFormat:@"%d",key]]];
+            NSNumber *blockId = [NSNumber numberWithInt:[[dict valueForKey:@"block_id"] intValue]];
             
-            NSNumber *block_id =  [blockDict valueForKey:@"block_id"];
-            
-            FMResultSet *rsSked = [db executeQuery:@"select w_blkid from ro_schedule where w_blkid = ? order by w_scheduledate desc",block_id];
-            
-            if([rsSked next])
+            if([blocksUserArr containsObject:blockId] == NO)
             {
-                //NSDictionary *blockDictCopy = blockDict;
-
-                //[blockDict setObject:[rsSked resultDictionary] forKey:@"schedule"];
-                
-                //search blockDict with key and replace the object inside that key with
-                
-                //[skedArr replaceObjectAtIndex:i withObject:blockDictCopy];
-                
-                //DDLogVerbose(@"insert at index %d",i);
+                [skedArr removeObjectAtIndex:i];
             }
         }
     }];
     
+    DDLogVerbose(@"%@",skedArr);
     return skedArr;
 }
+
 
 - (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)limit
 {
@@ -93,6 +88,27 @@
             [skedArr addObject:blockDict];
         }
 
+    }];
+    
+    return skedArr;
+}
+
+
+- (NSArray *)fetchScheduleForOthersAtPage2:(NSNumber *)limit
+{
+    NSNumber *start = [NSNumber numberWithInt:0];
+    
+    NSMutableArray *skedArr = [[NSMutableArray alloc] init];
+    
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        FMResultSet *rsBlocks = [db executeQuery:@"select * from blocks where block_id not in (select block_id from blocks_user) limit ? , ?",start,limit];
+        
+        while ([rsBlocks next]) {
+            [skedArr addObject:[rsBlocks resultDictionary]];
+        }
+        
     }];
     
     return skedArr;
@@ -164,16 +180,8 @@
             while ([rsChk next]) {
                 NSNumber *w_checklistid = [NSNumber numberWithInt:[[rsChk valueForKey:@"w_chklistid"] intValue]];
                 
-                //delete entry for same w_scheduleid and w_checklistid
-                BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ? and w_checklistid = ?",scheduleId,w_checklistid];
-                if(!del)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
                 //insert!
-                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_spochecked,w_status,w_created_on) values(?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now];
+                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_spochecked,w_status,w_created_on,chkAIid) values(?,?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now,checkListId];
                 
                 if(!ok)
                 {
@@ -212,16 +220,8 @@
             while ([rsChk next]) {
                 NSNumber *w_checklistid = [NSNumber numberWithInt:[rsChk intForColumn:@"w_chklistid"]];
                 
-                //delete entry for same w_scheduleid and w_checklistid
-                BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ? and w_checklistid = ?",scheduleId,w_checklistid];
-                if(!del)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
                 //insert!
-                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_checked,w_status,w_created_on) values(?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now];
+                ok = [db executeUpdate:@"insert into ro_inspectionresult (w_scheduleid,w_checklistid,w_chkareaid,w_reportby,w_checked,w_status,w_created_on,chkAIid) values(?,?,?,?,?,?,?,?)",scheduleId,w_checklistid,checkAreaId,[myDatabase.userDictionary valueForKey:@"user_id"],[NSNumber numberWithInt:1],status,now,checkListId];
                 
                 if(!ok)
                 {
@@ -258,12 +258,12 @@
     return ok;
 }
 
-- (NSArray *)checkListForScheduleId:(NSNumber *)checklistId
+- (NSArray *)checkListForScheduleId:(NSNumber *)scheduleId
 {
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select rs.w_jobtypeid, rs.w_scheduleid, rc.* from ro_schedule rs, ro_checklist rc where rs.w_scheduleid = ? and rs.w_jobtypeId = rc.w_jobtypeid",checklistId];
+        FMResultSet *rs = [db executeQuery:@"select rs.w_jobtypeid, rs.w_scheduleid, rc.* from ro_schedule rs, ro_checklist rc where rs.w_scheduleid = ? and rs.w_jobtypeId = rc.w_jobtypeid",scheduleId];
         
         while ([rs next]) {
             [arr addObject:[rs resultDictionary]];

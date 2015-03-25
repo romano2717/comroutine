@@ -10,6 +10,8 @@
 
 @implementation CheckListTableViewCell
 
+@synthesize checkList,checkBoxBtn;
+
 - (void)awakeFromNib {
     // Initialization code
 }
@@ -22,8 +24,8 @@
 
 - (void)initCellWithResultSet:(NSDictionary *)dict
 {
-    self.checkList.text = [dict valueForKey:@"w_item"];
-    self.checkBoxBtn.tag = [[dict valueForKey:@"id"] intValue];
+    checkList.text = [NSString stringWithFormat:@"%@ - %d",[dict valueForKey:@"w_item"],[[dict valueForKey:@"id"] intValue]];
+    checkBoxBtn.tag = [[dict valueForKey:@"id"] intValue];
 }
 
 @end

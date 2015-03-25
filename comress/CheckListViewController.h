@@ -12,12 +12,12 @@
 #import "CheckListHeader.h"
 #import "Schedule.h"
 #import "Database.h"
+#import "MBProgressHUD.h"
 
 @interface CheckListViewController : UIViewController<UITableViewDelegate,UITableViewDataSource>
 {
     Check_list *check_list;
     Schedule *schedule;
-    BOOL checkboxTapped;
     Database *myDatabase;
 }
 

@@ -31,8 +31,6 @@
     selectedJobTypes = [[NSMutableArray alloc] init];
     selectedCheckList = [[NSMutableArray alloc] init];
     
-    finishedInspectionResultArray = [[NSMutableArray alloc] init];
-    savedInspectionResultArray = [[NSMutableArray alloc] init];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -59,6 +57,7 @@
 
 - (void)fetchCheckList
 {
+    //get current updated checlist
     NSArray *updateChecklist = [check_list updatedChecklist];
 
     [selectedCheckList removeAllObjects];
@@ -69,6 +68,20 @@
         [selectedCheckList addObject:ids];
     }
     
+    //get all finished schedule and disable their checkboxes
+    [finishedInspectionResultArray removeAllObjects];
+    finishedInspectionResultArray = nil;
+    finishedInspectionResultArray = [[NSMutableArray alloc] init];
+    
+    NSArray *saved = [check_list inspectionResultCheckListForStatus:[NSNumber numberWithInt:2]];
+    for (int i = 0; i < saved.count; i++) {
+        NSDictionary *dict = [saved objectAtIndex:i];
+        NSNumber *chkAIid = [NSNumber numberWithInt:[[dict valueForKey:@"chkAIid"] intValue]];
+        
+        [finishedInspectionResultArray addObject:chkAIid];
+    }
+    
+    //get schedule
     scheduleArray = [check_list fetchCheckListForBlockId:blockId];
     scheduleArrayRaw = scheduleArray;
     
@@ -97,10 +110,8 @@
     
     self.areaLabel.text = area;
     
-    //dispatch_async(dispatch_get_main_queue(), ^{
-      //  DDLogVerbose(@"scheduleArray %@",scheduleArray);
-        [self.checkListTable reloadData];
-    //});
+    [self.checkListTable reloadData];
+
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
@@ -110,7 +121,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     @try {
         NSArray *arr = [scheduleArray objectAtIndex:section];
-        return arr.count;
+        return arr.count * 2;
     }
     @catch (NSException *exception) {
         DDLogVerbose(@"exception %@",exception);
@@ -128,14 +139,16 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return 45.0f;
+    return 40.0f;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
+    static NSString *cellIdentifier = @"headerCell";
+    
     NSDictionary *dict = [scheduleArrayRaw objectAtIndex:section];
     
-    CheckListHeader* ch = [tableView dequeueReusableCellWithIdentifier:@"headerCell"];
+    CheckListHeader* ch = (CheckListHeader *)[tableView dequeueReusableCellWithIdentifier:cellIdentifier];
     
     [ch initCellWithResultSet:dict];
     
@@ -162,12 +175,40 @@
     
     
     //jobtype save/finish?
-    if(checkboxTapped == NO)
+
+    if([[dict valueForKey:@"w_supflag"] intValue] == 2) //finished
     {
-        if([[dict valueForKey:@"w_supflag"] intValue] > 0)
+        ch.checkBoxBtn.enabled = NO;
+        ch.saveBtn.hidden = YES;
+        ch.finishBtn.hidden = YES;
+    }
+
+    
+    //mark check this section if all contents of checkList is found inside
+    NSNumber *jobTypeId = [NSNumber numberWithInt:[[[scheduleArrayRaw objectAtIndex:section] valueForKey:@"w_jobtypeId"] intValue]] ;
+    NSArray *checkList = [check_list checklistForJobTypeId:jobTypeId];
+    NSMutableArray *checkedIds = [[NSMutableArray alloc] init];
+    
+    //save only the ids
+    for (int i = 0; i < checkList.count; i++) {
+        NSNumber *ids = [NSNumber numberWithInt:[[[checkList objectAtIndex:i] valueForKey:@"id"] intValue]];
+        [checkedIds addObject:ids];
+    }
+    
+    BOOL found = YES;
+    for (int i = 0; i < checkedIds.count; i++) {
+        NSNumber *chklst = [checkedIds objectAtIndex:i];
+        if([selectedCheckList containsObject:chklst] == NO)
         {
-            [ch.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x"] forState:UIControlStateNormal];
+            found = NO;
+            break;
         }
+        
+    }
+    
+    if(found)
+    {
+        [ch.checkBoxBtn setSelected:YES];
     }
     
     return ch;
@@ -175,7 +216,10 @@
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    CheckListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
+    
+    static NSString *cellIdentifier = @"cell";
+    
+    CheckListTableViewCell *cell = (CheckListTableViewCell *)[tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     
     NSDictionary *dict = [[scheduleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
@@ -194,36 +238,44 @@
     {
         [cell.checkBoxBtn setSelected:NO];
     }
+
+    //is this checklist finished? disable checkbox
+    
+    if([finishedInspectionResultArray containsObject:tag])
+    {
+        DDLogVerbose(@"finishedInspectionResultArray %@",finishedInspectionResultArray);
+        DDLogVerbose(@"section %d",(int)indexPath.section);
+        DDLogVerbose(@"tag %@",tag);
+        DDLogVerbose(@"%@",dict);
+        [cell.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x"] forState:UIControlStateNormal];
+        cell.checkBoxBtn.enabled = NO;
+    }
+    
+
     
     return cell;
 }
 
 - (IBAction)saveCheckList:(id)sender
 {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    
     UIButton *btn = (UIButton *)sender;
 
-    DDLogVerbose(@"save checklist %@",selectedCheckList);
-    DDLogVerbose(@"save job type %@",selectedJobTypes);
-    DDLogVerbose(@"schedule id %d",(int)btn.tag);
-    
     NSNumber *tappedScheduleId = [NSNumber numberWithInt:(int)btn.tag];
     
     NSArray *arr = [schedule checkListForScheduleId:tappedScheduleId];
     
     //clear ro_inspectionresult first
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        db.traceExecution = YES;
         //delete entry for same w_scheduleid and w_checklistid
-        BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ?",tappedScheduleId];
+        BOOL del = [db executeUpdate:@"delete from ro_inspectionresult where w_scheduleid = ?",tappedScheduleId];
        
         if(!del)
         {
             *rollback = YES;
             return;
-        }
-        else
-        {
-            int affectedRows = [db changes];
-            DDLogVerbose(@"affectedRows %d",affectedRows);
         }
     }];
     
@@ -236,7 +288,6 @@
         
         if([selectedCheckList containsObject:checklistId] == YES && tappedScheduleId == scheduleId)
         {
-            DDLogVerbose(@"save %@",theChecklistId);
             BOOL save = [schedule saveOrFinishScheduleWithId:scheduleId checklistId:theChecklistId checkAreaId:checkAreaId withStatus:[NSNumber numberWithInt:1]];
             
             if(!save)
@@ -251,16 +302,17 @@
     [btn setSelected:!btn.selected];
     
     [self fetchCheckList];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
+    });
 }
 
 - (IBAction)finishCheckList:(id)sender
 {
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    
     UIButton *btn = (UIButton *)sender;
-    
-    DDLogVerbose(@"finish checklist %@",selectedCheckList);
-    DDLogVerbose(@"save job type %@",selectedJobTypes);
-    DDLogVerbose(@"schedule id %d",(int)btn.tag);
-    
     
     NSNumber *tappedScheduleId = [NSNumber numberWithInt:(int)btn.tag];
     
@@ -268,8 +320,10 @@
     
     //clear ro_inspectionresult first
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        db.traceExecution = YES;
         //delete entry for same w_scheduleid and w_checklistid
-        BOOL del = [db executeQuery:@"delete from ro_inspectionresult where w_scheduleid = ?",tappedScheduleId];
+        BOOL del = [db executeUpdate:@"delete from ro_inspectionresult where w_scheduleid = ?",tappedScheduleId];
+        
         if(!del)
         {
             *rollback = YES;
@@ -290,27 +344,26 @@
             
             if(!save)
             {
-                DDLogVerbose(@"finishCheckList failed");
+                DDLogVerbose(@"saveCheckList failed");
             }
             else
-                DDLogVerbose(@"finishCheckList ok");
+                DDLogVerbose(@"saveCheckList ok");
         }
-        
     }
     
     [btn setSelected:!btn.selected];
     
-    //[self fetchCheckList];
+    [self fetchCheckList];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
+    });
 }
 
 - (IBAction)toggleJobTypeCheckBox:(id)sender
 {
-    checkboxTapped = YES;
-    
     UIButton *btn = (UIButton *)sender;
     NSNumber *tag = [NSNumber numberWithInt:(int)btn.tag];
-    
-    DDLogVerbose(@"toggle job type check box for %@",tag);
     
     [btn setSelected:!btn.selected];
     
@@ -350,12 +403,8 @@
 
 - (IBAction)toggleCheckList:(id)sender
 {
-    checkboxTapped = YES;
-    
     UIButton *btn = (UIButton *)sender;
     NSNumber *tag = [NSNumber numberWithInt:(int)btn.tag];
-    
-    DDLogVerbose(@"toggle check list for %ld",(long)btn.tag);
     
     [btn setSelected:!btn.selected];
     
@@ -380,8 +429,7 @@
         BOOL found = YES;
         for (int i = 0; i < checkedIds.count; i++) {
             NSNumber *chklst = [checkedIds objectAtIndex:i];
-            DDLogVerbose(@"chklst %@",chklst);
-            DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
+
             if([selectedCheckList containsObject:chklst] == NO)
             {
                 found = NO;
@@ -405,9 +453,6 @@
         
         [selectedJobTypes removeObject:[NSNumber numberWithInt:(int)indexPath.section]];
     }
-    
-    DDLogVerbose(@"selectedCheckList %@",selectedCheckList);
-
     
     [self.checkListTable reloadData];
 }

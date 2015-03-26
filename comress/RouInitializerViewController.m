@@ -640,10 +640,12 @@
                 [self startDownloadJobsForPage:1 totalPage:0 requestDate:nil withUi:YES];
             else
             {
-                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
-                    [self checkSupSkedCount];
-                else
+                DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"group_name"]);
+                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SPO"])
                     [self checkSpoSkedCount];
+                else
+                    [self checkSupSkedCount];
+
             }
             
             
@@ -710,7 +712,7 @@
                 [job updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
             
             self.processLabel.text = @"Download complete";
-            
+            DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"group_name"]);
             if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"CT_NU"])
                 [self checkSupSkedCount];
             else
@@ -749,7 +751,8 @@
         }
         
         NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
-        
+        DDLogVerbose(@"params %@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_sup_sked] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *dict = [responseObject objectForKey:@"ScheduleContainer"];
@@ -774,10 +777,11 @@
                 [self startDownloadSupSkedForPage:1 totalPage:0 requestDate:nil withUi:YES];
             else
             {
-                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
-                    [self checkSupSkedCount];
-                else
+                DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"group_name"]);
+                if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SPO"])
                     [self checkSpoSkedCount];
+                else
+                    [self initializingCompleteWithUi:YES];
             }
             
             
@@ -860,11 +864,9 @@
                 [schedule updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
             
             self.processLabel.text = @"Download complete";
-            
-            if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"SUP"])
-                [self checkSupSkedCount];
-            else
-                [self checkSpoSkedCount];
+
+            [self initializingCompleteWithUi:YES];
+
         }
         
         

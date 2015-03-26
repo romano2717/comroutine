@@ -27,5 +27,4 @@
     checkList.text = [NSString stringWithFormat:@"%@ - %d",[dict valueForKey:@"w_item"],[[dict valueForKey:@"id"] intValue]];
     checkBoxBtn.tag = [[dict valueForKey:@"id"] intValue];
 }
-
 @end

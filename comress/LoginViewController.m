@@ -97,6 +97,7 @@
                     NSString *res_SessionId = [ActiveUser valueForKey:@"SessionId"];
                     NSNumber *res_deviceId = [NSNumber numberWithInt:[[ActiveUser valueForKey:@"DeviceId"] intValue]];
                     NSNumber *is_active = [NSNumber numberWithInt:1];
+                    NSNumber *contract_type = [NSNumber numberWithInt:[[ActiveUser valueForKey:@"ConTypeId"] intValue]];
                     
                     //update/insert user
                     FMResultSet *rsUser = [db executeQuery:@"select user_id from users where user_id = ?",res_UserId];
@@ -115,7 +116,7 @@
                     {
                         myDatabase.userBlocksInitComplete = 0;
                         
-                        user_q = [db executeUpdate:@"insert into users (company_id, user_id, company_name, group_id, group_name, full_name, guid, device_id, is_active) values (?,?,?,?,?,?,?,?,?)",res_CompanyId,res_UserId,res_CompanyName,res_GroupId,res_GroupName,res_UserName,res_SessionId,res_deviceId,is_active];
+                        user_q = [db executeUpdate:@"insert into users (company_id, user_id, company_name, group_id, group_name, full_name, guid, device_id, is_active,contract_type) values (?,?,?,?,?,?,?,?,?,?)",res_CompanyId,res_UserId,res_CompanyName,res_GroupId,res_GroupName,res_UserName,res_SessionId,res_deviceId,is_active,contract_type];
                         if(!user_q)
                         {
                             *rollback = YES;

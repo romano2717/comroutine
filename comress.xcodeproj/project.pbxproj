@@ -12,6 +12,9 @@
 		4D0717971AB016E00055191A /* crosshair@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D0717961AB016E00055191A /* crosshair@2x.png */; };
 		4D0717A11AB1707E0055191A /* BadgeLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0717A01AB1707E0055191A /* BadgeLabel.m */; };
 		4D0717A41AB199120055191A /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0717A31AB199120055191A /* Reachability.m */; };
+		4D0AA0081AC3EF9900DC2886 /* checkedDisabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */; };
+		4D0AA0101AC416D500DC2886 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA00F1AC416D500DC2886 /* comress.sqlite */; };
+		4D0AA0131AC4193E00DC2886 /* CheckAreaViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */; };
 		4D0C2F691A7B205A009E5E53 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F681A7B205A009E5E53 /* LoginViewController.m */; };
 		4D0C2F831A7B4C6F009E5E53 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F821A7B4C6F009E5E53 /* Client.m */; };
 		4D0C2F861A7B4C7C009E5E53 /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F851A7B4C7C009E5E53 /* Comment.m */; };
@@ -159,7 +162,6 @@
 		4DAEA6B41A834D7600A6EFBE /* NSDate+HumanizedTime.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B31A834D7600A6EFBE /* NSDate+HumanizedTime.m */; };
 		4DAEA6B71A83505E00A6EFBE /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B51A83505E00A6EFBE /* Localizable.strings */; };
 		4DAEA6B81A83505E00A6EFBE /* Localizable_full.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4DAEA6B61A83505E00A6EFBE /* Localizable_full.strings */; };
-		4DBA3B9A1AC282F1008F7733 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4DBA3B991AC282F1008F7733 /* comress.sqlite */; };
 		4DD6FE9E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE7E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m */; };
 		4DD6FE9F1A884CFF00CBBE1D /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE801A884CFF00CBBE1D /* NSData+ImageContentType.m */; };
 		4DD6FEA01A884CFF00CBBE1D /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DD6FE821A884CFF00CBBE1D /* SDImageCache.m */; };
@@ -206,6 +208,10 @@
 		4D0717A01AB1707E0055191A /* BadgeLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BadgeLabel.m; sourceTree = "<group>"; };
 		4D0717A21AB199120055191A /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		4D0717A31AB199120055191A /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkedDisabled@2x.png"; sourceTree = "<group>"; };
+		4D0AA00F1AC416D500DC2886 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
+		4D0AA0111AC4193E00DC2886 /* CheckAreaViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckAreaViewController.h; sourceTree = "<group>"; };
+		4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckAreaViewController.m; sourceTree = "<group>"; };
 		4D0C2F671A7B205A009E5E53 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		4D0C2F681A7B205A009E5E53 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4D0C2F701A7B2960009E5E53 /* ApiCallUrl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiCallUrl.h; sourceTree = "<group>"; };
@@ -485,7 +491,6 @@
 		4DAEA6B31A834D7600A6EFBE /* NSDate+HumanizedTime.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+HumanizedTime.m"; sourceTree = "<group>"; };
 		4DAEA6B51A83505E00A6EFBE /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		4DAEA6B61A83505E00A6EFBE /* Localizable_full.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable_full.strings; sourceTree = "<group>"; };
-		4DBA3B991AC282F1008F7733 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4DD6FE7D1A884CFF00CBBE1D /* MKAnnotationView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MKAnnotationView+WebCache.h"; sourceTree = "<group>"; };
 		4DD6FE7E1A884CFF00CBBE1D /* MKAnnotationView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MKAnnotationView+WebCache.m"; sourceTree = "<group>"; };
 		4DD6FE7F1A884CFF00CBBE1D /* NSData+ImageContentType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+ImageContentType.h"; sourceTree = "<group>"; };
@@ -572,6 +577,28 @@
 			name = ROUTINE;
 			sourceTree = "<group>";
 		};
+		4D0AA0141AC4194E00DC2886 /* checklist */ = {
+			isa = PBXGroup;
+			children = (
+				4D118AB81ABA9FD80062C129 /* CheckListViewController.h */,
+				4D118AB91ABA9FD80062C129 /* CheckListViewController.m */,
+				4D118ABF1ABACE690062C129 /* CheckListTableViewCell.h */,
+				4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */,
+				4D118AC81ABBF96D0062C129 /* CheckListHeader.h */,
+				4D118AC71ABBF96D0062C129 /* CheckListHeader.m */,
+			);
+			name = checklist;
+			sourceTree = "<group>";
+		};
+		4D0AA0151AC4195C00DC2886 /* checkarea */ = {
+			isa = PBXGroup;
+			children = (
+				4D0AA0111AC4193E00DC2886 /* CheckAreaViewController.h */,
+				4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */,
+			);
+			name = checkarea;
+			sourceTree = "<group>";
+		};
 		4D0C2F6A1A7B2205009E5E53 /* Database */ = {
 			isa = PBXGroup;
 			children = (
@@ -622,16 +649,12 @@
 		4D118AB11ABA9A6D0062C129 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
+				4D0AA0151AC4195C00DC2886 /* checkarea */,
+				4D0AA0141AC4194E00DC2886 /* checklist */,
 				4D118AB21ABA9B130062C129 /* RoutineChatViewController.h */,
 				4D118AB31ABA9B130062C129 /* RoutineChatViewController.m */,
 				4D118AB51ABA9B840062C129 /* MessageDataRoutine.h */,
 				4D118AB61ABA9B840062C129 /* MessageDataRoutine.m */,
-				4D118AB81ABA9FD80062C129 /* CheckListViewController.h */,
-				4D118AB91ABA9FD80062C129 /* CheckListViewController.m */,
-				4D118ABF1ABACE690062C129 /* CheckListTableViewCell.h */,
-				4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */,
-				4D118AC81ABBF96D0062C129 /* CheckListHeader.h */,
-				4D118AC71ABBF96D0062C129 /* CheckListHeader.m */,
 			);
 			name = Chat;
 			sourceTree = "<group>";
@@ -912,6 +935,7 @@
 		4DA2041A1A79CF7400C7E5C7 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */,
 				4D118ABB1ABAA9AD0062C129 /* checked@2x.png */,
 				4D118ABC1ABAA9AD0062C129 /* check@2x.png */,
 				4D81D4651AB8352300A403C9 /* report@2x.png */,
@@ -945,7 +969,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4DBA3B991AC282F1008F7733 /* comress.sqlite */,
+				4D0AA00F1AC416D500DC2886 /* comress.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1391,9 +1415,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4D0AA0101AC416D500DC2886 /* comress.sqlite in Resources */,
 				4D8AC9601AAD8AE3008F7652 /* routine.png in Resources */,
 				4DA207E41A79DA0A00C7E5C7 /* JSQMessagesViewController.xib in Resources */,
-				4DBA3B9A1AC282F1008F7733 /* comress.sqlite in Resources */,
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
 				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,
@@ -1417,6 +1441,7 @@
 				4DA203D01A79CBA100C7E5C7 /* Images.xcassets in Resources */,
 				4D8AC9691AAD8CD4008F7652 /* issue@2x.png in Resources */,
 				4DA204201A79CF8800C7E5C7 /* arrow.png in Resources */,
+				4D0AA0081AC3EF9900DC2886 /* checkedDisabled@2x.png in Resources */,
 				4D8AC95E1AAD8AE3008F7652 /* issue.png in Resources */,
 				4DA207FF1A79DA0A00C7E5C7 /* JSQMessagesLoadEarlierHeaderView.xib in Resources */,
 				4D8AC96A1AAD8CD4008F7652 /* settings@2x.png in Resources */,
@@ -1450,6 +1475,7 @@
 			files = (
 				4DA204191A79CC5B00C7E5C7 /* AFURLSessionManager.m in Sources */,
 				4DA207F01A79DA0A00C7E5C7 /* JSQMessagesAvatarImage.m in Sources */,
+				4D0AA0131AC4193E00DC2886 /* CheckAreaViewController.m in Sources */,
 				4DA204161A79CC5B00C7E5C7 /* AFURLConnectionOperation.m in Sources */,
 				4D118AB41ABA9B130062C129 /* RoutineChatViewController.m in Sources */,
 				4DA207FC1A79DA0A00C7E5C7 /* JSQMessagesInputToolbar.m in Sources */,

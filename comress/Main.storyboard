@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1510" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="49e-Tb-3d3">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="6751" systemVersion="14C1514" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="49e-Tb-3d3">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6736"/>
         <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
@@ -1082,10 +1082,10 @@
                                                         <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                                         <autoresizingMask key="autoresizingMask"/>
                                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                                            <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <subviews>
-                                                                <imageView userInteractionEnabled="NO" tag="1" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="bulb_off.png" translatesAutoresizingMaskIntoConstraints="NO" id="UyS-n6-qnE">
+                                                                <imageView userInteractionEnabled="NO" tag="1" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="bulb_off.png" translatesAutoresizingMaskIntoConstraints="NO" id="UyS-n6-qnE">
                                                                     <rect key="frame" x="0.0" y="0.0" width="20" height="20"/>
                                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                                 </imageView>
@@ -1627,6 +1627,116 @@
             </objects>
             <point key="canvasLocation" x="-423" y="-968"/>
         </scene>
+        <!--Check Area View Controller-->
+        <scene sceneID="77Y-06-fOv">
+            <objects>
+                <viewController id="f3b-vR-E5w" customClass="CheckAreaViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="YfN-eC-4dT"/>
+                        <viewControllerLayoutGuide type="bottom" id="Lrl-te-rRK"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="t32-pM-gEj">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ow4-9w-jAR">
+                                <rect key="frame" x="16" y="20" width="568" height="21"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="45" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="8Hu-Vd-gsg">
+                                <rect key="frame" x="0.0" y="49" width="600" height="551"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="checkListCell" rowHeight="36" id="oi7-Wp-4Cq">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="oi7-Wp-4Cq" id="kNQ-Xk-Bfj">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hGj-55-eZi">
+                                                    <rect key="frame" x="20" y="7" width="22" height="22"/>
+                                                    <state key="normal" image="check.png">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                    <state key="selected" image="checked.png"/>
+                                                </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LF1-bO-yyy">
+                                                    <rect key="frame" x="50" y="10" width="542" height="15"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="checkBoxBtn" destination="hGj-55-eZi" id="Ome-kX-MCf"/>
+                                            <outlet property="checkList" destination="LF1-bO-yyy" id="4Ls-rg-QZV"/>
+                                        </connections>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="headerCell" rowHeight="60" id="fDJ-Hu-ODO">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="fDJ-Hu-ODO" id="uBj-2B-vmh">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3pV-e8-JON">
+                                                    <rect key="frame" x="41" y="11" width="455" height="14.5"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qJ9-u4-lXv">
+                                                    <rect key="frame" x="8" y="7" width="22" height="22"/>
+                                                    <state key="normal" image="check.png">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                    <state key="selected" image="checked.png"/>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qeS-c5-Lij">
+                                                    <rect key="frame" x="504" y="11" width="34" height="22"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <state key="normal" title="Save">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QJk-Gr-QP9">
+                                                    <rect key="frame" x="41" y="33" width="455" height="15"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Fdj-xa-ufV">
+                                                    <rect key="frame" x="546" y="11" width="46" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <state key="normal" title="Finish">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="checkBoxBtn" destination="qJ9-u4-lXv" id="J6B-kE-We8"/>
+                                            <outlet property="checkListLabel" destination="3pV-e8-JON" id="Fla-PW-CY8"/>
+                                            <outlet property="finishBtn" destination="Fdj-xa-ufV" id="8c8-h7-2Dn"/>
+                                            <outlet property="saveBtn" destination="qeS-c5-Lij" id="XBJ-xd-gnf"/>
+                                            <outlet property="scheduleDate" destination="QJk-Gr-QP9" id="8pW-od-KpI"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="Wk5-x8-fHb" id="Z8z-Lq-cFx"/>
+                                    <outlet property="delegate" destination="Wk5-x8-fHb" id="azc-8g-weY"/>
+                                </connections>
+                            </tableView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TkM-Bw-EKF" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1444" y="-452"/>
+        </scene>
         <!--Check List View Controller-->
         <scene sceneID="Ty6-iI-RMe">
             <objects>
@@ -1639,167 +1749,144 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vAj-bH-VIA">
-                                <rect key="frame" x="0.0" y="20" width="600" height="580"/>
-                                <subviews>
-                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="45" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="BTQ-Fp-Ayo">
-                                        <rect key="frame" x="0.0" y="37" width="600" height="543"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                        <prototypes>
-                                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" rowHeight="45" id="Mzo-Dv-xXH" customClass="CheckListTableViewCell">
-                                                <autoresizingMask key="autoresizingMask"/>
-                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Mzo-Dv-xXH" id="A5G-cK-gB9">
-                                                    <autoresizingMask key="autoresizingMask"/>
-                                                    <subviews>
-                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tMF-ZU-g5S">
-                                                            <rect key="frame" x="66" y="15" width="551" height="15"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                            <nil key="highlightedColor"/>
-                                                        </label>
-                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dhd-0D-M4f">
-                                                            <rect key="frame" x="33" y="10" width="22" height="22"/>
-                                                            <constraints>
-                                                                <constraint firstAttribute="width" constant="22" id="ik3-hT-NWG"/>
-                                                            </constraints>
-                                                            <state key="normal" image="check.png">
-                                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                            </state>
-                                                            <state key="selected" image="checked.png"/>
-                                                        </button>
-                                                    </subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="45" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="BTQ-Fp-Ayo">
+                                <rect key="frame" x="0.0" y="49" width="600" height="551"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="checkListCell" rowHeight="36" id="Mzo-Dv-xXH" customClass="CheckListTableViewCell">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Mzo-Dv-xXH" id="A5G-cK-gB9">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dhd-0D-M4f">
+                                                    <rect key="frame" x="20" y="7" width="22" height="22"/>
                                                     <constraints>
-                                                        <constraint firstItem="tMF-ZU-g5S" firstAttribute="centerY" secondItem="A5G-cK-gB9" secondAttribute="centerY" id="2QC-Qg-RQz"/>
-                                                        <constraint firstItem="tMF-ZU-g5S" firstAttribute="leading" secondItem="Dhd-0D-M4f" secondAttribute="trailing" constant="11" id="83e-Yf-lFi"/>
-                                                        <constraint firstItem="tMF-ZU-g5S" firstAttribute="top" secondItem="A5G-cK-gB9" secondAttribute="topMargin" constant="7" id="J4x-Hg-k6D"/>
-                                                        <constraint firstItem="tMF-ZU-g5S" firstAttribute="trailing" secondItem="A5G-cK-gB9" secondAttribute="trailingMargin" constant="25" id="Q7S-xp-SX0"/>
-                                                        <constraint firstItem="Dhd-0D-M4f" firstAttribute="top" secondItem="A5G-cK-gB9" secondAttribute="topMargin" constant="2" id="U8x-XC-ZIS"/>
-                                                        <constraint firstItem="Dhd-0D-M4f" firstAttribute="leading" secondItem="A5G-cK-gB9" secondAttribute="leadingMargin" constant="25" id="tje-qG-ZJr"/>
+                                                        <constraint firstAttribute="width" constant="22" id="uHK-Oc-rkk"/>
                                                     </constraints>
-                                                </tableViewCellContentView>
-                                                <connections>
-                                                    <outlet property="checkBoxBtn" destination="Dhd-0D-M4f" id="sgJ-cw-onC"/>
-                                                    <outlet property="checkList" destination="tMF-ZU-g5S" id="Roi-6W-hFb"/>
-                                                </connections>
-                                            </tableViewCell>
-                                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="headerCell" rowHeight="45" id="5xn-fs-ija" customClass="CheckListHeader">
-                                                <autoresizingMask key="autoresizingMask"/>
-                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5xn-fs-ija" id="WZr-C2-9r9">
-                                                    <autoresizingMask key="autoresizingMask"/>
-                                                    <subviews>
-                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Az4-DF-TPM">
-                                                            <rect key="frame" x="41" y="8" width="455" height="15"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                            <nil key="highlightedColor"/>
-                                                        </label>
-                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="enb-EE-qme">
-                                                            <rect key="frame" x="546" y="11" width="46" height="20"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                            <state key="normal" title="Finish">
-                                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                            </state>
-                                                        </button>
-                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eVR-Ot-k49">
-                                                            <rect key="frame" x="504" y="7" width="34" height="28"/>
-                                                            <constraints>
-                                                                <constraint firstAttribute="width" constant="34" id="h1O-mb-bkM"/>
-                                                            </constraints>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                            <state key="normal" title="Save">
-                                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                            </state>
-                                                        </button>
-                                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5fP-SZ-jQd">
-                                                            <rect key="frame" x="8" y="8" width="22" height="22"/>
-                                                            <constraints>
-                                                                <constraint firstAttribute="width" constant="22" id="ZkG-sY-6jE"/>
-                                                            </constraints>
-                                                            <state key="normal" image="check.png">
-                                                                <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                                            </state>
-                                                            <state key="selected" image="checked.png"/>
-                                                        </button>
-                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hGt-sc-Gja">
-                                                            <rect key="frame" x="41" y="21" width="455" height="15"/>
-                                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                            <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                                            <nil key="highlightedColor"/>
-                                                        </label>
-                                                    </subviews>
-                                                    <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="bottomMargin" secondItem="enb-EE-qme" secondAttribute="bottom" constant="5.5" id="3ov-pd-OiU"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="centerY" secondItem="Az4-DF-TPM" secondAttribute="centerY" id="6i6-Tw-I3t"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="firstBaseline" secondItem="Az4-DF-TPM" secondAttribute="firstBaseline" id="6j2-BY-vYf"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="baseline" secondItem="Az4-DF-TPM" secondAttribute="firstBaseline" id="6tU-XA-aeo"/>
-                                                        <constraint firstItem="5fP-SZ-jQd" firstAttribute="leading" secondItem="WZr-C2-9r9" secondAttribute="leadingMargin" id="7Cw-yT-gAD"/>
-                                                        <constraint firstItem="5fP-SZ-jQd" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" id="8nf-Xf-HhV"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" constant="5" id="CJu-ce-rnW"/>
-                                                        <constraint firstItem="enb-EE-qme" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" constant="3" id="IdN-MY-WJE"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="leading" secondItem="5fP-SZ-jQd" secondAttribute="trailing" constant="11" id="JUX-Bk-9J4"/>
-                                                        <constraint firstAttribute="bottomMargin" secondItem="Az4-DF-TPM" secondAttribute="bottom" constant="14" id="Un0-D7-xot"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="trailing" secondItem="WZr-C2-9r9" secondAttribute="trailingMargin" constant="-96" id="XEQ-WG-7hO"/>
-                                                        <constraint firstItem="hGt-sc-Gja" firstAttribute="leading" secondItem="Az4-DF-TPM" secondAttribute="leading" id="ZgL-cc-NYn"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="baseline" secondItem="eVR-Ot-k49" secondAttribute="baseline" constant="-5.5" id="eAX-gg-EwP"/>
-                                                        <constraint firstAttribute="bottomMargin" secondItem="hGt-sc-Gja" secondAttribute="bottom" constant="0.5" id="f0Y-oH-gMp"/>
-                                                        <constraint firstItem="enb-EE-qme" firstAttribute="leading" secondItem="eVR-Ot-k49" secondAttribute="trailing" constant="8" symbolic="YES" id="gpk-uL-wx9"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="leading" secondItem="Az4-DF-TPM" secondAttribute="trailing" constant="8" symbolic="YES" id="k6f-Zb-Okm"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="leading" secondItem="hGt-sc-Gja" secondAttribute="trailing" constant="8" symbolic="YES" id="mNv-hE-fSZ"/>
-                                                        <constraint firstItem="enb-EE-qme" firstAttribute="trailing" secondItem="WZr-C2-9r9" secondAttribute="trailingMargin" id="o2u-AW-nHm"/>
-                                                        <constraint firstItem="hGt-sc-Gja" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" constant="13" id="o84-iU-P7g"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="centerY" secondItem="eVR-Ot-k49" secondAttribute="centerY" constant="-5.5" id="spv-VK-kki"/>
-                                                        <constraint firstItem="Az4-DF-TPM" firstAttribute="baseline" secondItem="eVR-Ot-k49" secondAttribute="firstBaseline" constant="-5.5" id="t5W-F4-IgX"/>
-                                                        <constraint firstItem="eVR-Ot-k49" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" constant="-1" id="xll-2c-VEg"/>
-                                                    </constraints>
-                                                    <variation key="default">
-                                                        <mask key="constraints">
-                                                            <exclude reference="CJu-ce-rnW"/>
-                                                            <exclude reference="6i6-Tw-I3t"/>
-                                                            <exclude reference="6j2-BY-vYf"/>
-                                                            <exclude reference="6tU-XA-aeo"/>
-                                                        </mask>
-                                                    </variation>
-                                                </tableViewCellContentView>
-                                                <connections>
-                                                    <outlet property="checkBoxBtn" destination="5fP-SZ-jQd" id="Wmm-A5-mf6"/>
-                                                    <outlet property="checkListLabel" destination="Az4-DF-TPM" id="jIc-np-llI"/>
-                                                    <outlet property="finishBtn" destination="enb-EE-qme" id="YMM-Jh-iJC"/>
-                                                    <outlet property="saveBtn" destination="eVR-Ot-k49" id="Cbf-CD-Hls"/>
-                                                    <outlet property="scheduleDate" destination="hGt-sc-Gja" id="Rrf-sD-5qB"/>
-                                                </connections>
-                                            </tableViewCell>
-                                        </prototypes>
+                                                    <state key="normal" image="check.png">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                    <state key="selected" image="checked.png"/>
+                                                </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tMF-ZU-g5S">
+                                                    <rect key="frame" x="50" y="10" width="542" height="15"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="Dhd-0D-M4f" firstAttribute="top" secondItem="A5G-cK-gB9" secondAttribute="topMargin" constant="-1" id="20Q-Ul-uWO"/>
+                                                <constraint firstItem="tMF-ZU-g5S" firstAttribute="leading" secondItem="Dhd-0D-M4f" secondAttribute="trailing" constant="8" symbolic="YES" id="Qk8-AL-rLd"/>
+                                                <constraint firstItem="tMF-ZU-g5S" firstAttribute="bottom" secondItem="Dhd-0D-M4f" secondAttribute="bottom" constant="-4" id="ZiY-aG-sfQ"/>
+                                                <constraint firstItem="Dhd-0D-M4f" firstAttribute="top" secondItem="tMF-ZU-g5S" secondAttribute="top" constant="-3" id="dZd-4v-gJb"/>
+                                                <constraint firstItem="Dhd-0D-M4f" firstAttribute="leading" secondItem="A5G-cK-gB9" secondAttribute="leadingMargin" constant="12" id="huy-Fn-IhB"/>
+                                                <constraint firstItem="tMF-ZU-g5S" firstAttribute="trailing" secondItem="A5G-cK-gB9" secondAttribute="trailingMargin" id="oqA-2S-iwR"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="Dhd-0D-M4f" secondAttribute="bottom" constant="-1.5" id="rsA-dO-Pdw"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
                                         <connections>
-                                            <outlet property="dataSource" destination="Wk5-x8-fHb" id="mSn-RT-QgB"/>
-                                            <outlet property="delegate" destination="Wk5-x8-fHb" id="XR1-py-NhH"/>
+                                            <outlet property="checkBoxBtn" destination="Dhd-0D-M4f" id="sgJ-cw-onC"/>
+                                            <outlet property="checkList" destination="tMF-ZU-g5S" id="Roi-6W-hFb"/>
                                         </connections>
-                                    </tableView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QzN-yq-x0h">
-                                        <rect key="frame" x="8" y="8" width="584" height="21"/>
-                                        <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
-                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                        <nil key="highlightedColor"/>
-                                    </label>
-                                </subviews>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="headerCell" rowHeight="60" id="5xn-fs-ija" customClass="CheckListHeader">
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="5xn-fs-ija" id="WZr-C2-9r9">
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Az4-DF-TPM">
+                                                    <rect key="frame" x="41" y="11" width="455" height="14.5"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5fP-SZ-jQd">
+                                                    <rect key="frame" x="8" y="7" width="22" height="22"/>
+                                                    <state key="normal" image="check.png">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                    <state key="selected" image="checked.png"/>
+                                                </button>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eVR-Ot-k49">
+                                                    <rect key="frame" x="504" y="11" width="34" height="22"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="34" id="sLx-0G-Qj9"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <state key="normal" title="Save">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hGt-sc-Gja">
+                                                    <rect key="frame" x="41" y="33" width="455" height="15"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="enb-EE-qme">
+                                                    <rect key="frame" x="546" y="11" width="46" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                                    <state key="normal" title="Finish">
+                                                        <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                                    </state>
+                                                </button>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                            <constraints>
+                                                <constraint firstItem="Az4-DF-TPM" firstAttribute="leading" secondItem="hGt-sc-Gja" secondAttribute="leading" id="38E-T6-IZ0"/>
+                                                <constraint firstItem="5fP-SZ-jQd" firstAttribute="bottom" secondItem="Az4-DF-TPM" secondAttribute="bottom" constant="4" id="3ei-zM-lzh"/>
+                                                <constraint firstItem="eVR-Ot-k49" firstAttribute="leading" secondItem="Az4-DF-TPM" secondAttribute="trailing" constant="8" symbolic="YES" id="8tM-UA-YEU"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="hGt-sc-Gja" secondAttribute="bottom" constant="4" id="DkD-dn-Ct3"/>
+                                                <constraint firstItem="enb-EE-qme" firstAttribute="leading" secondItem="eVR-Ot-k49" secondAttribute="trailing" constant="8" symbolic="YES" id="Grw-5T-DPd"/>
+                                                <constraint firstItem="Az4-DF-TPM" firstAttribute="top" secondItem="eVR-Ot-k49" secondAttribute="top" id="Jhl-UF-R4D"/>
+                                                <constraint firstItem="Az4-DF-TPM" firstAttribute="trailing" secondItem="hGt-sc-Gja" secondAttribute="trailing" id="MVK-fy-wPa"/>
+                                                <constraint firstItem="hGt-sc-Gja" firstAttribute="leading" secondItem="WZr-C2-9r9" secondAttribute="leadingMargin" constant="33" id="Mbu-9k-7zk"/>
+                                                <constraint firstItem="Az4-DF-TPM" firstAttribute="top" secondItem="WZr-C2-9r9" secondAttribute="topMargin" constant="3" id="Rel-H8-8bJ"/>
+                                                <constraint firstItem="eVR-Ot-k49" firstAttribute="bottom" secondItem="Az4-DF-TPM" secondAttribute="bottom" constant="7.5" id="UPh-gY-fIb"/>
+                                                <constraint firstItem="hGt-sc-Gja" firstAttribute="top" secondItem="Az4-DF-TPM" secondAttribute="bottom" constant="8" symbolic="YES" id="XR7-P1-VeH"/>
+                                                <constraint firstItem="5fP-SZ-jQd" firstAttribute="leading" secondItem="WZr-C2-9r9" secondAttribute="leadingMargin" id="ZqZ-eh-U5F"/>
+                                                <constraint firstItem="enb-EE-qme" firstAttribute="baseline" secondItem="eVR-Ot-k49" secondAttribute="firstBaseline" id="bCT-0e-dgq"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="hGt-sc-Gja" secondAttribute="trailing" constant="96" id="fSo-Bz-6hY"/>
+                                                <constraint firstItem="eVR-Ot-k49" firstAttribute="baseline" secondItem="enb-EE-qme" secondAttribute="firstBaseline" id="iem-A9-LoD"/>
+                                                <constraint firstItem="enb-EE-qme" firstAttribute="trailing" secondItem="WZr-C2-9r9" secondAttribute="trailingMargin" id="pH7-77-45V"/>
+                                                <constraint firstAttribute="bottomMargin" secondItem="5fP-SZ-jQd" secondAttribute="bottom" constant="23" id="swD-7I-K2u"/>
+                                                <constraint firstItem="eVR-Ot-k49" firstAttribute="top" secondItem="enb-EE-qme" secondAttribute="top" id="vSj-Ml-drJ"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="checkBoxBtn" destination="5fP-SZ-jQd" id="Wmm-A5-mf6"/>
+                                            <outlet property="checkListLabel" destination="Az4-DF-TPM" id="jIc-np-llI"/>
+                                            <outlet property="finishBtn" destination="enb-EE-qme" id="YMM-Jh-iJC"/>
+                                            <outlet property="saveBtn" destination="eVR-Ot-k49" id="Cbf-CD-Hls"/>
+                                            <outlet property="scheduleDate" destination="hGt-sc-Gja" id="Rrf-sD-5qB"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="Wk5-x8-fHb" id="mSn-RT-QgB"/>
+                                    <outlet property="delegate" destination="Wk5-x8-fHb" id="XR1-py-NhH"/>
+                                </connections>
+                            </tableView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QzN-yq-x0h">
+                                <rect key="frame" x="16" y="20" width="568" height="21"/>
                                 <constraints>
-                                    <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="top" secondItem="vAj-bH-VIA" secondAttribute="top" constant="37" id="CES-TX-o1E"/>
-                                    <constraint firstAttribute="trailing" secondItem="BTQ-Fp-Ayo" secondAttribute="trailing" id="OTh-bY-Gkh"/>
-                                    <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="leading" secondItem="vAj-bH-VIA" secondAttribute="leading" id="YQg-5C-yqn"/>
-                                    <constraint firstItem="QzN-yq-x0h" firstAttribute="centerX" secondItem="BTQ-Fp-Ayo" secondAttribute="centerX" id="bSn-JA-e0M"/>
-                                    <constraint firstItem="QzN-yq-x0h" firstAttribute="top" secondItem="vAj-bH-VIA" secondAttribute="topMargin" id="bsx-28-jDT"/>
-                                    <constraint firstItem="QzN-yq-x0h" firstAttribute="leading" secondItem="vAj-bH-VIA" secondAttribute="leadingMargin" id="cgL-jB-Zp6"/>
-                                    <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="top" secondItem="QzN-yq-x0h" secondAttribute="bottom" constant="8" symbolic="YES" id="nA2-0m-7Ft"/>
-                                    <constraint firstAttribute="bottom" secondItem="BTQ-Fp-Ayo" secondAttribute="bottom" id="zPp-gB-Rld"/>
+                                    <constraint firstAttribute="height" constant="21" id="gAl-iv-vsK"/>
                                 </constraints>
-                            </view>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="vAj-bH-VIA" secondAttribute="trailing" id="Adi-3a-0Zm"/>
-                            <constraint firstItem="vAj-bH-VIA" firstAttribute="leading" secondItem="SDn-bV-4b9" secondAttribute="leading" id="WfC-nu-ae0"/>
-                            <constraint firstItem="vAj-bH-VIA" firstAttribute="bottom" secondItem="0nR-Nv-kF0" secondAttribute="top" id="rgU-Vt-qya"/>
-                            <constraint firstItem="vAj-bH-VIA" firstAttribute="top" secondItem="DLa-PI-yox" secondAttribute="bottom" id="uZY-cM-vzD"/>
+                            <constraint firstItem="QzN-yq-x0h" firstAttribute="top" secondItem="DLa-PI-yox" secondAttribute="bottom" id="DWz-4c-xgV"/>
+                            <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="top" secondItem="QzN-yq-x0h" secondAttribute="bottom" constant="8" symbolic="YES" id="Kts-li-rnO"/>
+                            <constraint firstAttribute="trailing" secondItem="BTQ-Fp-Ayo" secondAttribute="trailing" id="YNM-6e-iqA"/>
+                            <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="bottom" secondItem="0nR-Nv-kF0" secondAttribute="top" id="dCx-oz-Je6"/>
+                            <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="leading" secondItem="SDn-bV-4b9" secondAttribute="leading" id="mJu-jL-tGK"/>
+                            <constraint firstItem="BTQ-Fp-Ayo" firstAttribute="centerX" secondItem="QzN-yq-x0h" secondAttribute="centerX" id="r5f-oM-fic"/>
+                            <constraint firstItem="QzN-yq-x0h" firstAttribute="leading" secondItem="SDn-bV-4b9" secondAttribute="leadingMargin" id="yNv-ly-rfw"/>
                         </constraints>
                     </view>
                     <connections>
@@ -1809,7 +1896,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="hXl-uK-QX9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1066" y="-188"/>
+            <point key="canvasLocation" x="-771" y="-99"/>
         </scene>
         <!--Routine chat-->
         <scene sceneID="2gP-dK-gNc">
@@ -1834,6 +1921,7 @@
                     <connections>
                         <segue destination="Wk5-x8-fHb" kind="presentation" identifier="modal_routine_info" id="a5b-vh-sV1"/>
                         <segue destination="1tC-jd-mh6" kind="presentation" identifier="push_view_image" id="dIz-fg-pc3"/>
+                        <segue destination="f3b-vR-E5w" kind="presentation" identifier="modal_check_area" id="O2b-Ph-64Q"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="uqr-l9-OF1" userLabel="First Responder" sceneMemberID="firstResponder"/>

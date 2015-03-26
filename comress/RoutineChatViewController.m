@@ -51,13 +51,6 @@
         DDLogVerbose(@"post already exist");
     
     
-    //temp
-    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        [db executeUpdate:@"update ro_schedule set w_supflag = ?",[NSNumber numberWithInt:0]];
-        [db executeUpdate:@"delete from ro_inspectionresult"];
-    }];
-    
-    
     
     //jsq settings
     //set sender Id
@@ -191,14 +184,21 @@
 
 - (void)popSkedInformation
 {
-    CheckListViewController *cvc = [self.storyboard instantiateViewControllerWithIdentifier:@"CheckListViewController"];
-    cvc.blockId = blockId;
+    if([[myDatabase.userDictionary valueForKey:@"contract_type"] intValue] != 4)
+    {
+        CheckListViewController *cvc = [self.storyboard instantiateViewControllerWithIdentifier:@"CheckListViewController"];
+        cvc.blockId = blockId;
+        
+        popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:cvc];
+        popover.arrowDirection = FPPopoverArrowDirectionUp;
+        popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.99, CGRectGetHeight(self.view.frame) * 0.99);
+        
+        [popover presentPopoverFromView:self.navigationController.navigationBar];
+    }
+    else
+    {
     
-    popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:cvc];
-    popover.arrowDirection = FPPopoverArrowDirectionUp;
-    popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.99, CGRectGetHeight(self.view.frame) * 0.99);
-    
-    [popover presentPopoverFromView:self.navigationController.navigationBar];
+    }
 }
 
 #pragma mark - Navigation

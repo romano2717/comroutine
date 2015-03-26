@@ -24,7 +24,18 @@
     NSMutableArray *skedAdrr = [[NSMutableArray alloc] init];
 
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? order by w_scheduledate asc",blkId];
+        
+        FMResultSet *rsSked;
+        
+        if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"PO"])
+        {
+            rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? and w_flag < ? order by w_scheduledate asc",blkId,[NSNumber numberWithInt:2]]; //saved or new
+        }
+        else
+        {
+            rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? and w_supflag < ? order by w_scheduledate asc",blkId,[NSNumber numberWithInt:2]]; //saved or new
+        }
+        
 
         while ([rsSked next]) {
             [skedAdrr addObject:[rsSked resultDictionary]];
@@ -43,16 +54,28 @@
         FMResultSet *rsChkL = [db executeQuery:@"select * from ro_checklist where w_jobtypeid = ?",jobTypeId];
         
         while ([rsChkL next]) {
+            [checkListArr addObject:[rsChkL resultDictionary]];
+        }
+    }];
+    
+    return checkListArr;
+}
+
+
+- (NSArray *)checkAreaForJobTypeId:(NSNumber *)jobTypeId
+{
+    NSMutableArray *checkListArr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        FMResultSet *rsChkL = [db executeQuery:@"select * from ro_checklist where w_jobtypeid = ? group by w_chkareaid",jobTypeId];
+        
+        while ([rsChkL next]) {
             NSNumber *w_chkareaid = [NSNumber numberWithInt:[rsChkL intForColumn:@"w_chkareaid"]];
             
-            if([w_chkareaid intValue] == 0)
-                [checkListArr addObject:[rsChkL resultDictionary]];
-            else
-            {
-                FMResultSet *rsChkArea = [db executeQuery:@"select * from ro_checkarea where w_chkareaid = ?",w_chkareaid];
-                while ([rsChkArea next]) {
-                    [checkListArr addObject:[rsChkL resultDictionary]];
-                }
+            FMResultSet *rsChkArea = [db executeQuery:@"select * from ro_checkarea where w_chkareaid = ?",w_chkareaid];
+            while ([rsChkArea next]) {
+                [checkListArr addObject:[rsChkArea resultDictionary]];
             }
         }
     }];

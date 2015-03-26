@@ -61,6 +61,7 @@
     NSArray *updateChecklist = [check_list updatedChecklist];
 
     [selectedCheckList removeAllObjects];
+    [selectedJobTypes removeAllObjects];
     
     for (int i = 0; i < updateChecklist.count; i++) {
         NSDictionary *dict = [updateChecklist objectAtIndex:i];
@@ -119,17 +120,9 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    @try {
-        NSArray *arr = [scheduleArray objectAtIndex:section];
-        return arr.count * 2;
-    }
-    @catch (NSException *exception) {
-        DDLogVerbose(@"exception %@",exception);
-        DDLogVerbose(@"sked %@",scheduleArray);
-    }
-    @finally {
-
-    }
+    
+    return [[scheduleArray objectAtIndex:section] count];
+    
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -139,7 +132,7 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    return 40.0f;
+    return 70.0f;
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -217,42 +210,49 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
-    static NSString *cellIdentifier = @"cell";
+    static NSString *cellIdentifier = @"checkListCell";
     
     CheckListTableViewCell *cell = (CheckListTableViewCell *)[tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
     
     NSDictionary *dict = [[scheduleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    //[cell initCellWithResultSet:dict];
     
-    [cell initCellWithResultSet:dict];
-    
-    //add method to checkbox
+    //set custom views
+    cell.checkList.text = [NSString stringWithFormat:@"%@ - %d",[dict valueForKey:@"w_item"],[[dict valueForKey:@"id"] intValue]];
+
+    cell.checkBoxBtn.tag = [[dict valueForKey:@"id"] intValue];
     [cell.checkBoxBtn addTarget:self action:@selector(toggleCheckList:) forControlEvents:UIControlEventTouchUpInside];
     
+    
+    //custom view modifier
     NSNumber *tag = [NSNumber numberWithInt:(int)cell.checkBoxBtn.tag];
     
     if([selectedCheckList containsObject:tag] ==  YES)
     {
         [cell.checkBoxBtn setSelected:YES];
+        
+        /*
+         TODO: use the code below to display finished jobs but disabled checkbox button.
+         problem: cell re-use issue shit when modifying checkbox button view.
+         */
+        
+        //is this checklist finished? disable checkbox
+//        if([finishedInspectionResultArray containsObject:tag])
+//        {
+//            DDLogVerbose(@"finishedInspectionResultArray %@",finishedInspectionResultArray);
+//            DDLogVerbose(@"section %d",(int)indexPath.section);
+//            DDLogVerbose(@"tag %@",tag);
+//            DDLogVerbose(@"%@",dict);
+//            [cell.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x"] forState:UIControlStateNormal];
+//            cell.checkBoxBtn.enabled = NO;
+//            cell.checkBoxBtn.hidden = YES;
+//        }
     }
     else
     {
         [cell.checkBoxBtn setSelected:NO];
     }
 
-    //is this checklist finished? disable checkbox
-    
-    if([finishedInspectionResultArray containsObject:tag])
-    {
-        DDLogVerbose(@"finishedInspectionResultArray %@",finishedInspectionResultArray);
-        DDLogVerbose(@"section %d",(int)indexPath.section);
-        DDLogVerbose(@"tag %@",tag);
-        DDLogVerbose(@"%@",dict);
-        [cell.checkBoxBtn setImage:[UIImage imageNamed:@"checked@2x"] forState:UIControlStateNormal];
-        cell.checkBoxBtn.enabled = NO;
-    }
-    
-
-    
     return cell;
 }
 

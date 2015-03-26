@@ -15,5 +15,4 @@
 
 @property (nonatomic, weak) IBOutlet UIButton *checkBoxBtn;
 @property (nonatomic, weak) IBOutlet UILabel *checkList;
-
 @end

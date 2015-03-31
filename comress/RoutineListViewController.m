@@ -14,6 +14,7 @@
     int currentNumberOfRows;
     int per_page;
     CGPoint currentPoint;
+    int lastRow;
 }
 
 
@@ -170,9 +171,15 @@
             NSString *blockNo = [skedDict valueForKey:@"block_no"];
             NSNumber *blockId = [NSNumber numberWithInt:[[skedDict valueForKey:@"block_id"] intValue]];
             
+            BOOL isFiltered = NO;
+            
+            if(self.segment.selectedSegmentIndex == 0)
+                isFiltered = YES;
+            
             RoutineChatViewController *rtc = [segue destinationViewController];
             rtc.blockNo = blockNo;
             rtc.blockId = blockId;
+            rtc.isFiltered = isFiltered;
             rtc = segue.destinationViewController;
             
         }
@@ -226,7 +233,9 @@
     [cell initCellWithResultSet:dict];
     
     self.routineTableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
-    DDLogVerbose(@"row %ld",(long)indexPath.row);
+
+    if((int)indexPath.row >= lastRow)
+        lastRow = (int)indexPath.row;
     return cell;
 }
 
@@ -267,11 +276,11 @@
             if(self.segment.selectedSegmentIndex == 1)
             {
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    int lastRow = currentNumberOfRows;
+                    int theLastRow = currentNumberOfRows;
                     currentNumberOfRows += per_page;
                     [self fetchSchedule];
                     
-                    int scrollToRow = lastRow + 2;
+                    int scrollToRow = theLastRow + 2;
                     
                     if(scrollToRow > scheduleArray.count) //last row
                     {
@@ -281,8 +290,8 @@
                     
                     else
                     {
-                        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:scrollToRow inSection:0];
-                        
+                        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:lastRow inSection:0];
+                        DDLogVerbose(@"scroll to indexpath %ld",(long)newIndexPath.row);
                         [self.routineTableView scrollToRowAtIndexPath:newIndexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
                     }
                 });

@@ -13,8 +13,15 @@
 		4D0717A11AB1707E0055191A /* BadgeLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0717A01AB1707E0055191A /* BadgeLabel.m */; };
 		4D0717A41AB199120055191A /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0717A31AB199120055191A /* Reachability.m */; };
 		4D0AA0081AC3EF9900DC2886 /* checkedDisabled@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */; };
-		4D0AA0101AC416D500DC2886 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA00F1AC416D500DC2886 /* comress.sqlite */; };
 		4D0AA0131AC4193E00DC2886 /* CheckAreaViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */; };
+		4D0AA0181AC4ED2500DC2886 /* Contract_type.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA0171AC4ED2500DC2886 /* Contract_type.m */; };
+		4D0AA01E1AC50B9200DC2886 /* textFieldBg@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA01D1AC50B9200DC2886 /* textFieldBg@2x.png */; };
+		4D0AA0211AC5265300DC2886 /* CheckAreaHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA0201AC5265300DC2886 /* CheckAreaHeader.m */; };
+		4D0AA0241AC5266800DC2886 /* CheckListCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA0231AC5266800DC2886 /* CheckListCell.m */; };
+		4D0AA0261AC537D400DC2886 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA0251AC537D400DC2886 /* comress.sqlite */; };
+		4D0AA0281AC5669600DC2886 /* list@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D0AA0271AC5669600DC2886 /* list@2x.png */; };
+		4D0AA02B1AC658C400DC2886 /* SubCheckListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA02A1AC658C400DC2886 /* SubCheckListViewController.m */; };
+		4D0AA02E1AC6910C00DC2886 /* SubCheckListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0AA02D1AC6910C00DC2886 /* SubCheckListTableViewCell.m */; };
 		4D0C2F691A7B205A009E5E53 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F681A7B205A009E5E53 /* LoginViewController.m */; };
 		4D0C2F831A7B4C6F009E5E53 /* Client.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F821A7B4C6F009E5E53 /* Client.m */; };
 		4D0C2F861A7B4C7C009E5E53 /* Comment.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C2F851A7B4C7C009E5E53 /* Comment.m */; };
@@ -209,9 +216,21 @@
 		4D0717A21AB199120055191A /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		4D0717A31AB199120055191A /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkedDisabled@2x.png"; sourceTree = "<group>"; };
-		4D0AA00F1AC416D500DC2886 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D0AA0111AC4193E00DC2886 /* CheckAreaViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckAreaViewController.h; sourceTree = "<group>"; };
 		4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckAreaViewController.m; sourceTree = "<group>"; };
+		4D0AA0161AC4ED2500DC2886 /* Contract_type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Contract_type.h; sourceTree = "<group>"; };
+		4D0AA0171AC4ED2500DC2886 /* Contract_type.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Contract_type.m; sourceTree = "<group>"; };
+		4D0AA01D1AC50B9200DC2886 /* textFieldBg@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "textFieldBg@2x.png"; sourceTree = "<group>"; };
+		4D0AA01F1AC5265300DC2886 /* CheckAreaHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckAreaHeader.h; sourceTree = "<group>"; };
+		4D0AA0201AC5265300DC2886 /* CheckAreaHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckAreaHeader.m; sourceTree = "<group>"; };
+		4D0AA0221AC5266800DC2886 /* CheckListCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListCell.h; sourceTree = "<group>"; };
+		4D0AA0231AC5266800DC2886 /* CheckListCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckListCell.m; sourceTree = "<group>"; };
+		4D0AA0251AC537D400DC2886 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
+		4D0AA0271AC5669600DC2886 /* list@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "list@2x.png"; sourceTree = "<group>"; };
+		4D0AA0291AC658C400DC2886 /* SubCheckListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubCheckListViewController.h; sourceTree = "<group>"; };
+		4D0AA02A1AC658C400DC2886 /* SubCheckListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubCheckListViewController.m; sourceTree = "<group>"; };
+		4D0AA02C1AC6910C00DC2886 /* SubCheckListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubCheckListTableViewCell.h; sourceTree = "<group>"; };
+		4D0AA02D1AC6910C00DC2886 /* SubCheckListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SubCheckListTableViewCell.m; sourceTree = "<group>"; };
 		4D0C2F671A7B205A009E5E53 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		4D0C2F681A7B205A009E5E53 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4D0C2F701A7B2960009E5E53 /* ApiCallUrl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiCallUrl.h; sourceTree = "<group>"; };
@@ -595,6 +614,14 @@
 			children = (
 				4D0AA0111AC4193E00DC2886 /* CheckAreaViewController.h */,
 				4D0AA0121AC4193E00DC2886 /* CheckAreaViewController.m */,
+				4D0AA0291AC658C400DC2886 /* SubCheckListViewController.h */,
+				4D0AA02A1AC658C400DC2886 /* SubCheckListViewController.m */,
+				4D0AA02C1AC6910C00DC2886 /* SubCheckListTableViewCell.h */,
+				4D0AA02D1AC6910C00DC2886 /* SubCheckListTableViewCell.m */,
+				4D0AA01F1AC5265300DC2886 /* CheckAreaHeader.h */,
+				4D0AA0201AC5265300DC2886 /* CheckAreaHeader.m */,
+				4D0AA0221AC5266800DC2886 /* CheckListCell.h */,
+				4D0AA0231AC5266800DC2886 /* CheckListCell.m */,
 			);
 			name = checkarea;
 			sourceTree = "<group>";
@@ -635,6 +662,8 @@
 				4D0C2F911A7B4CAC009E5E53 /* Users.m */,
 				4D91D5B51A8DC40900A21DBA /* Device_token.h */,
 				4D91D5B61A8DC40900A21DBA /* Device_token.m */,
+				4D0AA0161AC4ED2500DC2886 /* Contract_type.h */,
+				4D0AA0171AC4ED2500DC2886 /* Contract_type.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -935,6 +964,8 @@
 		4DA2041A1A79CF7400C7E5C7 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4D0AA0271AC5669600DC2886 /* list@2x.png */,
+				4D0AA01D1AC50B9200DC2886 /* textFieldBg@2x.png */,
 				4D0AA0071AC3EF9900DC2886 /* checkedDisabled@2x.png */,
 				4D118ABB1ABAA9AD0062C129 /* checked@2x.png */,
 				4D118ABC1ABAA9AD0062C129 /* check@2x.png */,
@@ -969,7 +1000,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4D0AA00F1AC416D500DC2886 /* comress.sqlite */,
+				4D0AA0251AC537D400DC2886 /* comress.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1415,7 +1446,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D0AA0101AC416D500DC2886 /* comress.sqlite in Resources */,
 				4D8AC9601AAD8AE3008F7652 /* routine.png in Resources */,
 				4DA207E41A79DA0A00C7E5C7 /* JSQMessagesViewController.xib in Resources */,
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
@@ -1423,6 +1453,7 @@
 				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,
 				4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */,
 				4D8AC95F1AAD8AE3008F7652 /* crm.png in Resources */,
+				4D0AA0281AC5669600DC2886 /* list@2x.png in Resources */,
 				4DA204221A79CF8800C7E5C7 /* btn_small.png in Resources */,
 				4D0717971AB016E00055191A /* crosshair@2x.png in Resources */,
 				4DF666A81AA8596000C3B0FF /* newmsg.png in Resources */,
@@ -1434,6 +1465,7 @@
 				4D91D6041A91CA3C00A21DBA /* pin.png in Resources */,
 				4D81D4641AB80EC500A403C9 /* qr@2x.png in Resources */,
 				4D8AC9711AAD91A4008F7652 /* bulb_on@2x.png in Resources */,
+				4D0AA0261AC537D400DC2886 /* comress.sqlite in Resources */,
 				4DAEA6B01A83423300A6EFBE /* noImage.png in Resources */,
 				4DA207DA1A79DA0A00C7E5C7 /* JSQMessagesAssets.bundle in Resources */,
 				4DA203D31A79CBA100C7E5C7 /* LaunchScreen.xib in Resources */,
@@ -1451,6 +1483,7 @@
 				4DAEA6B71A83505E00A6EFBE /* Localizable.strings in Resources */,
 				4D37BDB81A9C2271006B414A /* back.png in Resources */,
 				4D8AC9671AAD8CD4008F7652 /* routine@2x.png in Resources */,
+				4D0AA01E1AC50B9200DC2886 /* textFieldBg@2x.png in Resources */,
 				4DA207DB1A79DA0A00C7E5C7 /* JSQMessages.strings in Resources */,
 				4D81D4691AB8352300A403C9 /* unlocked@2x.png in Resources */,
 				4D8AC9681AAD8CD4008F7652 /* crm@2x.png in Resources */,
@@ -1537,6 +1570,7 @@
 				4DA207EE1A79DA0A00C7E5C7 /* JSQMediaItem.m in Sources */,
 				4DA41DF81A80831E00184A18 /* NewIssueViewController.m in Sources */,
 				4D81D44D1AB6D1AC00A403C9 /* Scan_Check_list.m in Sources */,
+				4D0AA0241AC5266800DC2886 /* CheckListCell.m in Sources */,
 				4DA207F21A79DA0A00C7E5C7 /* JSQPhotoMediaItem.m in Sources */,
 				4DAEA6B41A834D7600A6EFBE /* NSDate+HumanizedTime.m in Sources */,
 				4D81D4561AB7CCAA00A403C9 /* Schedule.m in Sources */,
@@ -1560,6 +1594,7 @@
 				4DA207DF1A79DA0A00C7E5C7 /* UIDevice+JSQMessages.m in Sources */,
 				4DA203FC1A79CC5200C7E5C7 /* FMDatabaseQueue.m in Sources */,
 				4DD6FEB91A88954800CBBE1D /* Synchronize.m in Sources */,
+				4D0AA02B1AC658C400DC2886 /* SubCheckListViewController.m in Sources */,
 				4D91D5B71A8DC40900A21DBA /* Device_token.m in Sources */,
 				4DA203C51A79CBA100C7E5C7 /* main.m in Sources */,
 				4DA207F31A79DA0A00C7E5C7 /* JSQVideoMediaItem.m in Sources */,
@@ -1595,12 +1630,15 @@
 				4D0C2F921A7B4CAC009E5E53 /* Users.m in Sources */,
 				4DF666B41AA9615300C3B0FF /* NavigationBarTitleWithSubtitleView.m in Sources */,
 				4D91D5EF1A8FAA2500A21DBA /* PostStatusTableViewController.m in Sources */,
+				4D0AA0211AC5265300DC2886 /* CheckAreaHeader.m in Sources */,
 				4D81D4501AB6D3DB00A403C9 /* Scan_Check_List_Block.m in Sources */,
 				4D0717A41AB199120055191A /* Reachability.m in Sources */,
 				4DA203FA1A79CC5200C7E5C7 /* FMDatabaseAdditions.m in Sources */,
 				4DD6FEAB1A884CFF00CBBE1D /* UIImageView+HighlightedWebCache.m in Sources */,
+				4D0AA02E1AC6910C00DC2886 /* SubCheckListTableViewCell.m in Sources */,
 				4DAC7D821AA69C74001A0317 /* MBProgressHUD.m in Sources */,
 				4DA208071A79DC0900C7E5C7 /* JSQSystemSoundPlayer.m in Sources */,
+				4D0AA0181AC4ED2500DC2886 /* Contract_type.m in Sources */,
 				4DA207ED1A79DA0A00C7E5C7 /* JSQLocationMediaItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

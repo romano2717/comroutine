@@ -228,7 +228,8 @@
                                    @"Location":[rs stringForColumn:@"address"],
                                    @"PostalCode":[rs stringForColumn:@"postal_code"],
                                    @"Level":[rs stringForColumn:@"level"],
-                                   @"IsUpdated":[NSNumber numberWithBool:NO]
+                                   @"IsUpdated":[NSNumber numberWithBool:NO],
+                                   @"PostGroup": [NSNumber numberWithInt:[rs intForColumn:@"contract_type"]]
                                    };
             
             
@@ -595,8 +596,9 @@
 
         if(thisSelf)
         {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self uploadCommentFromSelf:YES];
+                                                                // call this faster
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self uploadInspectionResultFromSelf:YES];
             });
             return;
         }
@@ -630,20 +632,114 @@
         }
         if(thisSelf)
         {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self uploadCommentFromSelf:YES];
+                                                                    //call this faster
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self uploadInspectionResultFromSelf:YES];
             });
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         imagesInDb = nil;
         
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+
         if(thisSelf)
         {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [self uploadCommentFromSelf:YES];
+                                                                    //call this faster
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                [self uploadInspectionResultFromSelf:YES];
             });
         }
+    }];
+}
+
+
+#pragma mark - upload inspection result
+- (void)uploadInspectionResultFromSelf:(BOOL)thisSelf
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        NSNumber *requiredSync = [NSNumber numberWithInt:1];
+        
+        FMResultSet *rs = [db executeQuery:@"select * from ro_inspectionresult where w_required_sync = ? limit 1,10",requiredSync];
+        NSMutableArray *inspArr = [[NSMutableArray alloc] init];
+        
+        while ([rs next]) {
+//            {
+//                "inspectionResultList" :  [
+//                { "ScheduleId" : 1 , "CheckListId": 1 , "ChkAreaId" : 0, "ReportBy" : "ems2", "Checked" :  1 , "SPOChecked" : 0}
+//                                           , { "ScheduleId" : 1 , "CheckListId": 1 , "ChkAreaId" : 0, "ReportBy" : "ems2", "Checked" :  1 , "SPOChecked" : 0}
+//                                           ]
+//            }
+            
+            NSNumber *ScheduleId = [NSNumber numberWithInt:[rs intForColumn:@"w_scheduleid"]];
+            NSNumber *CheckListId = [NSNumber numberWithInt:[rs intForColumn:@"w_checklistid"]];
+            NSNumber *ChkAreaId = [NSNumber numberWithInt:[rs intForColumn:@"w_chkareaid"]];
+            NSString *ReportBy = [rs stringForColumn:@"w_reportby"];
+            NSNumber *Checked = [NSNumber numberWithInt:[rs intForColumn:@"w_checked"]];
+            NSNumber *SPOChecked = [NSNumber numberWithInt:[rs intForColumn:@"w_spochecked"]];
+            
+            NSDictionary *dict = @{ @"ScheduleId" : ScheduleId , @"CheckListId": CheckListId , @"ChkAreaId" : ChkAreaId, @"ReportBy" : ReportBy, @"Checked" :  Checked , @"SPOChecked" : SPOChecked};
+            
+            [inspArr addObject:dict];
+        }
+        
+        NSDictionary *inspDict = @{@"inspectionResultList":inspArr};
+        DDLogVerbose(@"inspectionResultList %@",[myDatabase toJsonString:inspDict]);
+       [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_inspection_res] parameters:inspDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+           
+//           {"AckInspectionResultObj":[
+//               {"CheckListId":1,"ChkAreaId":0,"ScheduleId":1,"Successful": true}
+//                                      ,{"CheckListId":2,"ChkAreaId":0,"ScheduleId":1,"Successful":true}
+//                                      ]
+//           }
+           
+           NSDictionary *topDict = (NSDictionary *)responseObject;
+           
+           NSArray *AckInspectionResultObj = [topDict objectForKey:@"AckInspectionResultObj"];
+           
+           DDLogVerbose(@"inspection result to send %@",AckInspectionResultObj);
+           
+           for (int i = 0; i < AckInspectionResultObj.count; i++) {
+               NSDictionary *dict = [AckInspectionResultObj objectAtIndex:i];
+               
+               NSNumber *CheckListId = [NSNumber numberWithInt:[[dict valueForKey:@"CheckListId"] intValue]];
+               NSNumber *ChkAreaId = [NSNumber numberWithInt:[[dict valueForKey:@"ChkAreaId"] intValue]];
+               NSNumber *ScheduleId = [NSNumber numberWithInt:[[dict valueForKey:@"ScheduleId"] intValue]];
+               BOOL Successful = [[dict valueForKey:@"Successful"] boolValue];
+               
+               if(Successful)
+               {
+                   NSNumber *syncNotRequired = [NSNumber numberWithInt:0];
+                   BOOL up = [db executeUpdate:@"update ro_inspectionresult set w_required_sync = ? where w_checklistid = ? and w_chkareaid = ? and w_scheduleid = ?",syncNotRequired,CheckListId,ChkAreaId,ScheduleId];
+                   
+                   if(!up)
+                   {
+                       *rollback = YES;
+                       return;
+                   }
+               }
+           }
+           
+           if(thisSelf)
+           {
+                                                                        // call this faster
+               dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                   [self uploadCommentFromSelf:YES];
+               });
+           }
+           
+       } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+           
+           DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+           
+           if(thisSelf)
+           {
+                                                                        // call this faster
+               dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                   [self uploadCommentFromSelf:YES];
+               });
+           }
+       }];
+        
     }];
 }
 
@@ -690,6 +786,7 @@
             NSString *PostalCode = [dictPost valueForKey:@"PostalCode"];
             NSNumber *Severity = [NSNumber numberWithInt:[[dictPost valueForKey:@"Severity"] intValue]];
             NSDate *PostDate = [myDatabase createNSDateWithWcfDateString:[dictPost valueForKey:@"PostDate"]];
+            NSNumber *contractType = [NSNumber numberWithInt:[[dictPost valueForKey:@"PostGroup"] intValue]];
             
             fromUser = PostBy;
             msgFromUser = PostTopic;
@@ -699,7 +796,7 @@
                 FMResultSet *rsPost = [theDb executeQuery:@"select post_id from post where post_id = ?",PostId];
                 if([rsPost next] == NO) //does not exist. insert
                 {
-                    BOOL qIns = [theDb executeUpdate:@"insert into post (status, block_id, level, address, post_by, post_id, post_topic, post_type, postal_code, severity, post_date, updated_on,seen) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",ActionStatus, BlkId, Level, Location, PostBy, PostId, PostTopic, PostType, PostalCode, Severity, PostDate,PostDate,[NSNumber numberWithBool:NO]];
+                    BOOL qIns = [theDb executeUpdate:@"insert into post (status, block_id, level, address, post_by, post_id, post_topic, post_type, postal_code, severity, post_date, updated_on,seen,contract_type) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",ActionStatus, BlkId, Level, Location, PostBy, PostId, PostTopic, PostType, PostalCode, Severity, PostDate,PostDate,[NSNumber numberWithBool:NO],contractType];
                     
                     if(!qIns)
                     {

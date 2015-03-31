@@ -299,9 +299,10 @@
             NSDictionary *dictList = [dictArray objectAtIndex:i];
             NSString *ChkArea = [dictList valueForKey:@"ChkArea"];
             NSNumber *ChkAreaId = [NSNumber numberWithInt:[[dictList valueForKey:@"ChkAreaId"] intValue]];
+            NSNumber *randomKey = [NSNumber numberWithInt:abs((int)arc4random())];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-                BOOL ins = [theDb executeUpdate:@"insert into ro_checkarea(w_chkareaid,w_chkarea) values (?,?)",ChkAreaId,ChkArea];
+                BOOL ins = [theDb executeUpdate:@"insert into ro_checkarea(w_chkareaid,w_chkarea,key) values (?,?,?)",ChkAreaId,ChkArea,randomKey];
                 
                 if(!ins)
                 {

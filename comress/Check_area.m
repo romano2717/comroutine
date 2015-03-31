@@ -18,6 +18,84 @@
     return self;
 }
 
+- (NSArray *)scheduleForBlock:(NSNumber *)blockId
+{
+    NSMutableArray *skedAdrr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsSked;
+        
+        if([[myDatabase.userDictionary valueForKey:@"group_name"] isEqualToString:@"PO"])
+        {
+            rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? and w_flag < ? order by w_scheduledate asc",blockId,[NSNumber numberWithInt:2]]; //saved or new
+        }
+        else
+        {
+            rsSked = [db executeQuery:@"select * from ro_schedule where w_blkid = ? and w_supflag < ? order by w_scheduledate asc",blockId,[NSNumber numberWithInt:2]]; //saved or new
+        }
+        
+        
+        while ([rsSked next]) {
+            [skedAdrr addObject:[rsSked resultDictionary]];
+        }
+        
+    }];
+    
+    return skedAdrr;
+}
+
+- (NSArray *)checkAreaForJobTypeId:(NSNumber *)jobTypeId
+{
+    NSMutableArray *checkAreaArr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        FMResultSet *rsChkL = [db executeQuery:@"select * from ro_checklist where w_jobtypeid = ? group by w_chkareaid",jobTypeId];
+        
+        while ([rsChkL next]) {
+            NSNumber *w_chkareaid = [NSNumber numberWithInt:[rsChkL intForColumn:@"w_chkareaid"]];
+            
+            FMResultSet *rsCheckArea = [db executeQuery:@"select * from ro_checkarea where w_chkareaid = ?",w_chkareaid];
+            
+            while ([rsCheckArea next]) {
+                [checkAreaArr addObject:[rsCheckArea resultDictionary]];
+            }
+        }
+    }];
+    
+    return checkAreaArr;
+}
+
+- (NSArray *)checkListForJobTypeId:(NSNumber *)jobTypeId
+{
+    NSMutableArray *checkList = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsChkL = [db executeQuery:@"select * from ro_checklist where w_jobtypeid = ? group by w_chkareaid",jobTypeId];
+        
+        while ([rsChkL next]) {
+            [checkList addObject:[rsChkL resultDictionary]];
+        }
+    }];
+    
+    return checkList;
+}
+
+- (NSDictionary *)checkAreaForId:(NSNumber *)checkAreaId
+{
+    __block NSDictionary *dict;
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from ro_checkarea where w_chkareaid = ?",checkAreaId];
+        
+        while ([rs next]) {
+            dict = [rs resultDictionary];
+        }
+    }];
+    
+    return dict;
+}
+
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString
 {
     NSInteger startPosition = [dateString rangeOfString:@"("].location + 1; //start of the date value

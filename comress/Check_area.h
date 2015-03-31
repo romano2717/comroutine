@@ -17,4 +17,13 @@
 
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString;
 
+- (NSArray *)scheduleForBlock:(NSNumber *)blockId;
+
+- (NSArray *)checkAreaForJobTypeId:(NSNumber *)jobTypeId;
+
+- (NSArray *)checkListForJobTypeId:(NSNumber *)jobTypeId;
+
+- (NSDictionary *)checkAreaForId:(NSNumber *)checkAreaId;
+
+- (NSArray *)inspectionResultForCheckAreaId:(NSNumber *)checkAreaId status:(NSNumber *)status;
 @end

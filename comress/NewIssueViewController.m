@@ -11,15 +11,14 @@
 
 @interface NewIssueViewController ()
 {
-    BOOL lookingForPostalCodes;
+    int selectedContractTypeId;
 }
 
 @property (nonatomic, strong) NSMutableArray *photoArray;
 @property (nonatomic, strong) NSMutableArray *photoArrayFull;
 @property (nonatomic, strong) NSArray *severtiyArray;
-@property (nonatomic, strong) NSMutableArray *postalCodeResultsArray;
-@property (nonatomic, strong) NSMutableArray *addressResultsArray;
-@property (nonatomic, strong) NSMutableArray *placeMarksArray;
+@property (nonatomic, strong) NSArray *contractTypeArray;
+@property (nonatomic, strong) NSArray *contractTypeArrayCopy;
 @property (nonatomic, strong) NSMutableArray *blocksArray;
 @property (nonatomic, strong) NSMutableArray *addressArray;
 
@@ -34,13 +33,15 @@
     // Do any additional setup after loading the view.
     
     myDatabase = [Database sharedMyDbManager];
+    contract_type = [[Contract_type alloc] init];
     
     self.photoArray = [[NSMutableArray alloc] init];
     self.photoArrayFull = [[NSMutableArray alloc] init];
+    
     self.severtiyArray = [NSArray arrayWithObjects:@"Routine",@"Severe", nil];
-    self.postalCodeResultsArray = [[NSMutableArray alloc] init];
-    self.addressResultsArray = [[NSMutableArray alloc] init];
-    self.placeMarksArray = [[NSMutableArray alloc] init];
+    
+    self.contractTypeArray = [contract_type contractTypes];
+    self.contractTypeArrayCopy = self.contractTypeArray;
     
     blocks = [[Blocks alloc] init];
     
@@ -52,18 +53,25 @@
     scrollView.keyboardDismissMode = UIScrollViewKeyboardDismissModeInteractive;
     
     //set the severity by default to Routine
-    self.severityTextField.text = [self.severtiyArray objectAtIndex:0];
+    [self.severityBtn setTitle:[NSString stringWithFormat:@" %@",[self.severtiyArray objectAtIndex:0]] forState:UIControlStateNormal];
+    
+    //set contract type default to first object
+    NSMutableArray *contractTypeArr = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < self.contractTypeArray.count; i++) {
+        
+        if(i == 0)
+            selectedContractTypeId = [[[self.contractTypeArray objectAtIndex:i] valueForKey:@"id"] intValue];
+        
+        [contractTypeArr addObject:[[self.contractTypeArray objectAtIndex:i] valueForKey:@"contract"]];
+    }
+    self.contractTypeArray = contractTypeArr;
+    [self.contractTypeBtn setTitle:[NSString stringWithFormat:@" %@",[self.contractTypeArray firstObject]] forState:UIControlStateNormal];
     
     //add border to the textview
     [[self.descriptionTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
     [[self.descriptionTextView layer] setBorderWidth:1];
     [[self.descriptionTextView layer] setCornerRadius:15];
-    
-    //init location manager
-    locationManager = [[CLLocationManager alloc] init];
-    locationManager.distanceFilter = 100;
-    locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-    locationManager.delegate = self;
     
     blocks = [[Blocks alloc] init];
     
@@ -294,22 +302,30 @@
 
 #pragma mark textfield delegate
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField
+- (IBAction)selectSeverity:(id)sender
 {
-    if(textField.tag == 1)//severity
-    {
-        [ActionSheetStringPicker showPickerWithTitle:@"Severity" rows:self.severtiyArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
-            
-            textField.text = [self.severtiyArray objectAtIndex:selectedIndex];
-            
-        } cancelBlock:^(ActionSheetStringPicker *picker) {
-            
-        } origin:textField];
+    [self hideKeyboard:sender];
+    
+    [ActionSheetStringPicker showPickerWithTitle:@"Severity" rows:self.severtiyArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
+        [self.severityBtn setTitle:[NSString stringWithFormat:@" %@",[self.severtiyArray objectAtIndex:selectedIndex]] forState:UIControlStateNormal];
         
-        lookingForPostalCodes = NO;
+    } cancelBlock:^(ActionSheetStringPicker *picker) {
         
-        [self hideKeyboard:self];
-    }
+    } origin:sender];
+}
+
+- (IBAction)selectContractType:(id)sender
+{
+    [self hideKeyboard:sender];
+    
+    [ActionSheetStringPicker showPickerWithTitle:@"Contract type" rows:self.contractTypeArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
+
+        [self.contractTypeBtn setTitle:[NSString stringWithFormat:@" %@",[self.contractTypeArray objectAtIndex:selectedIndex]] forState:UIControlStateNormal];
+        selectedContractTypeId = [[[self.contractTypeArrayCopy objectAtIndex:selectedIndex] valueForKey:@"id"] intValue];
+        
+    } cancelBlock:^(ActionSheetStringPicker *picker) {
+        
+    } origin:sender];
 }
 
 - (IBAction)hideKeyboard:(id)sender
@@ -322,129 +338,6 @@
 
 }
 
-#pragma mark uipickerview datasource and delegate
-- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
-{
-    return 1;
-}
-
-- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
-{
-    if(lookingForPostalCodes == NO)
-        return self.severtiyArray.count;
-    else
-        return self.postalCodeResultsArray.count;
-}
-
-- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
-{
-    if(lookingForPostalCodes == NO)
-        return [self.severtiyArray objectAtIndex:row];
-    else
-        return [self.addressResultsArray objectAtIndex:row];
-}
-
-- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
-{
-    if(lookingForPostalCodes == NO)
-    {
-        self.severityTextField.text = [self.severtiyArray objectAtIndex:row];
-    }
-    else
-    {
-        self.postalCodeTextField.text = [self.postalCodeResultsArray objectAtIndex:row];
-    }
-}
-
-#pragma mark postal codes near you
-- (IBAction)postalCodesNearYou:(id)sender
-{
-    [self.view endEditing:YES];
-    
-    lookingForPostalCodes = YES;
-    
-    [locationManager startUpdatingLocation];
-    
-    [self performSelector:@selector(stopUpdatingLocation) withObject:nil afterDelay:5.0];
-}
-
-#pragma mark CLLocationManagerDelegate
-- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
-{
-    CLLocation *location = (CLLocation *)[locations lastObject];
-    
-    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
-    
-    [geoCoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error) {
-        
-        if(!error)
-        {
-            [self storeFoundPlaceMarks:placemarks];
-        }
-    }];
-}
-
-- (void)stopUpdatingLocation
-{
-    [locationManager stopUpdatingLocation];
-    
-    [ActionSheetStringPicker showPickerWithTitle:@"Found Postal Codes" rows:self.addressResultsArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
-        
-        if(self.addressResultsArray.count > 0)
-        {
-            self.addressTextField.text = [self.addressResultsArray objectAtIndex:selectedIndex];
-            self.postalCodeTextField.text = [self.postalCodeResultsArray objectAtIndex:selectedIndex];
-        }
-        
-        [locationManager stopUpdatingLocation];
-        
-    } cancelBlock:^(ActionSheetStringPicker *picker) {
-        
-        
-    } origin:self.postalCodesNearYouButton];
-}
-
-- (void)storeFoundPlaceMarks:(NSArray *)array
-{
-    for (int i = 0; i < array.count; i ++) {
-        if([self.placeMarksArray containsObject:[array objectAtIndex:i]] == NO)
-        {
-            [self.placeMarksArray addObject:[array objectAtIndex:i]];
-        }
-    }
-    
-    for (int i = 0; i < self.placeMarksArray.count; i++) {
-        
-        CLPlacemark *pm = (CLPlacemark *)[self.placeMarksArray objectAtIndex:i];
-        
-        if([self.postalCodeResultsArray containsObject:pm.postalCode] == NO)
-        {
-            NSDictionary *address = pm.addressDictionary;
-
-            
-            if(pm.postalCode.length == 6)
-            {
-                NSString *postalCode = pm.postalCode;
-                NSString *foundAddress = [address valueForKey:@"Name"];
-                
-                if([self.postalCodeResultsArray containsObject:postalCode] == NO)
-                {
-                    if(self.postalCodeResultsArray.count > 0)
-                    {
-                        [self.postalCodeResultsArray insertObject:postalCode atIndex:0];
-                        [self.addressResultsArray insertObject:[NSString stringWithFormat:@"%@ - %@",postalCode,foundAddress] atIndex:0];
-                    }
-                    
-                    else
-                    {
-                        [self.postalCodeResultsArray addObject:postalCode];
-                        [self.addressResultsArray addObject:[NSString stringWithFormat:@"%@ - %@",postalCode,foundAddress]];
-                    }
-                }
-            }
-        }
-    }
-}
 
 #pragma mark Save new issue to local db
 - (IBAction)postNewIssue:(id)sender
@@ -457,7 +350,8 @@
     NSString *location = [self.addressTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     NSString *level = [self.levelTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     NSString *post_topic = [self.descriptionTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSString *severity = [self.severityTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *severity = [self.severityBtn.titleLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSNumber *contract_type_id = [NSNumber numberWithInt:selectedContractTypeId];
     
     if(postal_code.length == 0)
     {
@@ -487,7 +381,7 @@
     NSString *post_by = user.user_id;
     NSDate *post_date = [NSDate date];
     
-    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:post_topic,@"post_topic",post_by,@"post_by",post_date,@"post_date",post_type,@"post_type",severityNumber,@"severity",@"0",@"status",location,@"address",level,@"level",postal_code,@"postal_code",blockId,@"block_id",post_date,@"updated_on",[NSNumber numberWithBool:YES],@"seen", nil];
+    NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:post_topic,@"post_topic",post_by,@"post_by",post_date,@"post_date",post_type,@"post_type",severityNumber,@"severity",@"0",@"status",location,@"address",level,@"level",postal_code,@"postal_code",blockId,@"block_id",post_date,@"updated_on",[NSNumber numberWithBool:YES],@"seen",contract_type_id,@"contract_type", nil];
     
 
     long long lastClientPostId =  [post savePostWithDictionary:dict];

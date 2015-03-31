@@ -123,12 +123,6 @@
     
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithObjectsAndKeys:[self.postInfoDict objectForKey:@"post"],@"post",[self.postInfoDict objectForKey:@"images"],@"images", nil];
     self.postInfoDict = dict;
-    
-    //add tap gestuer to the navbar for the pop-over post info
-    UITapGestureRecognizer *tapNavBar = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(popPostInformation)];
-    tapNavBar.numberOfTapsRequired = 1;
-    
-    [self.navigationController.navigationBar addGestureRecognizer:tapNavBar];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -146,6 +140,13 @@
     [self.navigationItem setTitleView: navigationBarTitleView];
     [navigationBarTitleView setTitleText:[[self.postInfoDict objectForKey:@"post"] valueForKey:@"post_topic"]];
     [navigationBarTitleView setDetailText:@"Tap here for info."];
+    
+    
+    //add tap gestuer to the navbar for the pop-over post info
+    UITapGestureRecognizer *tapNavBar = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(popPostInformation)];
+    tapNavBar.numberOfTapsRequired = 1;
+    
+    [self.navigationController.navigationBar addGestureRecognizer:tapNavBar];
 }
 
 

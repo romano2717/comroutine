@@ -91,7 +91,7 @@
                 
                 //clear tables
                 for (int i = 0; i < tableToDelete.count; i++) {
-                    NSString *tbl = [NSString stringWithFormat:@"delete from %@",[tableToDelete objectAtIndex:i]] ;
+                    NSString *tbl = [NSString stringWithFormat:@"delete from %@",[tableToDelete objectAtIndex:i]];
                     BOOL del = [db executeUpdate:tbl];
                     
                     if(!del)

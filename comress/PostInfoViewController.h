@@ -9,10 +9,15 @@
 #import <UIKit/UIKit.h>
 #import "AppWideImports.h"
 #import "ImagePreviewViewController.h"
+#import "Contract_type.h"
 
 @interface PostInfoViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate>
+{
+    Contract_type *contract_type;
+}
 
 @property (nonatomic, weak) IBOutlet UILabel *issueLabel;
+@property (nonatomic, weak) IBOutlet UILabel *contractTypeLabel;
 @property (nonatomic, weak) IBOutlet UILabel *issueByLabel;
 @property (nonatomic, weak) IBOutlet UILabel *locationLabel;
 @property (nonatomic, weak) IBOutlet UILabel *levelLabel;

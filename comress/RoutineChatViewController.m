@@ -14,7 +14,7 @@
 
 @implementation RoutineChatViewController
 
-@synthesize blockId,blockNo,postDict,commentsArray,ServerPostId,postId;
+@synthesize blockId,blockNo,postDict,commentsArray,ServerPostId,postId,isFiltered;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -96,7 +96,10 @@
     
     NSDictionary *params = @{@"order":@"order by updated_on asc"};
 
-    postDict = [[post fetchIssuesWithParams:params forPostId:[NSNumber numberWithInt:self.postId] filterByBlock:YES newIssuesFirst:NO] objectAtIndex:0];
+    if(isFiltered)
+        postDict = [[post fetchIssuesWithParams:params forPostId:[NSNumber numberWithInt:self.postId] filterByBlock:YES newIssuesFirst:NO] objectAtIndex:0];
+    else
+        postDict = [[post fetchIssuesWithParams:params forPostId:[NSNumber numberWithInt:self.postId] filterByBlock:NO newIssuesFirst:NO] objectAtIndex:0];
 
     //get the post information so we can do a pop-up view for post
     self.postInfoDict = [NSDictionary dictionaryWithObjectsAndKeys:[[postDict objectForKey:[NSNumber numberWithInt:self.postId]] objectForKey:@"post"],@"post",[[postDict objectForKey:[NSNumber numberWithInt:self.postId]] objectForKey:@"postImages"],@"images", nil];
@@ -197,7 +200,16 @@
     }
     else
     {
-    
+        CheckAreaViewController *cavc = [self.storyboard instantiateViewControllerWithIdentifier:@"CheckAreaViewController"];
+        cavc.blockId = blockId;
+
+        UINavigationController *ncavc = [[UINavigationController alloc] initWithRootViewController:cavc];
+        
+        popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:ncavc];
+        popover.arrowDirection = FPPopoverArrowDirectionUp;
+        popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.99, CGRectGetHeight(self.view.frame) * 0.99);
+        popover.title = nil;
+        [popover presentPopoverFromView:self.navigationController.navigationBar];
     }
 }
 

@@ -19,16 +19,17 @@
 #import "Blocks.h"
 #import "MPGTextField.h"
 #import "Database.h"
+#import "Contract_type.h"
 
-@interface NewIssueViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITextFieldDelegate, UIPickerViewDataSource,UIPickerViewDelegate,UIScrollViewDelegate,CLLocationManagerDelegate,MPGTextFieldDelegate>
+@interface NewIssueViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate, UIActionSheetDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITextFieldDelegate,UIScrollViewDelegate,MPGTextFieldDelegate>
 {
     ImageOptions *imgOpts;
-    CLLocationManager *locationManager;
     Users *user;
     Post *post;
     PostImage *postImage;
     Blocks *blocks;
     Database *myDatabase;
+    Contract_type *contract_type;
 }
 
 @property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
@@ -43,7 +44,8 @@
 @property (nonatomic, weak) IBOutlet UITextField *levelTextField;
 @property (nonatomic, weak) IBOutlet UITextView *descriptionTextView;
 @property (nonatomic, weak) IBOutlet UILabel *descriptionLabel;
-@property (nonatomic, weak) IBOutlet UITextField *severityTextField;
+@property (nonatomic, weak) IBOutlet UIButton *severityBtn;
+@property (nonatomic, weak) IBOutlet UIButton *contractTypeBtn;
 @property (nonatomic, weak) IBOutlet UIButton *addPhotosButton;
 @property (nonatomic, strong) NSNumber *blockId;
 

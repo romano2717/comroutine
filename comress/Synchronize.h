@@ -46,6 +46,8 @@
 
 - (void)uploadCommentNotiAlreadyReadFromSelf:(BOOL)thisSelf;
 
+- (void)uploadInspectionResultFromSelf:(BOOL)thisSelf;
+
 //download
 
 - (void)startDownloadPostForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate;

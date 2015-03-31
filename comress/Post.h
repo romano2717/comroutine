@@ -28,6 +28,7 @@
 @property (nonatomic, strong) NSNumber *block_id;
 @property (nonatomic, strong) NSString *postal_code;
 @property (nonatomic, strong) NSNumber *seen;
+@property (nonatomic, strong) NSNumber *contract_type;
 
 - (long long)savePostWithDictionary:(NSDictionary *)dict;
 

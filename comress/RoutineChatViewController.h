@@ -24,6 +24,7 @@
 #import "NSDate+HumanizedTime.h"
 #import "ImagePreviewViewController.h"
 #import "MBProgressHUD.h"
+#import "CheckAreaViewController.h"
 
 @class RoutineChatViewController;
 
@@ -54,5 +55,6 @@
 @property (nonatomic, strong) NSDictionary *postInfoDict;
 @property (nonatomic, strong) UIImagePickerController *imagePicker;
 @property (nonatomic, strong) NSArray *commentsArray;
+@property (nonatomic) BOOL isFiltered;
 
 @end

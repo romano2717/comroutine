@@ -25,6 +25,8 @@
 
 - (BOOL)saveOrFinishScheduleWithId:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId withStatus:(NSNumber *)status;
 
+- (BOOL)saveOrFinishScheduleWithId2:(NSNumber *)scheduleId checklistId:(NSNumber *)checkListId checkAreaId:(NSNumber *)checkAreaId withStatus:(NSNumber *)status;
+
 - (NSArray *)checkListForScheduleId:(NSNumber *)scheduleId;
 
 @end

@@ -19,6 +19,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+    
+    contract_type = [[Contract_type alloc] init];
+    
     self.issueLabel.text = [[postInfoDict objectForKey:@"post"] valueForKey:@"post_topic"];
     
     self.issueByLabel.text = [NSString stringWithFormat:@"Issue by: %@",[[postInfoDict objectForKey:@"post"] valueForKey:@"post_by"]];
@@ -30,6 +33,9 @@
     NSString *dateString = [formatter stringFromDate:date];
     
     self.dateLabel.text = dateString;
+    
+    NSString *contract = [contract_type contractDescriptionForId:[NSNumber numberWithInt:[[[postInfoDict objectForKey:@"post"] valueForKey:@"contract_type"] intValue]]];
+    self.contractTypeLabel.text = contract;
     
     self.locationLabel.text = [NSString stringWithFormat:@"%@ %@",[[postInfoDict objectForKey:@"post"] valueForKey:@"postal_code"],[[postInfoDict objectForKey:@"post"] valueForKey:@"address"]];
 

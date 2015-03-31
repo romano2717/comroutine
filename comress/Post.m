@@ -25,7 +25,8 @@ status,
 level,
 block_id,
 postal_code,
-seen;
+seen,
+contract_type;
 
 -(id)init {
     if (self = [super init]) {
@@ -53,9 +54,10 @@ seen;
     postal_code     = [dict valueForKey:@"postal_code"];
     updated_on      = [dict valueForKey:@"updated_on"];
     seen            = [dict valueForKey:@"seen"];
+    contract_type   = [dict valueForKey:@"contract_type"];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        postSaved = [db executeUpdate:@"insert into post (post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,isUpdated,postal_code,updated_on,seen) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,[NSNumber numberWithBool:YES],postal_code,updated_on,seen];
+        postSaved = [db executeUpdate:@"insert into post (post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,isUpdated,postal_code,updated_on,seen,contract_type) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",post_topic,post_by,post_date,post_type,severity,address,status,level,block_id,[NSNumber numberWithBool:YES],postal_code,updated_on,seen,contract_type];
         
         if(!postSaved)
         {

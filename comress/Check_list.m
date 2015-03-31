@@ -83,6 +83,34 @@
     return checkListArr;
 }
 
+- (NSArray *)checkListForCheckAreaId:(NSNumber *)checkAreaId JobTypeId:(NSNumber *)jobTypeId
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from ro_checklist where w_chkareaid = ? and w_jobtypeid = ?",checkAreaId,jobTypeId];
+        while ([rs next]) {
+            [arr addObject:[rs resultDictionary]];
+        }
+    }];
+    
+    return arr;
+}
+
+- (NSArray *)checkListForCheckAreaId:(NSNumber *)checkAreaId
+{
+    NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from ro_checklist where w_chkareaid = ?",checkAreaId];
+        while ([rs next]) {
+            [arr addObject:[rs resultDictionary]];
+        }
+    }];
+    
+    return arr;
+}
+
 - (NSArray *)updatedChecklist
 {
     NSMutableArray *arr = [[NSMutableArray alloc] init];

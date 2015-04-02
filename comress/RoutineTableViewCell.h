@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 #import "AppWideImports.h"
+#import "NSDate+HumanizedTime.h"
+#import "BadgeLabel.h"
 
 @interface RoutineTableViewCell : UITableViewCell
 
@@ -18,8 +20,8 @@
 @property (nonatomic, weak) IBOutlet UILabel *dateLabel;
 
 @property (nonatomic, weak) IBOutlet UIButton *unlockButton;
-@property (nonatomic, weak) IBOutlet UILabel *msgCount;
+@property (nonatomic, weak) IBOutlet BadgeLabel *msgCount;
 
-- (void)initCellWithResultSet:(NSDictionary *)dict;
+- (void)initCellWithResultSet:(NSDictionary *)dict postDict:(NSDictionary *)postDict;
 
 @end

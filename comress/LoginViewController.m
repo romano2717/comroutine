@@ -80,7 +80,7 @@
             __block BOOL client_q = NO;
             __block BOOL loginOk = YES;
             
-            [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",server_url ,api_login] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url ,api_login] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
                 
                 NSDictionary *dict = (NSDictionary *) responseObject;
                 DDLogVerbose(@"%@",dict);
@@ -114,6 +114,7 @@
                     }
                     else
                     {
+                        //new user.
                         myDatabase.userBlocksInitComplete = 0;
                         
                         user_q = [db executeUpdate:@"insert into users (company_id, user_id, company_name, group_id, group_name, full_name, guid, device_id, is_active,contract_type) values (?,?,?,?,?,?,?,?,?,?)",res_CompanyId,res_UserId,res_CompanyName,res_GroupId,res_GroupName,res_UserName,res_SessionId,res_deviceId,is_active,contract_type];
@@ -123,6 +124,36 @@
                             loginOk = NO;
                             [myDatabase alertMessageWithMessage:@"Login failed. try again."];
                             return;
+                        }
+                        //make this user download his data by resetting some tables in issues
+                        NSArray *tablesTodelete = @[@"blocks_user",@"blocks_user_last_request_date",@"comment",@"comment_noti",@"post",@"post_image",@"blocks_user",@"blocks_user_last_request_date",@"comment_last_request_date",@"comment_noti_last_request_date",@"post_image_last_request_date",@"post_last_request_date"];
+                        
+                        for (int i = 0; i < tablesTodelete.count; i++) {
+                            NSString *delTbString = [NSString stringWithFormat:@"delete from %@",[tablesTodelete objectAtIndex:i]];
+                            BOOL delTb = [db executeUpdate:delTbString];
+                            
+                            if(!delTb)
+                            {
+                                *rollback = YES;
+                                return;
+                            }
+                        }
+                        
+                        //delete images
+                        NSArray *directoryContents =  [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject] error:NULL];
+                        
+                        if([directoryContents count] > 0)
+                        {
+                            for (NSString *path in directoryContents)
+                            {
+                                NSString *fullPath = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject] stringByAppendingPathComponent:path];
+                                
+                                NSRange r =[fullPath rangeOfString:@".jpg"];
+                                if (r.location != NSNotFound || r.length == [@".jpg" length])
+                                {
+                                    [[NSFileManager defaultManager] removeItemAtPath:fullPath error:nil];
+                                }
+                            }
                         }
                     }
                     

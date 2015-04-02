@@ -866,8 +866,7 @@
             
             self.processLabel.text = @"Download complete";
 
-            [self initializingCompleteWithUi:YES];
-
+            [self prepareToDownloadSupActiveBlocks];
         }
         
         
@@ -1010,9 +1009,94 @@
             
             self.processLabel.text = @"Download complete";
             
-            [self initializingCompleteWithUi:YES];
+            [self prepareToDownloadSupActiveBlocks];
         }
         
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        [self initializingCompleteWithUi:NO];
+    }];
+}
+
+
+- (void)prepareToDownloadSupActiveBlocks
+{
+    //check if the saved date is less than our current date. if so, delete from ro_sup_activeBlocks
+    
+    __block BOOL up;
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        up = [db executeUpdate:@"delete from ro_sup_activeBlocks"];
+        if(!up)
+        {
+            *rollback = YES;
+            return;
+        }
+    }];
+    
+    if(up)
+        [self startDownloadSupActiveBlocksForPage:1 totalPage:0 requestDate:nil withUi:YES];
+}
+
+
+- (void)startDownloadSupActiveBlocksForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading schedule page... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_sup_active_blocks] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"SUPActiveBlockContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        NSArray *dictArray = [dict objectForKey:@"SUPActiveBlockList"];
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictList = [dictArray objectAtIndex:i];
+            
+            NSDate *ActiveDate  = [myDatabase createNSDateWithWcfDateString:[dictList valueForKey:@"ActiveDate"]];
+            NSNumber *BlkId     = [NSNumber numberWithInt:[[dictList valueForKey:@"BlkId"] intValue]];
+            NSString *UserId    = [dictList valueForKey:@"UserName"];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                //db query and insert
+                
+                BOOL ins = [theDb executeUpdate:@"insert into ro_sup_activeBlocks (activeDate, block_id, user_id) values (?,?,?)",ActiveDate,BlkId,UserId];
+                
+                if(!ins)
+                {
+                    *rollback = YES;
+                    return;
+                }
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadSupActiveBlocksForPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:withUi];
+        }
+        else
+        {
+            self.processLabel.text = @"Download complete";
+            
+            [self initializingCompleteWithUi:YES];
+        }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);

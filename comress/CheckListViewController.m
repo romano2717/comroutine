@@ -7,6 +7,7 @@
 //
 
 #import "CheckListViewController.h"
+#import "Synchronize.h"
 
 @interface CheckListViewController ()
 
@@ -306,6 +307,12 @@
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
     });
+    
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        Synchronize *sync = [Synchronize sharedManager];
+        [sync uploadInspectionResultFromSelf:NO];
+    });
 }
 
 - (IBAction)finishCheckList:(id)sender
@@ -357,6 +364,11 @@
     
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
+    });
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        Synchronize *sync = [Synchronize sharedManager];
+        [sync uploadInspectionResultFromSelf:NO];
     });
 }
 

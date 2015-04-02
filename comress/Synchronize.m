@@ -663,13 +663,7 @@
         NSMutableArray *inspArr = [[NSMutableArray alloc] init];
         
         while ([rs next]) {
-//            {
-//                "inspectionResultList" :  [
-//                { "ScheduleId" : 1 , "CheckListId": 1 , "ChkAreaId" : 0, "ReportBy" : "ems2", "Checked" :  1 , "SPOChecked" : 0}
-//                                           , { "ScheduleId" : 1 , "CheckListId": 1 , "ChkAreaId" : 0, "ReportBy" : "ems2", "Checked" :  1 , "SPOChecked" : 0}
-//                                           ]
-//            }
-            
+
             NSNumber *ScheduleId = [NSNumber numberWithInt:[rs intForColumn:@"w_scheduleid"]];
             NSNumber *CheckListId = [NSNumber numberWithInt:[rs intForColumn:@"w_checklistid"]];
             NSNumber *ChkAreaId = [NSNumber numberWithInt:[rs intForColumn:@"w_chkareaid"]];
@@ -683,20 +677,14 @@
         }
         
         NSDictionary *inspDict = @{@"inspectionResultList":inspArr};
-        DDLogVerbose(@"inspectionResultList %@",[myDatabase toJsonString:inspDict]);
+        DDLogVerbose(@"inspectionResultList to send %@",[myDatabase toJsonString:inspDict]);
        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_inspection_res] parameters:inspDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
-           
-//           {"AckInspectionResultObj":[
-//               {"CheckListId":1,"ChkAreaId":0,"ScheduleId":1,"Successful": true}
-//                                      ,{"CheckListId":2,"ChkAreaId":0,"ScheduleId":1,"Successful":true}
-//                                      ]
-//           }
            
            NSDictionary *topDict = (NSDictionary *)responseObject;
            
            NSArray *AckInspectionResultObj = [topDict objectForKey:@"AckInspectionResultObj"];
            
-           DDLogVerbose(@"inspection result to send %@",AckInspectionResultObj);
+           DDLogVerbose(@"AckInspectionResultObj %@",AckInspectionResultObj);
            
            for (int i = 0; i < AckInspectionResultObj.count; i++) {
                NSDictionary *dict = [AckInspectionResultObj objectAtIndex:i];

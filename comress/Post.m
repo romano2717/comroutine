@@ -118,7 +118,6 @@ contract_type;
 
 - (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst
 {
-    
     @try {
         myDatabase.allPostWasSeen = YES;
         
@@ -434,6 +433,143 @@ contract_type;
     [sync uploadCommentNotiAlreadyReadFromSelf:NO];
     
     return ok;
+}
+
+
+#pragma mark - routine posts
+
+-(NSArray *)fetchPostsForBlockId:(NSNumber *)blockId
+{
+    @try {
+        myDatabase.allPostWasSeen = YES;
+        
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        
+        /*
+         change query to also get all the images for the post
+         */
+
+
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rsPost = [db executeQuery:@"select * from post where block_id = ? and post_type = ?",blockId,[NSNumber numberWithInt:2]];
+            
+            while ([rsPost next]) {
+                
+                NSNumber *clientPostId = [NSNumber numberWithInt:[rsPost intForColumn:@"client_post_id"]];
+                NSNumber *serverPostId = [NSNumber numberWithInt:[rsPost intForColumn:@"post_id"]];
+                
+                NSMutableDictionary *postDict = [[NSMutableDictionary alloc] init];
+                NSMutableDictionary *postChild = [[NSMutableDictionary alloc] init];
+                
+                if([rsPost boolForColumn:@"seen"] == NO) //if we found at leas one we flag it to no
+                    myDatabase.allPostWasSeen = NO;
+                
+                [postChild setObject:[rsPost resultDictionary] forKey:@"post"];
+                
+                
+                //check if this post is not yet read by the user
+                NSNumber *newCommentsCount = [NSNumber numberWithInt:0];
+                FMResultSet *rsRead = [db executeQuery:@"select count(*) as count from comment_noti where post_id = ? and status = ? group by post_id",serverPostId,[NSNumber numberWithInt:1]];
+                if([rsRead next] == YES)
+                    newCommentsCount = [NSNumber numberWithInt:[rsRead intForColumn:@"count"]];
+                
+                [postChild setObject:newCommentsCount forKey:@"newCommentsCount"];
+                
+                
+                //add all images of this post
+                FMResultSet *rsPostImage;
+                
+                if([serverPostId intValue] != 0)
+                {
+                    rsPostImage = [db executeQuery:@"select * from post_image where post_id = ? order by client_post_image_id ",serverPostId];
+                }
+                else if([clientPostId intValue] != 0)
+                {
+                    rsPostImage = [db executeQuery:@"select * from post_image where client_post_id = ? order by client_post_image_id ",clientPostId];
+                }
+                
+                NSMutableArray *imagesArray = [[NSMutableArray alloc] init];
+                
+                while ([rsPostImage next]) {
+                    [imagesArray addObject:[rsPostImage resultDictionary]];
+                }
+                
+                [postChild setObject:imagesArray forKey:@"postImages"];
+                
+                
+                //get all comments for this post including comment image if there's any
+                FMResultSet *rsPostComment = [db executeQuery:@"select * from comment where (client_post_id = ? or post_id = ?)  order by comment_on desc",clientPostId,serverPostId];
+                NSMutableArray *commentsArray = [[NSMutableArray alloc] init];
+                
+                while ([rsPostComment next]) {
+                    
+                    NSMutableDictionary *commentsDict = [[NSMutableDictionary alloc] initWithDictionary:[rsPostComment resultDictionary]];
+                    
+                    if([[rsPostComment stringForColumn:@"comment"] isEqualToString:@"<image>"])
+                    {
+                        //get the image path
+                        FMResultSet *rsImagePath = [db executeQuery:@"select image_path from post_image where client_comment_id = ? or comment_id = ?",[NSNumber numberWithInt:[rsPostComment intForColumn:@"client_comment_id"]],[NSNumber numberWithInt:[rsPostComment intForColumn:@"comment_id"]]];
+                        
+                        while ([rsImagePath next]) {
+                            [commentsDict setObject:[rsImagePath stringForColumn:@"image_path"] forKey:@"image"];
+                        }
+                    }
+                    
+                    [commentsArray addObject:commentsDict];
+                    
+                }
+                
+                [postChild setObject:commentsArray forKey:@"postComments"];
+                
+                [postDict setObject:postChild forKey:blockId ? blockId : clientPostId];
+                
+                [arr addObject:postDict];
+            }
+        }];
+        
+        NSMutableArray *mutArr = [[NSMutableArray alloc] initWithArray:arr];
+        
+        //re-order the posts according to unread messages
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rs = [db executeQuery:@"select * from comment_noti order by id desc"];
+            
+            while ([rs next]) {
+                NSNumber *postId = [NSNumber numberWithInt:[rs intForColumn:@"post_id"]];
+                
+                for (int i = 0; i < arr.count; i++) {
+                    NSDictionary *dict = (NSDictionary *)[arr objectAtIndex:i];
+                    NSNumber *key = [[dict allKeys] lastObject];
+                    NSNumber *postIdNum = [[[dict objectForKey:key] objectForKey:@"post"] valueForKey:@"post_id"];
+                    
+                    if([postIdNum isEqual:[NSNull null]])
+                        return;
+                    
+                    if([postId intValue] == [postIdNum intValue])
+                    {
+                        [mutArr removeObject:dict];
+                        [mutArr insertObject:dict atIndex:0];
+                    }
+                }
+            }
+        }];
+        
+        
+        if(mutArr.count == arr.count)
+            return mutArr;
+        
+        if(myDatabase.allPostWasSeen)
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"allPostWasSeen" object:nil];
+        }
+        
+        return arr;
+    }
+    @catch (NSException *exception) {
+        DDLogVerbose(@"fetchIssuesWithParams: %@",exception);
+    }
+    @finally {
+        
+    }
 }
 
 @end

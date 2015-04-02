@@ -44,4 +44,6 @@
 
 - (BOOL)updatePostAsSeen:(NSNumber *)clientPostId serverPostId:(NSNumber *)serverPostId;
 
+-(NSArray *)fetchPostsForBlockId:(NSNumber *)blockId;
+
 @end

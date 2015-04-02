@@ -22,13 +22,16 @@
 
 @implementation RoutineListViewController
 
-@synthesize scheduleArray;
+@synthesize scheduleArray,sectionsArray,postInfoArray;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
     myDatabase = [Database sharedMyDbManager];
+    post = [[Post alloc] init];
+    
+    sectionsArray = [NSArray arrayWithObjects:@"Active",@"Inactive", nil];
     
     schedule = [[Schedule alloc] init];
     
@@ -166,7 +169,12 @@
         {
             NSIndexPath *indexPath = (NSIndexPath *)sender;
             
-            NSDictionary *skedDict = [scheduleArray objectAtIndex:indexPath.row];
+            NSDictionary *skedDict;
+            
+            if(self.segment.selectedSegmentIndex == 1)
+                skedDict = [[scheduleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+            else
+                skedDict = [scheduleArray objectAtIndex:indexPath.row];
             
             NSString *blockNo = [skedDict valueForKey:@"block_no"];
             NSNumber *blockId = [NSNumber numberWithInt:[[skedDict valueForKey:@"block_id"] intValue]];
@@ -200,7 +208,19 @@
     if(self.segment.selectedSegmentIndex == 0)
         scheduleArray = [schedule fetchScheduleForMe];
     else
-        scheduleArray = [schedule fetchScheduleForOthersAtPage2:[NSNumber numberWithInt:currentNumberOfRows]];
+    {
+        scheduleArray = [schedule fetchScheduleForOthersAtPage3:[NSNumber numberWithInt:currentNumberOfRows]];
+        
+        NSDictionary *topDict = [scheduleArray firstObject];
+        
+        NSDictionary *activeSked = [topDict objectForKey:@"active"];
+        NSDictionary *inactiveSked = [topDict objectForKey:@"inactive"];
+        
+        NSArray *newSkedArrFormat = [NSArray arrayWithObjects:activeSked,inactiveSked, nil];
+        
+        scheduleArray = newSkedArrFormat;
+    }
+    
     
     [self.routineTableView reloadData];
     
@@ -211,31 +231,121 @@
     }
     else
         self.scrollToTopBtn.hidden = YES;
+    
+    [self postInformation];
 }
+
+- (void)postInformation
+{
+    NSMutableArray *postsArr = [[NSMutableArray alloc] init];
+    
+    if(self.segment.selectedSegmentIndex == 0)
+    {
+        for (int i = 0; i < scheduleArray.count; i++) {
+            NSDictionary *dict = [scheduleArray objectAtIndex:i];
+            NSNumber *blockId = [NSNumber numberWithInt:[[dict valueForKey:@"block_id"] intValue]];
+            [postsArr addObject:[post fetchPostsForBlockId:blockId]];
+        }
+        postInfoArray = postsArr;
+    }
+    else
+    {
+        
+    }
+}
+
 
 #pragma mark - uitableview delegate and datasource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 1;
+    if(self.segment.selectedSegmentIndex == 1)
+        return sectionsArray.count;
+    else
+        return 1;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return scheduleArray.count;
+    if(self.segment.selectedSegmentIndex == 0)
+        return scheduleArray.count;
+    else
+        return [[scheduleArray objectAtIndex:section] count];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if(self.segment.selectedSegmentIndex == 1)
+        return 35.0f;
+    
+    return 0;
+}
+
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+    return nil;
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.routineTableView.frame) , 45.0f)];
+
+    UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetWidth(self.routineTableView.frame) / 2, 5, 100, 25.0f)];
+
+    label.font = [UIFont boldSystemFontOfSize:15.0f];
+    label.textAlignment = NSTextAlignmentCenter;
+    [label setCenter:CGPointMake(CGRectGetWidth(self.routineTableView.frame) / 2, 20)];
+    [view addSubview:label];
+    
+    if(self.segment.selectedSegmentIndex == 1)
+    {
+        if(section == 0)
+        {
+            view.backgroundColor = [UIColor greenColor];
+            label.text = @"Active";
+            label.textColor = [UIColor blackColor];
+        }
+
+        else
+        {
+            view.backgroundColor = [UIColor redColor];
+            label.text = @"Inactive";
+            label.textColor = [UIColor whiteColor];
+        }
+        
+        
+        return view;
+    }
+    else
+        return nil;
+    
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     RoutineTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"cell" forIndexPath:indexPath];
     
     NSDictionary *dict;
+    NSDictionary *postDict;
+    if(self.segment.selectedSegmentIndex == 0)
+    {
+        dict = (NSDictionary *)[scheduleArray objectAtIndex:indexPath.row];
+        
+        postDict = (NSDictionary *)[[postInfoArray objectAtIndex:indexPath.row] firstObject];
+        
+        [cell initCellWithResultSet:dict postDict:postDict];
+    }
+    else
+    {
+        dict = (NSDictionary *)[[scheduleArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    }
     
-    dict = (NSDictionary *)[scheduleArray objectAtIndex:indexPath.row];
-    
-    [cell initCellWithResultSet:dict];
     
     self.routineTableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
 
-    if((int)indexPath.row >= lastRow)
-        lastRow = (int)indexPath.row;
+    if(indexPath.section == 1)
+    {
+        if((int)indexPath.row >= lastRow)
+            lastRow = (int)indexPath.row;
+    }
+    
     return cell;
 }
 
@@ -278,11 +388,16 @@
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                     int theLastRow = currentNumberOfRows;
                     currentNumberOfRows += per_page;
+                    
                     [self fetchSchedule];
                     
                     int scrollToRow = theLastRow + 2;
                     
-                    if(scrollToRow > scheduleArray.count) //last row
+                    //
+                    NSSet *visibleSections = [NSSet setWithArray:[[self.routineTableView indexPathsForVisibleRows] valueForKey:@"section"]];
+                    int visibleSectionsInt = [[[visibleSections allObjects] lastObject] intValue];
+                    
+                    if(scrollToRow > [[scheduleArray objectAtIndex:visibleSectionsInt] count]) //last row
                     {
                         [self addLoadMoreView:NO];
                         return;
@@ -290,7 +405,7 @@
                     
                     else
                     {
-                        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:lastRow inSection:0];
+                        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:lastRow inSection:visibleSectionsInt];
                         DDLogVerbose(@"scroll to indexpath %ld",(long)newIndexPath.row);
                         [self.routineTableView scrollToRowAtIndexPath:newIndexPath atScrollPosition:UITableViewScrollPositionMiddle animated:YES];
                     }

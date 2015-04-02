@@ -114,6 +114,50 @@
     return skedArr;
 }
 
+- (NSArray *)fetchScheduleForOthersAtPage3:(NSNumber *)limit
+{
+    NSNumber *start = [NSNumber numberWithInt:0];
+    
+    __block NSMutableArray *arr = [[NSMutableArray alloc] init];
+    
+    NSMutableArray *activeSked = [[NSMutableArray alloc] init];
+    NSMutableArray *inactiveSked = [[NSMutableArray alloc] init];
+    
+    NSCalendar *cal = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDateComponents *comps = [cal components:NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:[NSDate date]];
+    
+    comps.hour = 0;
+    comps.minute = 0;
+    comps.second = 0;
+    
+    NSDate *newDate = [cal dateFromComponents:comps ];
+    
+    double timteStamp = [newDate timeIntervalSince1970];
+    NSNumber *NStimeStamp = [NSNumber numberWithDouble:timteStamp];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        FMResultSet *rsBlocks = [db executeQuery:@"select * from blocks where block_id in (select block_id from ro_sup_activeBlocks where activeDate = ?) ",NStimeStamp];
+        
+        while ([rsBlocks next]) {
+            [activeSked addObject:[rsBlocks resultDictionary]];
+        }
+        
+        
+        //add the rest of the blocks from blocks where not in rsBlocks
+        FMResultSet *rsBlocks2 = [db executeQuery:@"select * from blocks where block_id not in (select block_id from ro_sup_activeBlocks where activeDate = ?) and block_id not in (select block_id from blocks_user) limit ?, ?",NStimeStamp,start,limit];
+        
+        while ([rsBlocks2 next]) {
+            [inactiveSked addObject:[rsBlocks2 resultDictionary]];
+        }
+        
+        [arr addObject:@{@"active":activeSked,@"inactive":inactiveSked}];
+        
+    }];
+    
+    return arr;
+}
+
 
 - (BOOL)updateLastRequestDateWithDate:(NSString *)dateString
 {

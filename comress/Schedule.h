@@ -20,6 +20,7 @@
 
 - (NSArray *)fetchScheduleForOthersAtPage:(NSNumber *)row;
 - (NSArray *)fetchScheduleForOthersAtPage2:(NSNumber *)limit;
+- (NSArray *)fetchScheduleForOthersAtPage3:(NSNumber *)limit;
 
 - (NSDictionary *)scheduleForBlockId:(NSNumber *)blockId;
 

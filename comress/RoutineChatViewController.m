@@ -66,7 +66,7 @@
     //update post as seen
     //get the clientPostId and ServerPostId of this routine
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select client_post_id, post_id from post where block_id = ?",blockId];
+        FMResultSet *rs = [db executeQuery:@"select client_post_id, post_id from post where block_id = ? and post_type = ?",blockId,[NSNumber numberWithInt:2]];
         
         while ([rs next]) {
             postId = [rs intForColumn:@"client_post_id"];

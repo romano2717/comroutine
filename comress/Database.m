@@ -88,8 +88,11 @@ static const int newDatabaseVersion = 1; //this database version is incremented 
 
 - (void)createAfManager
 {
-    _api_url = @"http://comresstest.selfip.com/ComressMWCF/";
-    _domain = @"http://comresstest.selfip.com/";
+//    _api_url = @"http://comresstest.selfip.com/ComressMWCF/";
+//    _domain = @"http://comresstest.selfip.com/";
+    
+    _api_url = [NSString stringWithFormat:@"%@%@",[_clientDictionary valueForKey:@"api_url"],app_path];
+    _domain = [_clientDictionary valueForKey:@"api_url"];
     
     DDLogVerbose(@"session id: %@",[_clientDictionary valueForKey:@"user_guid"]);
     

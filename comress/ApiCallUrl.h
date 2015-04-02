@@ -14,7 +14,7 @@ static NSString * AFkey_allowInvalidCertificates = @"allowInvalidCertificates";
 
 static NSString *api_activationUrl = @"http://fmit.com.sg/comressmainservice/AddressManager.svc/json/GetUrlAddress/?group=";
 
-static NSString *server_url = @"http://comresstest.selfip.com/ComressMWCF/"; //temporary
+static NSString *app_path = @"ComressMWCF/v1.00/";
 
 static NSString *api_login = @"User.svc/ComressLogin";
 
@@ -74,6 +74,15 @@ static NSString *api_upload_scan_blk = @"Job/ScanBlock.svc/UploadScanBlock";
 static NSString *api_upload_scan_inspection = @"Job/ScanInspection.svc/UploadScanInspection";
 
 static NSString *api_upload_inspection_res = @"Job/InspectionResult.svc/UploadInspectionResult";
+
+static NSString *api_download_sup_active_blocks = @"Job/Block.svc/GetActiveSUPBlocks";
+
+
+
+//feedback
+
+static NSString *api_download_fed_questions = @"Survey/Question.svc/GetQuestions";
+
 
 
 #endif

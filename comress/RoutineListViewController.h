@@ -14,15 +14,19 @@
 #import "Schedule.h"
 #import "RoutineTableViewCell.h"
 #import "RoutineChatViewController.h"
+#import "Post.h"
 
 @interface RoutineListViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIScrollViewDelegate>
 
 {
     Database *myDatabase;
     Schedule *schedule;
+    Post *post;
 }
 
 @property (nonatomic, strong) NSArray *scheduleArray;
+@property (nonatomic, strong) NSArray *sectionsArray;
+@property (nonatomic, strong) NSArray *postInfoArray;
 
 @property (nonatomic, weak) IBOutlet UITableView *routineTableView;
 @property (nonatomic, weak) IBOutlet UISegmentedControl *segment;

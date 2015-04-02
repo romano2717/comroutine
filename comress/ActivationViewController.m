@@ -67,6 +67,7 @@
                         FMResultSet *rs = [db executeQuery:@"select * from client"];
                         while ([rs next]) {
                             myDatabase.clientDictionary = [rs resultDictionary];
+                            [myDatabase createAfManager];
                         }
                         
                         [self performSegueWithIdentifier:@"push_the_login" sender:self];

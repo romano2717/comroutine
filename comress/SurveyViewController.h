@@ -12,6 +12,7 @@
 #import "Questions.h"
 #import "ResidentInfoViewController.h"
 #import <CoreLocation/CoreLocation.h>
+#import "FeedBackViewController.h"
 
 @interface SurveyViewController : UIViewController<UICollectionViewDataSource,UICollectionViewDelegate,CLLocationManagerDelegate>
 {
@@ -20,6 +21,7 @@
     
     CLLocationManager *locationManager;
 }
+@property (nonatomic, weak) IBOutlet UISegmentedControl *segment;
 
 @property (nonatomic, weak) IBOutlet UICollectionView *ratingsCollectionView;
 @property (nonatomic, weak) IBOutlet UILabel *questionCounter;
@@ -35,4 +37,9 @@
 @property (nonatomic) long long currentSurveyId;
 
 @property (nonatomic, strong)CLLocation *currentLocation;
+
+@property (nonatomic) int averageRating;
+@property (nonatomic, strong) NSMutableArray *ratingsArray;
+
+@property (nonatomic, strong) NSString *locale;
 @end

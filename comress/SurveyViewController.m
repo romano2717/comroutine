@@ -16,7 +16,7 @@
 
 @implementation SurveyViewController
 
-@synthesize ratingsImageArray,ratingsStringArray,ratingsImageSelectedArray,selectedRating,ratingsCollectionView,surveyQuestions;
+@synthesize ratingsImageArray,ratingsStringArray,ratingsImageSelectedArray,selectedRating,ratingsCollectionView,surveyQuestions,ratingsArray,locale,segment;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -24,6 +24,9 @@
     
     myDatabase = [Database sharedMyDbManager];
     questions = [[Questions alloc] init];
+    ratingsArray = [[NSMutableArray alloc] init];
+    
+    locale = @"en";
     
     //init location manager
     locationManager = [[CLLocationManager alloc] init];
@@ -52,9 +55,14 @@
     ratingsImageArray = [NSArray arrayWithObjects:excellent,good,average,poor,very_poor, nil];
     ratingsImageSelectedArray = [NSArray arrayWithObjects:excellent_sel,good_sel,average_sel,poor_sel,very_poor_sel, nil];
     
-    ratingsStringArray = [NSArray arrayWithObjects:@"Excellent",@"Good",@"Average",@"Poor",@"Very poor", nil];
+    NSArray *en    = @[@"Excellent",@"Good",@"Average",@"Poor",@"Very poor"];
+    NSArray *cn    = @[@"优秀",@"良好",@"平均",@"穷",@"非常差"];
+    NSArray *my    = @[@"cemerlang",@"baik",@"purata",@"miskin",@"sangat miskin"];
+    NSArray *ind = @[@"उत्कृष्ट",@"अच्छा",@"औसतन",@"ஏழை",@"बहुत गरीब"];
     
+    ratingsStringArray = [NSArray arrayWithObjects:@{@"en":en},@{@"cn":cn},@{@"my":my},@{@"ind":ind},nil];
     
+
     //save this as new survey
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         NSDate *now = [NSDate date];
@@ -71,6 +79,44 @@
     }];
     
     [self checkQuestionsCount];
+}
+
+
+- (IBAction)toggleSegment:(id)sender
+{
+    int index = (int)segment.selectedSegmentIndex;
+    
+    if(index == 1)
+    {
+        FeedBackViewController *fvc = [self.storyboard instantiateViewControllerWithIdentifier:@"FeedBackViewController"];
+        [self.navigationController pushViewController:fvc animated:NO];
+        [UIView commitAnimations];
+    }
+    
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    self.tabBarController.tabBar.hidden = YES;
+    self.hidesBottomBarWhenPushed = YES;
+    
+    segment.selectedSegmentIndex = 0;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
+    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
 }
 
 #pragma mark - location manager
@@ -246,10 +292,34 @@
         
         surveyQuestions = questionsArr;
         
-        NSString *firstQuestion = [[surveyQuestions firstObject] valueForKey:@"en"];
+        NSString *firstQuestion = [[surveyQuestions firstObject] valueForKey:locale];
         [self setQuestionTextViewWithQuestion:firstQuestion];
         
     }];
+}
+
+- (IBAction)setNewLocale:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    
+    switch ((int)btn.tag) {
+        case 2:
+            locale = @"cn";
+            break;
+        
+        case 3:
+            locale = @"my";
+            break;
+        case 4:
+            locale = @"ind";
+            break;
+        default:
+            locale = @"en";
+            break;
+    }
+    
+    [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:locale]];
+    [self.ratingsCollectionView reloadData];
 }
 
 - (void)setQuestionTextViewWithQuestion:(NSString *)question
@@ -269,26 +339,6 @@
     }
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
-    
-    self.tabBarController.tabBar.hidden = YES;
-    self.hidesBottomBarWhenPushed = YES;
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
-    [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
-}
 
 #pragma mark <UICollectionViewDataSource>
 
@@ -312,7 +362,16 @@
     UILabel *ratingLabel = (UILabel *)[cell viewWithTag:2];
     
     imageView.image = (UIImage *)[ratingsImageArray objectAtIndex:indexPath.row];
-    ratingLabel.text = [ratingsStringArray objectAtIndex:indexPath.row];
+    
+    NSString *theLocale;
+    for (int i = 0; i < ratingsStringArray.count; i++) {
+        NSDictionary *dict = [ratingsStringArray objectAtIndex:i];
+        NSString *key = [[dict allKeys] firstObject];
+        
+        if([key isEqualToString:locale])
+            theLocale = [[dict valueForKey:key] objectAtIndex:indexPath.row];
+    }
+    ratingLabel.text = theLocale;
     
     return cell;
 }
@@ -350,7 +409,7 @@
     [imageView shake:5 withDelta:5 andSpeed:0.1 shakeDirection:ShakeDirectionVertical completionHandler:^{
         imageView.image = (UIImage *)[ratingsImageSelectedArray objectAtIndex:indexPath.row];
         
-        selectedRating = (int)indexPath.row + 1;
+        selectedRating = (int)ratingsImageArray.count - (int) indexPath.row;
         
 
         //go to next question
@@ -358,6 +417,8 @@
         {
             //save this answer
             [self saveSurveyQuestionWithRating:[NSNumber numberWithInt:selectedRating]  forQuestionId:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"id"]];
+            
+            [ratingsArray addObject:[NSNumber numberWithInt:selectedRating]];
             
             if(self.currentQuestionIndex == surveyQuestions.count - 1)//last question
             {
@@ -371,7 +432,7 @@
             {
                 self.currentQuestionIndex++;
                 
-                [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"en"]];
+                [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:locale]];
                 
                 if(selectedRating > 0) //reset the previously selected image
                 {
@@ -396,10 +457,23 @@
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     
-    ResidentInfoViewController *resident = [segue destinationViewController];
-    
-    resident.surveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
-    resident.currentLocation = self.currentLocation;
+    if([segue.identifier isEqualToString:@"push_feedback"])
+    {
+        FeedBackViewController *fvc = [segue destinationViewController];
+    }
+    else
+    {
+        int sum = [[ratingsArray valueForKeyPath: @"@sum.self"] intValue];
+        
+        int aver = sum / ratingsImageArray.count;
+        
+        ResidentInfoViewController *resident = [segue destinationViewController];
+        
+        resident.surveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
+        resident.currentLocation = self.currentLocation;
+        resident.currentSurveyId = self.currentSurveyId;
+        resident.averageRating = [NSNumber numberWithInt:aver];
+    }
 }
 
 
@@ -437,7 +511,7 @@
     {
         self.currentQuestionIndex--;
         
-        [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"en"]];
+        [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:locale]];
         
     }
 }
@@ -448,7 +522,7 @@
     {
         self.currentQuestionIndex++;
         
-        [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"en"]];
+        [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:locale]];
     }
 }
 

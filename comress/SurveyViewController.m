@@ -16,7 +16,7 @@
 
 @implementation SurveyViewController
 
-@synthesize ratingsImageArray,ratingsStringArray,ratingsImageSelectedArray,selectedRating,ratingsCollectionView,surveyQuestions,ratingsArray,locale,segment;
+@synthesize ratingsImageArray,ratingsStringArray,ratingsImageSelectedArray,selectedRating,ratingsCollectionView,surveyQuestions,locale,segment;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -24,7 +24,6 @@
     
     myDatabase = [Database sharedMyDbManager];
     questions = [[Questions alloc] init];
-    ratingsArray = [[NSMutableArray alloc] init];
     
     locale = @"en";
     
@@ -56,9 +55,9 @@
     ratingsImageSelectedArray = [NSArray arrayWithObjects:excellent_sel,good_sel,average_sel,poor_sel,very_poor_sel, nil];
     
     NSArray *en    = @[@"Excellent",@"Good",@"Average",@"Poor",@"Very poor"];
-    NSArray *cn    = @[@"优秀",@"良好",@"平均",@"穷",@"非常差"];
+    NSArray *cn    = @[@"非常好",@"良好",@"一般",@"差",@"非常差"];
     NSArray *my    = @[@"cemerlang",@"baik",@"purata",@"miskin",@"sangat miskin"];
-    NSArray *ind = @[@"उत्कृष्ट",@"अच्छा",@"औसतन",@"ஏழை",@"बहुत गरीब"];
+    NSArray *ind = @[@"சிறந்த",@"நல்ல",@"சராசரி",@"ஏழை",@"மிக மோசமான"];
     
     ratingsStringArray = [NSArray arrayWithObjects:@{@"en":en},@{@"cn":cn},@{@"my":my},@{@"ind":ind},nil];
     
@@ -89,6 +88,8 @@
     if(index == 1)
     {
         FeedBackViewController *fvc = [self.storyboard instantiateViewControllerWithIdentifier:@"FeedBackViewController"];
+        fvc.pushFromSurvey = YES;
+        fvc.currentClientSurveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
         [self.navigationController pushViewController:fvc animated:NO];
         [UIView commitAnimations];
     }
@@ -418,8 +419,6 @@
             //save this answer
             [self saveSurveyQuestionWithRating:[NSNumber numberWithInt:selectedRating]  forQuestionId:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"id"]];
             
-            [ratingsArray addObject:[NSNumber numberWithInt:selectedRating]];
-            
             if(self.currentQuestionIndex == surveyQuestions.count - 1)//last question
             {
                 DDLogVerbose(@"last q");
@@ -463,7 +462,15 @@
     }
     else
     {
-        int sum = [[ratingsArray valueForKeyPath: @"@sum.self"] intValue];
+        //get all the rating for this current survey
+        __block int sum = 0;
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rsRatings = [db executeQuery:@"select sum(rating) as sumOfRatings from su_answers where client_survey_id = ?",[NSNumber numberWithLongLong:self.currentSurveyId]];
+            
+            while ([rsRatings next]) {
+                sum = [rsRatings intForColumn:@"sumOfRatings"];
+            }
+        }];
         
         int aver = sum / ratingsImageArray.count;
         

@@ -9,11 +9,16 @@
 #import <UIKit/UIKit.h>
 #import "AppWideImports.h"
 #import "Database.h"
+#import "CreateIssueViewController.h"
+#import "Survey.h"
 
 @interface FeedBackViewController : UIViewController<UIScrollViewDelegate,UIAlertViewDelegate>
 {
     Database *myDatabase;
 }
+@property (nonatomic)BOOL pushFromSurvey;
+@property (nonatomic)BOOL pushFromSurveyDetail;
+
 @property (nonatomic, strong) NSNumber *currentClientSurveyId;
 
 @property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
@@ -29,4 +34,6 @@
 
 @property (nonatomic, strong) NSString *selectedFeedBackLoc;
 @property (nonatomic, strong) NSMutableArray *selectedFeeBackTypeArr;
+
+@property (nonatomic, strong) NSString *postalCode;
 @end

@@ -28,9 +28,9 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Allow Comress to access your current location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Allow Comress to access your current location</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Allow Comress to access your current location</string>
 	<key>UIBackgroundModes</key>
 	<array>

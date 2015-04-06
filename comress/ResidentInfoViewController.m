@@ -42,10 +42,14 @@
     if([segue.identifier isEqualToString:@"push_feedback"])
     {
         FeedBackViewController *fvc = [segue destinationViewController];
+        fvc.currentClientSurveyId =  [NSNumber numberWithLongLong:currentSurveyId];
+        fvc.postalCode = self.postalCode;
     }
-    else
+    else if([segue.identifier isEqualToString:@"push_survey_detail"])
     {
-    
+        SurveyDetailViewController *surveyDetail = [segue destinationViewController];
+        surveyDetail.surveyId = [NSNumber numberWithLongLong:currentSurveyId];
+        surveyDetail.pushFromResidentInfo = YES;
     }
 }
 
@@ -103,6 +107,7 @@
         NSLog(@"Found %@", placemark.name);
         self.surveyAddressTxtFld.text = placemark.name;
         self.residentAddressTxtFld.text = placemark.name;
+        self.postalCode = placemark.postalCode;
     }];
 }
 
@@ -175,15 +180,15 @@
 {
     if(buttonIndex == 0)
     {
-        [self performSegueWithIdentifier:@"push_feedback" sender:self];
+        [self saveResidentAdressWithSegueToFeedback:YES];
     }
     else
     {
-        [self saveResidentAdress];
+        [self saveResidentAdressWithSegueToFeedback:NO];
     }
 }
 
-- (void)saveResidentAdress
+- (void)saveResidentAdressWithSegueToFeedback:(BOOL)goToFeedback
 {
 
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -208,7 +213,7 @@
         
         BOOL insResidentAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area) values (?,?,?)",self.residentAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text];
         
-        if(!insSurveyAddress)
+        if(!insResidentAddress)
         {
             *rollback = YES;
             return;
@@ -244,6 +249,11 @@
             *rollback = YES;
             return;
         }
+        
+        if(goToFeedback)
+            [self performSegueWithIdentifier:@"push_feedback" sender:self];
+        else
+            [self performSegueWithIdentifier:@"push_survey_detail" sender:self];
     }];
     
     

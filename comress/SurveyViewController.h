@@ -39,7 +39,6 @@
 @property (nonatomic, strong)CLLocation *currentLocation;
 
 @property (nonatomic) int averageRating;
-@property (nonatomic, strong) NSMutableArray *ratingsArray;
 
 @property (nonatomic, strong) NSString *locale;
 @end

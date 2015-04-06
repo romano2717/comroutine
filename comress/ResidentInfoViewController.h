@@ -11,6 +11,7 @@
 #import "ActionSheetStringPicker.h"
 #import "Database.h"
 #import "FeedBackViewController.h"
+#import "SurveyDetailViewController.h"
 
 @interface ResidentInfoViewController : UIViewController<UIAlertViewDelegate>
 {
@@ -30,6 +31,7 @@
 
 @property (nonatomic, strong) NSNumber *surveyId;
 @property (nonatomic, strong) CLLocation *currentLocation;
+@property (nonatomic,strong) NSString *postalCode;
 
 @property (nonatomic, strong) NSArray *ageRangeArray;
 @property (nonatomic, strong) NSArray *raceArray;
@@ -38,7 +40,6 @@
 @property (nonatomic) long long currentSurveyId;
 
 @property (nonatomic, strong) NSNumber *averageRating;
-
 
 
 

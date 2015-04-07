@@ -83,6 +83,8 @@ static NSString *api_download_sup_active_blocks = @"Job/Block.svc/GetActiveSUPBl
 
 static NSString *api_download_fed_questions = @"Survey/Question.svc/GetQuestions";
 
+static NSString *api_upload_survey =  @"Survey/Survey.svc/UploadSurvey";
+
 
 
 #endif

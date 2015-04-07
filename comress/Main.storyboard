@@ -1981,7 +1981,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="3Sr-IO-FMl">
-                                <rect key="frame" x="16" y="492" width="568" height="80"/>
+                                <rect key="frame" x="16" y="483" width="568" height="80"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="80" id="rVH-NX-aWN"/>
@@ -2051,14 +2051,15 @@
                                 </connections>
                             </button>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vgp-W1-s0B">
-                                <rect key="frame" x="16" y="110" width="568" height="374"/>
+                                <rect key="frame" x="16" y="110" width="568" height="365"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="30"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                             <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ekd-Xh-Xr5">
-                                <rect key="frame" x="552" y="575" width="32" height="25"/>
-                                <state key="normal" image="hi.png">
+                                <rect key="frame" x="552" y="566" width="31" height="34"/>
+                                <state key="normal" title="IND">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -2066,8 +2067,9 @@
                                 </connections>
                             </button>
                             <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hmE-HH-vaZ">
-                                <rect key="frame" x="512" y="575" width="32" height="25"/>
-                                <state key="normal" image="my.png">
+                                <rect key="frame" x="514" y="566" width="30" height="34"/>
+                                <state key="normal" title="MY">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -2075,8 +2077,9 @@
                                 </connections>
                             </button>
                             <button opaque="NO" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="e9C-eP-wAD">
-                                <rect key="frame" x="472" y="575" width="32" height="25"/>
-                                <state key="normal" image="zh.png">
+                                <rect key="frame" x="476" y="566" width="30" height="34"/>
+                                <state key="normal" title="CN">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -2084,8 +2087,9 @@
                                 </connections>
                             </button>
                             <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PX6-hk-ltK">
-                                <rect key="frame" x="432" y="575" width="32" height="25"/>
-                                <state key="normal" image="en.png">
+                                <rect key="frame" x="438" y="566" width="30" height="34"/>
+                                <state key="normal" title="EN">
+                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
@@ -2478,7 +2482,7 @@
                         <viewControllerLayoutGuide type="bottom" id="ei2-vp-N1f"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="oXf-7e-NKL">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="551"/>
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5Nu-GL-3XH">
@@ -4773,15 +4777,12 @@
         <image name="check.png" width="22" height="22"/>
         <image name="checked.png" width="23" height="22"/>
         <image name="crm.png" width="27" height="27"/>
-        <image name="en.png" width="32" height="25"/>
         <image name="excellent.png" width="50" height="50"/>
-        <image name="hi.png" width="32" height="24"/>
         <image name="industry.png" width="32" height="32"/>
         <image name="issue.png" width="30" height="27"/>
         <image name="list.png" width="22" height="22"/>
         <image name="locked.png" width="15" height="20"/>
         <image name="mosquito.png" width="32" height="32"/>
-        <image name="my.png" width="32" height="25"/>
         <image name="nostars.png" width="100" height="20"/>
         <image name="pin2.png" width="75" height="75"/>
         <image name="qr.png" width="25" height="25"/>
@@ -4793,12 +4794,11 @@
         <image name="tree.png" width="32" height="32"/>
         <image name="user168.png" width="64" height="64"/>
         <image name="wiping.png" width="32" height="32"/>
-        <image name="zh.png" width="32" height="24"/>
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="cqu-JP-Kpv"/>
         <segue reference="Pdc-0J-hiS"/>
-        <segue reference="Xuv-qH-m2P"/>
+        <segue reference="Lgh-C8-ibG"/>
         <segue reference="NVT-Pf-NEn"/>
     </inferredMetricsTieBreakers>
 </document>

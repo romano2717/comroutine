@@ -24,6 +24,7 @@
     
     myDatabase = [Database sharedMyDbManager];
     
+    
 }
 
 - (void)viewDidAppear:(BOOL)animated

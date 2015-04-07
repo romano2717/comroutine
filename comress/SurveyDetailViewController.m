@@ -49,6 +49,20 @@
     [self fetchSurveyDetail];
 }
 
+- (IBAction)popResidentInfForThisSurvey:(id)sender
+{
+    NSDictionary *residentInfo = [survey surveDetailForId:surveyId];
+    
+    ResidentPopInfoViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"ResidentPopInfoViewController"];
+    postInfoVc.residentInfo = residentInfo;
+    
+    popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
+    popover.arrowDirection = FPPopoverArrowDirectionRight;
+    popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
+    
+    [popover presentPopoverFromView:sender];
+}
+
 -(void) viewWillDisappear:(BOOL)animated
 {
     if ([self.navigationController.viewControllers indexOfObject:self]==NSNotFound)
@@ -63,6 +77,12 @@
 -(void)backButtonPressed
 { 
     if(self.pushFromResidentInfo)
+    {
+        //pop to tab
+        [self.navigationController popToRootViewControllerAnimated:YES];
+    }
+    
+    if(self.pushFromIssue)
     {
         //pop to tab
         [self.navigationController popToRootViewControllerAnimated:YES];
@@ -138,6 +158,16 @@
 - (IBAction)addFeedBack:(id)sender
 {
     [self performSegueWithIdentifier:@"push_add_feedback" sender:self];
+}
+
+
+- (IBAction)startChat:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    
+    int tag = (int)btn.tag;
+    
+    
 }
 
 

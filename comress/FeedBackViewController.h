@@ -34,6 +34,9 @@
 
 @property (nonatomic, strong) NSString *selectedFeedBackLoc;
 @property (nonatomic, strong) NSMutableArray *selectedFeeBackTypeArr;
+@property (nonatomic, strong) NSMutableArray *selectedFeeBackTypeStringArr;
 
 @property (nonatomic, strong) NSString *postalCode;
+
+@property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
 @end

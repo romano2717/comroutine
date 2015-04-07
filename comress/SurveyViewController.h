@@ -41,4 +41,7 @@
 @property (nonatomic) int averageRating;
 
 @property (nonatomic, strong) NSString *locale;
+
+@property (nonatomic, strong) CLPlacemark *placemark;
+
 @end

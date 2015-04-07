@@ -36,6 +36,10 @@
     NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
     [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     
+    self.tabBarController.tabBar.hidden = NO;
+    self.navigationController.navigationBar.hidden = NO;
+    self.hidesBottomBarWhenPushed = NO;
+    
     [self fetchSurvey];
 }
 

@@ -711,7 +711,7 @@
            {
                                                                         // call this faster
                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                   [self uploadCommentFromSelf:YES];
+                   [self uploadSurveyFromSelf:YES];
                });
            }
            
@@ -723,10 +723,137 @@
            {
                                                                         // call this faster
                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                   [self uploadCommentFromSelf:YES];
+                   [self uploadSurveyFromSelf:YES];
                });
            }
        }];
+        
+    }];
+}
+
+
+#pragma mark - upload inspection result
+- (void)uploadSurveyFromSelf:(BOOL)thisSelf
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        NSNumber *requiredSync = [NSNumber numberWithInt:1];
+        
+        NSMutableDictionary *surveyDict = [[NSMutableDictionary alloc] init];
+        
+        FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey"];
+        
+        while ([rsSurvey next]) {
+            int ClientSurveyId = [rsSurvey intForColumn:@"client_survey_id"];
+            int ClientSurveyAddressId = [rsSurvey intForColumn:@"client_survey_address_id"];
+            
+            NSDate *surveyNsDate = [NSDate dateWithTimeIntervalSinceNow:[rsSurvey doubleForColumn:@"survey_date"]];
+            NSString *surveyDateJsonString = [self serializedStringDateJson:surveyNsDate];
+            NSString *ResidentName = [rsSurvey stringForColumn:@"resident_name"];
+            NSString *ResidentAgeRange = [rsSurvey stringForColumn:@"resident_age_range"];
+            NSString *ResidentGender = [rsSurvey stringForColumn:@"resident_gender"];
+            NSString *ResidentRace = [rsSurvey stringForColumn:@"resident_race"];
+            int ClientResidentAddressId = [rsSurvey intForColumn:@"client_resident_address_id"];
+            NSString *ResidentContact = [rsSurvey stringForColumn:@"resident_contact"];
+            
+            [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyId] forKey:@"ClientSurveyId"];
+            [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyAddressId] forKey:@"ClientSurveyAddressId"];
+            [surveyDict setObject:surveyDateJsonString forKey:@"SurveyDate"];
+            [surveyDict setObject:ResidentName forKey:@"ResidentName"];
+            [surveyDict setObject:ResidentAgeRange forKey:@"ResidentAgeRange"];
+            [surveyDict setObject:ResidentGender forKey:@"ResidentGender"];
+            [surveyDict setObject:ResidentRace forKey:@"ResidentRace"];
+            [surveyDict setObject:[NSNumber numberWithInt:ClientResidentAddressId] forKey:@"ClientResidentAddressId"];
+            [surveyDict setObject:ResidentContact forKey:@"ResidentContact"];
+            
+            
+            //get answers list
+            FMResultSet *rsAnswers = [db executeQuery:@"select * from su_answers where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
+            NSMutableArray *answersArray = [[NSMutableArray alloc] init];
+            while ([rsAnswers next]) {
+                NSNumber *ClientAnswerId = [NSNumber numberWithInt:[rsAnswers intForColumn:@"client_answer_id"]];
+                NSNumber *QuestionId = [NSNumber numberWithInt:[rsAnswers intForColumn:@"question_id"]];
+                NSNumber *Rating = [NSNumber numberWithInt:[rsAnswers intForColumn:@"rating"]];
+                
+                NSDictionary *dictRowAnswers = @{@"ClientAnswerId":ClientAnswerId,@"QuestionId":QuestionId,@"Rating":Rating};
+                
+                [answersArray addObject:dictRowAnswers];
+            }
+            
+            [surveyDict setObject:answersArray forKey:@"AnswerList"];
+            
+            
+            
+            //get feedbacks
+            FMResultSet *rsFeedBack = [db executeQuery:@"select * from su_feedback where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
+            NSMutableArray *feedbackListArray = [[NSMutableArray alloc] init];
+            while ([rsFeedBack next]) {
+                NSNumber *ClientFeedbackIssueId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_feedback_issue_id"]];
+                NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_feedback_id"]];
+                NSNumber *PostId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"post_id"]];
+                NSString *IssueDes = [rsFeedBack stringForColumn:@"issue_des"];
+                
+                NSDictionary *dictFeedback = @{@"ClientFeedbackIssueId":ClientFeedbackIssueId,@"ClientFeedbackId":ClientFeedbackId,@"PostId":PostId,@"IssueDes":IssueDes};
+                
+                [feedbackListArray addObject:dictFeedback];
+            }
+            
+            [surveyDict setObject:feedbackListArray forKey:@"FeedbackIssueList"];
+            
+            
+            //get the addresses base on survey
+            NSMutableArray *addressArray = [[NSMutableArray alloc] init];
+        }
+        
+        
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_inspection_res] parameters:surveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *topDict = (NSDictionary *)responseObject;
+            
+            NSArray *AckInspectionResultObj = [topDict objectForKey:@"AckInspectionResultObj"];
+            
+            DDLogVerbose(@"AckInspectionResultObj %@",AckInspectionResultObj);
+            
+            for (int i = 0; i < AckInspectionResultObj.count; i++) {
+                NSDictionary *dict = [AckInspectionResultObj objectAtIndex:i];
+                
+                NSNumber *CheckListId = [NSNumber numberWithInt:[[dict valueForKey:@"CheckListId"] intValue]];
+                NSNumber *ChkAreaId = [NSNumber numberWithInt:[[dict valueForKey:@"ChkAreaId"] intValue]];
+                NSNumber *ScheduleId = [NSNumber numberWithInt:[[dict valueForKey:@"ScheduleId"] intValue]];
+                BOOL Successful = [[dict valueForKey:@"Successful"] boolValue];
+                
+                if(Successful)
+                {
+                    NSNumber *syncNotRequired = [NSNumber numberWithInt:0];
+                    BOOL up = [db executeUpdate:@"update ro_inspectionresult set w_required_sync = ? where w_checklistid = ? and w_chkareaid = ? and w_scheduleid = ?",syncNotRequired,CheckListId,ChkAreaId,ScheduleId];
+                    
+                    if(!up)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }
+            
+            if(thisSelf)
+            {
+                // call this faster
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self uploadCommentFromSelf:YES];
+                });
+            }
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            if(thisSelf)
+            {
+                // call this faster
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self uploadCommentFromSelf:YES];
+                });
+            }
+        }];
         
     }];
 }

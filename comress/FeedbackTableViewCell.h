@@ -13,6 +13,10 @@
 
 @property (nonatomic, weak) IBOutlet UILabel *addressLabel;
 @property (nonatomic, weak) IBOutlet UILabel *feedbackLabel;
+@property (nonatomic, weak) IBOutlet UIButton *conservancyChatBtn;
+@property (nonatomic, weak) IBOutlet UIButton *hortChatBtn;
+@property (nonatomic, weak) IBOutlet UIButton *pumpChatBtn;
+@property (nonatomic, weak) IBOutlet UIButton *mosqChatBtn;
 
 - (void)initCellWithResultSet:(NSDictionary *)dict;
 

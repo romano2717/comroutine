@@ -14,7 +14,7 @@
 
 @implementation FeedBackViewController
 
-@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode;
+@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode,pushFromSurveyAndModalFromFeedback;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -66,6 +66,23 @@
     [[self.feedBackTextView layer] setCornerRadius:15];
     
     self.selectedFeeBackTypeArr = [[NSMutableArray alloc] init];
+    self.selectedFeeBackTypeStringArr = [[NSMutableArray alloc] init];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(push_survey_detail:) name:@"push_survey_detail" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(go_back_to_survey) name:@"go_back_to_survey" object:nil];
+    
+}
+
+- (void)go_back_to_survey
+{
+    [self.navigationController popViewControllerAnimated:NO];
+}
+
+- (void)push_survey_detail:(NSNotification *)notif
+{
+    NSNumber *surveyId = [[notif userInfo] valueForKey:@"surveyId"];
+    
+    [self performSegueWithIdentifier:@"push_survey_detail" sender:surveyId];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -84,10 +101,34 @@
         Survey *survey = [[Survey alloc] init];
         NSDictionary *dict = [survey surveyForId:currentClientSurveyId forAddressType:self.selectedFeedBackLoc];
         
+        NSMutableString *contractString = [[NSMutableString alloc] init];
+        
+        for (int i = 0; i < self.selectedFeeBackTypeStringArr.count; i++) {
+            NSString *str = [self.selectedFeeBackTypeStringArr objectAtIndex:i];
+            [contractString appendString:[NSString stringWithFormat:@"%@, ",str]];
+        }
+        
         CreateIssueViewController *cvc = [segue destinationViewController];
         cvc.surveyId = currentClientSurveyId;
+        cvc.feedBackId = sender;
         cvc.surveyDetail = dict;
         cvc.postalCode = postalCode;
+        cvc.selectedContractTypesArr = self.selectedFeeBackTypeArr;
+        cvc.selectedContractTypesString = contractString;
+        if(pushFromSurveyAndModalFromFeedback)
+            cvc.pushFromSurveyAndModalFromFeedback = YES;
+    }
+    
+    if([segue.identifier isEqualToString:@"push_survey_detail"])
+    {
+        self.tabBarController.tabBar.hidden = YES;
+        self.hidesBottomBarWhenPushed = YES;
+        self.navigationController.navigationBar.hidden = NO;
+        
+        SurveyDetailViewController *sdvc = [segue destinationViewController];
+        NSNumber *surveyId = sender;
+        sdvc.surveyId = surveyId;
+        sdvc.pushFromIssue = YES;
     }
 }
 
@@ -184,25 +225,76 @@
         [self.selectedFeeBackTypeArr removeObject:tag];
     }
     
+    //add contract type strings
+    NSString *contractypeString;
+    int intTag = [tag intValue];
+    switch (intTag) {
+        case 1:
+            contractypeString = @"Conservancy";
+            break;
+            
+        case 2:
+            contractypeString = @"Horticulture";
+            break;
+            
+        case 4:
+            contractypeString = @"Pump";
+            break;
+            
+        case 5:
+            contractypeString = @"Mosquito";
+            break;
+            
+        case 19:
+            contractypeString = @"General";
+            break;
+            
+        case 6:
+            contractypeString = @"LTA";
+            break;
+            
+        case 7:
+            contractypeString = @"HDB";
+            break;
+            
+        case 8:
+            contractypeString = @"Others";
+            break;
+            
+        default:
+            contractypeString = @"General";
+            break;
+    }
+    
+    if([self.selectedFeeBackTypeStringArr containsObject:contractypeString] == NO)
+    {
+        [self.selectedFeeBackTypeStringArr addObject:contractypeString];
+    }
+    else
+    {
+        [self.selectedFeeBackTypeStringArr removeObject:contractypeString];
+    }
+    
     [btn setSelected:!btn.selected];
 }
 
 
 - (IBAction)addFeedBack:(id)sender
 {
-    NSArray *comressTypes = @[[NSNumber numberWithInt:2],[NSNumber numberWithInt:3],[NSNumber numberWithInt:4],[NSNumber numberWithInt:5]];
     
-    int foundComressTypes = 0;
+//    NSArray *comressTypes = @[[NSNumber numberWithInt:2],[NSNumber numberWithInt:3],[NSNumber numberWithInt:4],[NSNumber numberWithInt:5]];
+//    
+//    int foundComressTypes = 0;
+//    
+//    for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
+//        NSNumber *selected = [self.selectedFeeBackTypeArr objectAtIndex:i];
+//        
+//        if([comressTypes containsObject:selected])
+//            foundComressTypes ++;
+//        
+//    }
     
-    for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
-        NSNumber *selected = [self.selectedFeeBackTypeArr objectAtIndex:i];
-        
-        if([comressTypes containsObject:selected])
-            foundComressTypes ++;
-        
-    }
-    
-    NSString *message = [NSString stringWithFormat:@"Are you sure you want to create %d issues?",foundComressTypes];
+    NSString *message = [NSString stringWithFormat:@"Are you sure you want to create %lu issues?",(unsigned long)self.selectedFeeBackTypeStringArr.count];
     
     UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes", nil];
 
@@ -215,7 +307,7 @@
     if(buttonIndex == 1) //YES!
     {
         //save feedback!
-        
+        __block NSNumber *feedBackId;
         __block BOOL feedbackSaved = NO;
         
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -278,6 +370,8 @@
             else
             {
                 feedbackSaved = YES;
+                
+                feedBackId = [NSNumber numberWithLongLong:[db lastInsertRowId]];
             }
         }];
         
@@ -285,8 +379,7 @@
         if(feedbackSaved)
         {
             //segue to issues and pass selected contract types;
-            
-            [self performSegueWithIdentifier:@"modal_create_issue" sender:self];
+            [self performSegueWithIdentifier:@"modal_create_issue" sender:feedBackId];
         }
     }
 }

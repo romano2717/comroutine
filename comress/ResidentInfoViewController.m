@@ -14,7 +14,7 @@
 
 @implementation ResidentInfoViewController
 
-@synthesize surveyId,currentLocation,currentSurveyId,averageRating;
+@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -100,15 +100,9 @@
 
 - (void)preFillOtherInfo
 {
-    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
-    
-    [geoCoder reverseGeocodeLocation:self.currentLocation completionHandler:^(NSArray *placemarks, NSError *error){
-        CLPlacemark *placemark = placemarks[0];
-        NSLog(@"Found %@", placemark.name);
-        self.surveyAddressTxtFld.text = placemark.name;
-        self.residentAddressTxtFld.text = placemark.name;
-        self.postalCode = placemark.postalCode;
-    }];
+    self.surveyAddressTxtFld.text = placemark.name;
+    self.residentAddressTxtFld.text = placemark.name;
+    self.postalCode = placemark.postalCode;
 }
 
 - (IBAction)selectAge:(id)sender
@@ -199,6 +193,7 @@
         NSString *resident_gender = self.gender;
         NSString *resident_race = self.raceBtn.titleLabel.text;
         NSNumber *average_rating = averageRating;
+        NSString *resident_contact = self.contactNoTxFld.text;
         
         BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area) values (?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text];
         
@@ -242,7 +237,7 @@
         NSNumber *client_survey_address_id = [NSNumber numberWithInt:[[surveyAddressDict valueForKey:@"client_address_id"] intValue]];
         NSNumber *client_resident_address_id = [NSNumber numberWithInt:[[residentAddressDict valueForKey:@"client_address_id"] intValue]];
         
-        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ? where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,[NSNumber numberWithLongLong:currentSurveyId]];
+        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?  where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,[NSNumber numberWithLongLong:currentSurveyId]];
         
         if(!up)
         {

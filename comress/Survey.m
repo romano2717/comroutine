@@ -75,6 +75,7 @@
             
             while ([rs next]) {
                 NSMutableDictionary *row = [[NSMutableDictionary alloc] init];
+                NSMutableArray *postsArray = [[NSMutableArray alloc] init];
                 
                 [row setObject:[rs resultDictionary] forKey:@"feedback"];
                 
@@ -86,6 +87,31 @@
                     [row setObject:[rsAdd resultDictionary] forKey:@"address"];
                 }
                 
+                
+                //get post details
+                NSNumber *client_feedback_id = [NSNumber numberWithInt:[rs intForColumn:@"client_feedback_id"]];
+                FMResultSet *rsFeedBackIssue = [db executeQuery:@"select * from su_feedback_issue where client_feedback_id = ?",client_feedback_id];
+                while ([rsFeedBackIssue next]) {
+                    
+                    NSNumber *postId = [NSNumber numberWithInt:[rsFeedBackIssue intForColumn:@"client_post_id"]];
+                    FMResultSet *rspost = [db executeQuery:@"select * from post where client_post_id = ?",postId];
+                    
+                    while ([rspost next]) {
+                        [postsArray addObject:[rspost resultDictionary]];
+                    }
+                    
+                    [row setObject:postsArray forKey:@"post"];
+                }
+                
+                //get contract types
+                FMResultSet *rsContractTypes = [db executeQuery:@"select * from contract_type"];
+                NSMutableArray *contractTypesArray = [[NSMutableArray alloc] init];
+                while ([rsContractTypes next]) {
+                    [contractTypesArray addObject:[rsContractTypes resultDictionary]];
+                }
+                [row setObject:contractTypesArray forKey:@"contractTypes"];
+                
+                //store!
                 [arr addObject:row];
             }
         }];
@@ -112,7 +138,8 @@
             residentAddressId = [rs intForColumn:@"client_resident_address_id"];
         }
         
-        [dict setObject:surveyDict forKey:@"survey"];
+        if(surveyDict != nil)
+            [dict setObject:surveyDict forKey:@"survey"];
         
         //get address
         if([addressType isEqualToString:@"survey"])
@@ -125,7 +152,7 @@
         }
         
         //get address
-        if([addressType isEqualToString:@"survey"])
+        if([addressType isEqualToString:@"resident"])
         {
             FMResultSet *rsAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:residentAddressId]];
             
@@ -134,7 +161,55 @@
             }
         }
         
-        [dict setObject:addressDict forKey:@"address"];
+        if(addressDict != nil)
+            [dict setObject:addressDict forKey:@"address"];
+        
+    }];
+    
+    return dict;
+}
+
+
+- (NSDictionary *)surveDetailForId:(NSNumber *)surveyId
+{
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
+        NSDictionary *surveyDict;
+        NSDictionary *residentAddressDict;
+        NSDictionary *surveyAddressDict;
+        
+        int surveyAddressId = 0;
+        int residentAddressId = 0;
+        while ([rs next]) {
+            surveyDict = [rs resultDictionary];
+            
+            surveyAddressId = [rs intForColumn:@"client_survey_address_id"];
+            residentAddressId = [rs intForColumn:@"client_resident_address_id"];
+        }
+        
+        if(surveyDict != nil)
+            [dict setObject:surveyDict forKey:@"survey"];
+        
+        
+            FMResultSet *rsAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:surveyAddressId]];
+            
+            while ([rsAddress next]) {
+                surveyAddressDict = [rsAddress resultDictionary];
+            }
+        
+            FMResultSet *rsAddress2 = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:residentAddressId]];
+            
+            while ([rsAddress2 next]) {
+                residentAddressDict = [rsAddress2 resultDictionary];
+            }
+        
+        if(residentAddressDict != nil)
+            [dict setObject:residentAddressDict forKey:@"residentAddress"];
+        
+        if(surveyAddressDict != nil)
+            [dict setObject:surveyAddressDict forKey:@"surveyAddress"];
         
     }];
     

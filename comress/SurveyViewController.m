@@ -90,6 +90,7 @@
         FeedBackViewController *fvc = [self.storyboard instantiateViewControllerWithIdentifier:@"FeedBackViewController"];
         fvc.pushFromSurvey = YES;
         fvc.currentClientSurveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
+        fvc.pushFromSurveyAndModalFromFeedback = YES;
         [self.navigationController pushViewController:fvc animated:NO];
         [UIView commitAnimations];
     }
@@ -110,6 +111,14 @@
     self.hidesBottomBarWhenPushed = YES;
     
     segment.selectedSegmentIndex = 0;
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    self.tabBarController.tabBar.hidden = NO;
+    self.hidesBottomBarWhenPushed = NO;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -142,8 +151,21 @@
     if(locationIsGood)
     {
         self.currentLocation = loc;
+        
+        [self reverseGeoCodeTheLocation:loc];
     }
 }
+
+
+- (void)reverseGeoCodeTheLocation:(CLLocation *)location
+{
+    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
+    
+    [geoCoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error){
+        self.placemark = placemarks[0];
+    }];
+}
+
 
 #pragma mark - check spo sked
 - (void)checkQuestionsCount
@@ -459,6 +481,7 @@
     if([segue.identifier isEqualToString:@"push_feedback"])
     {
         FeedBackViewController *fvc = [segue destinationViewController];
+        fvc.pushFromSurveyAndModalFromFeedback = YES;
     }
     else
     {
@@ -478,6 +501,7 @@
         
         resident.surveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
         resident.currentLocation = self.currentLocation;
+        resident.placemark = self.placemark;
         resident.currentSurveyId = self.currentSurveyId;
         resident.averageRating = [NSNumber numberWithInt:aver];
     }

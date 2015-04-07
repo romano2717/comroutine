@@ -31,6 +31,7 @@
 
 @property (nonatomic, strong) NSNumber *surveyId;
 @property (nonatomic, strong) CLLocation *currentLocation;
+@property (nonatomic, strong) CLPlacemark *placemark;
 @property (nonatomic,strong) NSString *postalCode;
 
 @property (nonatomic, strong) NSArray *ageRangeArray;

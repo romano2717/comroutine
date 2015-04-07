@@ -12,11 +12,14 @@
 #import "Survey.h"
 #import "Database.h"
 #import "FeedBackViewController.h"
+#import "FPPopoverKeyboardResponsiveController.h"
+#import "ResidentPopInfoViewController.h"
 
 @interface SurveyDetailViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 {
     Survey *survey;
     Database *myDatabase;
+    FPPopoverKeyboardResponsiveController *popover;    
 }
 @property (nonatomic, strong) NSNumber *surveyId;
 
@@ -27,5 +30,7 @@
 @property (nonatomic, strong) NSArray *dataArray;
 
 @property (nonatomic) BOOL pushFromResidentInfo;
+
+@property (nonatomic) BOOL pushFromIssue;
 
 @end

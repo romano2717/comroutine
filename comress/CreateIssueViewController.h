@@ -60,5 +60,4 @@
 
 @property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
 
-
 @end

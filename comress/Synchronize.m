@@ -35,9 +35,9 @@
     [self uploadPostFromSelf:YES];
     syncKickstartTimerOutgoing = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(uploadPost) userInfo:nil repeats:YES];
 
-    [self startDownload];
-    downloadIsTriggeredBySelf = YES;
-    syncKickstartTimerIncoming = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(startDownload) userInfo:nil repeats:YES];
+//    [self startDownload];
+//    downloadIsTriggeredBySelf = YES;
+//    syncKickstartTimerIncoming = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(startDownload) userInfo:nil repeats:YES];
 }
 
 
@@ -751,18 +751,21 @@
 }
 
 
-#pragma mark - upload inspection result
+#pragma mark - upload survey
 - (void)uploadSurveyFromSelf:(BOOL)thisSelf
 {
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        NSNumber *requiredSync = [NSNumber numberWithInt:1];
         
         NSMutableDictionary *surveyDict = [[NSMutableDictionary alloc] init];
         NSDictionary *surveyContainer;
         
-        FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc limit 0, 1",[NSNumber numberWithInt:0]];
+        BOOL doUpload = NO;
+        
+        FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc limit 0, 1",[NSNumber numberWithInt:1]];
         
         while ([rsSurvey next]) {
+            doUpload = YES;
+            
             int ClientSurveyId = [rsSurvey intForColumn:@"client_survey_id"];
             int ClientSurveyAddressId = [rsSurvey intForColumn:@"client_survey_address_id"];
             
@@ -891,7 +894,18 @@
             
         } //end of while ([rsSurvey next])
         
-       
+        if(doUpload == NO)
+        {
+            if(thisSelf)
+            {
+                // call this faster
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self uploadCommentFromSelf:YES];
+                });
+            }
+            
+            return;
+        }
         
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
@@ -976,12 +990,89 @@
             
             if(massUpdateOk == YES)
             {
-                BOOL upSurveySync = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",requiredSync,ClientSurveyId];
+                BOOL upSurveySync = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",[NSNumber numberWithInt:0],ClientSurveyId];
                 if(!upSurveySync)
                 {
                     *rollback = YES;
                     return;
                 }
+            }
+            
+            
+            if(thisSelf)
+            {
+                // call this faster
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self uploadCrmFromSelf:YES];
+                });
+            }
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            if(thisSelf)
+            {
+                // call this faster
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [self uploadCrmFromSelf:YES];
+                });
+            }
+        }];
+        
+    }];
+}
+
+
+
+#pragma mark - upload survey
+- (void)uploadCrmFromSelf:(BOOL)thisSelf
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        //select * from suv_crm
+        __block NSDictionary *crmSurveyDict;
+        
+        NSMutableArray *crmList = [[NSMutableArray alloc] init];
+        
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rsCrmGet = [db executeQuery:@"select * from suv_crm where uploaded = ?",[NSNumber numberWithInt:0]];
+            
+            while ([rsCrmGet next]) {
+                NSNumber *ClientCRMIssueId = [NSNumber numberWithInt:[rsCrmGet intForColumn:@"client_crm_id"]];
+                NSString *Subject = [rsCrmGet stringForColumn:@"subject"];
+                NSString *Body = [rsCrmGet stringForColumn:@"body"];
+                NSDictionary *row = @{@"ClientCRMIssueId":ClientCRMIssueId,@"Subject":Subject,@"Body":Body};
+                
+                [crmList addObject:row];
+            }
+            
+            crmSurveyDict = @{@"crmIssuetList":crmList};
+        }];
+        
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_crm] parameters:crmSurveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            //process crm result
+
+            NSDictionary *topDict = (NSDictionary *)responseObject;
+            NSArray *AckCRMIssueObj = [topDict objectForKey:@"AckCRMIssueObj"];
+            
+            for (int i = 0; i < AckCRMIssueObj.count; i++) {
+                NSDictionary *crmDict = [AckCRMIssueObj objectAtIndex:i];
+                
+                NSNumber *CRMIssueId = [NSNumber numberWithInt:[[crmDict valueForKey:@"CRMIssueId"] intValue]];
+                NSNumber *ClientCRMIssueId = [NSNumber numberWithInt:[[crmDict valueForKey:@"ClientCRMIssueId"] intValue]];
+                
+                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                   
+                    BOOL upCmr = [db executeUpdate:@"update suv_crm set crm_id = ? where client_crm_id = ?",CRMIssueId,ClientCRMIssueId];
+                    
+                    if(!upCmr)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }];
             }
             
             
@@ -1026,11 +1117,145 @@
         
         DDLogVerbose(@"new survey %@",dict);
         
+        //save address
         NSArray *AddressList = [dict objectForKey:@"AddressList"];
+        for (int i = 0; i < AddressList.count; i++) {
+            NSNumber *AddressId = [NSNumber numberWithInt:[[[AddressList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
+            NSNumber *Location = [[AddressList objectAtIndex:i] valueForKey:@"Location"];
+            NSString *SpecifyArea = [[AddressList objectAtIndex:i] valueForKey:@"SpecifyArea"];
+            NSString *UnitNo = [[AddressList objectAtIndex:i] valueForKey:@"UnitNo"];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_address where address_id = ?",AddressId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_address(address_id,address,unit_no,specify_area) values (?,?,?,?)",AddressId,Location,UnitNo,SpecifyArea];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save answers
         NSArray *AnswerList = [dict objectForKey:@"AnswerList"];
+        for (int i = 0; i < AnswerList.count; i++) {
+            NSNumber *AnswerId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"AnswerId"] intValue]];
+            NSNumber *QuestionId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"QuestionId"] intValue]];
+            NSNumber *Rating = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"Rating"] intValue]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_answers where answer_id = ?",AnswerId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_answers(answer_id,question_id,rating,survey_id) values (?,?,?,?)",AnswerId,QuestionId,Rating,SurveyId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save FeedbackIssueList
         NSArray *FeedbackIssueList = [dict objectForKey:@"FeedbackIssueList"];
+        for (int i = 0; i < FeedbackIssueList.count; i++) {
+            
+            NSNumber *FeedbackId = [NSNumber numberWithInt:[[[FeedbackIssueList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
+            NSNumber *FeedbackIssueId = [NSNumber numberWithInt:[[[FeedbackIssueList objectAtIndex:i] valueForKey:@"FeedbackIssueId"] intValue]];
+            NSString *IssueDes = [[FeedbackIssueList objectAtIndex:i] valueForKey:@"IssueDes"];
+            
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_feedback_issue where feedback_issue_id = ?",FeedbackIssueId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_feedback_issue(feedback_id,feedback_issue_id,issue_des) values (?,?,?)",FeedbackId,FeedbackIssueId,IssueDes];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save FeedbackList
         NSArray *FeedbackList = [dict objectForKey:@"FeedbackList"];
+        for (int i = 0; i < FeedbackList.count; i++) {
+            
+            NSNumber *AddressId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
+            NSString *Description = [[FeedbackList objectAtIndex:i] valueForKey:@"Description"];
+            NSNumber *FeedbackId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_feedback where feedback_id = ?",FeedbackId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_feedback(address_id,description,feedback_id,survey_id) values (?,?,?,?)",AddressId,Description,FeedbackId,SurveyId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        
+        //save Survey
         NSArray *SurveyList = [dict objectForKey:@"SurveyList"];
+        for (int i = 0; i < SurveyList.count; i++) {
+            
+            NSNumber *AverageRating = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"AverageRating"] intValue]];
+            NSNumber *ResidentAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"AverageRating"] intValue]];
+            NSString *ResidentAgeRange = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentAgeRange"];
+            NSString *ResidentGender = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentGender"];
+            NSString *ResidentName = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentName"];
+            NSString *ResidentRace = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentRace"];
+            NSNumber *SurveyAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyAddressId"] intValue]];
+            NSDate *SurveyDate = [myDatabase createNSDateWithWcfDateString:[[SurveyList objectAtIndex:i] valueForKey:@"SurveyDate"]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+            
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_survey where survey_id = ?",SurveyId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id) values (?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
         
         int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
         
@@ -1075,9 +1300,6 @@
         }
     }];
 }
-
-
-
 
 
 #pragma mark - download new data from server

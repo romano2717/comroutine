@@ -324,7 +324,7 @@
     CGFloat longitude = loc.coordinate.longitude;
     CGFloat latitude = loc.coordinate.latitude;
     
-    NSURL *mapImageUrl = [NSURL URLWithString:[NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=16&size=750x1334&markers=color:red%%7C%f,%f",latitude,longitude,latitude,longitude]];
+    NSURL *mapImageUrl = [NSURL URLWithString:[NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/staticmap?center=%f,%f&zoom=16&size=750x1334&markers=color:red%%7C%f,%f&key=%@",latitude,longitude,latitude,longitude,google_api_key]];
 
     NSTimeInterval locationAge = -[loc.timestamp timeIntervalSinceNow];
     
@@ -351,19 +351,22 @@
 - (void)sendLocationAsMessageWithUrl:(NSURL *)url
 {
     SDWebImageManager *manager = [SDWebImageManager sharedManager];
-    
+    DDLogVerbose(@"url %@",url);
     [manager downloadImageWithURL:url options:0 progress:^(NSInteger receivedSize, NSInteger expectedSize) {
         
     } completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
         
-        [self.messageData addPhotoMediaMessageWithImage:image SenderId:user.user_id DisplayName:user.user_id];
-        
-        //save comment
-        NSDate *date = [NSDate date];
-        
-        NSDictionary *dict = @{@"client_post_id":[NSNumber numberWithInt:self.postId], @"text":[NSNull null],@"senderId":user.user_id,@"date":date,@"messageType":@"image",@"comment_type":[NSNumber numberWithInt:1],@"image":image};
-        
-        [self saveCommentForMessage:dict];
+        if(image != nil)
+        {
+            [self.messageData addPhotoMediaMessageWithImage:image SenderId:user.user_id DisplayName:user.user_id];
+            
+            //save comment
+            NSDate *date = [NSDate date];
+            
+            NSDictionary *dict = @{@"client_post_id":[NSNumber numberWithInt:self.postId], @"text":[NSNull null],@"senderId":user.user_id,@"date":date,@"messageType":@"image",@"comment_type":[NSNumber numberWithInt:1],@"image":image};
+            
+            [self saveCommentForMessage:dict];
+        }
         
         [self finishReceivingMessageAnimated:YES];
     }];

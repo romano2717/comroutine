@@ -24,6 +24,4 @@
 - (NSArray *)checkListForJobTypeId:(NSNumber *)jobTypeId;
 
 - (NSDictionary *)checkAreaForId:(NSNumber *)checkAreaId;
-
-- (NSArray *)inspectionResultForCheckAreaId:(NSNumber *)checkAreaId status:(NSNumber *)status;
 @end

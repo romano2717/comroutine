@@ -62,22 +62,30 @@
     ratingsStringArray = [NSArray arrayWithObjects:@{@"en":en},@{@"cn":cn},@{@"my":my},@{@"ind":ind},nil];
     
 
+    [self checkQuestionsCount];
+}
+
+- (void)saveSurvey
+{
     //save this as new survey
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        db.traceExecution = YES;
         NSDate *now = [NSDate date];
         
-        BOOL ins = [db executeUpdate:@"insert into su_survey(survey_date) values (?)",now];
-        
-        if(!ins)
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",[NSNumber numberWithLongLong:self.currentSurveyId]];
+        if([rs next] == NO)
         {
-            *rollback = YES;
-            return;
+            BOOL ins = [db executeUpdate:@"insert into su_survey(survey_date) values (?)",now];
+            
+            if(!ins)
+            {
+                *rollback = YES;
+                return;
+            }
+            else
+                self.currentSurveyId = [db lastInsertRowId];
         }
-        else
-            self.currentSurveyId = [db lastInsertRowId];
     }];
-    
-    [self checkQuestionsCount];
 }
 
 
@@ -438,6 +446,8 @@
         //go to next question
         if(self.currentQuestionIndex < surveyQuestions.count)
         {
+            [self saveSurvey];
+            
             //save this answer
             [self saveSurveyQuestionWithRating:[NSNumber numberWithInt:selectedRating]  forQuestionId:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"id"]];
             

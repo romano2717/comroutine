@@ -39,4 +39,5 @@
 @property (nonatomic, strong) NSString *postalCode;
 
 @property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
+
 @end

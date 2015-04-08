@@ -7,6 +7,7 @@
 //
 
 #import "ResidentInfoViewController.h"
+#import "Synchronize.h"
 
 @interface ResidentInfoViewController ()
 
@@ -237,7 +238,12 @@
         NSNumber *client_survey_address_id = [NSNumber numberWithInt:[[surveyAddressDict valueForKey:@"client_address_id"] intValue]];
         NSNumber *client_resident_address_id = [NSNumber numberWithInt:[[residentAddressDict valueForKey:@"client_address_id"] intValue]];
         
-        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?  where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,[NSNumber numberWithLongLong:currentSurveyId]];
+        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?, status = ?  where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,[NSNumber numberWithInt:1],[NSNumber numberWithLongLong:currentSurveyId]];
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            Synchronize *sync = [Synchronize sharedManager];
+            [sync uploadSurveyFromSelf:NO];
+        });
         
         if(!up)
         {
@@ -246,7 +252,19 @@
         }
         
         if(goToFeedback)
+        {
+            //our survey is not yet finish so update the survey status to 0 w/c means upload is not required
+            BOOL up = [db executeUpdate:@"update su_survey set status = ?  where client_survey_id = ?",[NSNumber numberWithInt:0],[NSNumber numberWithLongLong:currentSurveyId]];
+            
+            if(!up)
+            {
+                *rollback = YES;
+                return;
+            }
+            
             [self performSegueWithIdentifier:@"push_feedback" sender:self];
+        }
+        
         else
             [self performSegueWithIdentifier:@"push_survey_detail" sender:self];
     }];

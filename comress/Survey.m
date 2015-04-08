@@ -27,7 +27,7 @@
         
         while ([rs next]) {
             //check if this survey got atleast 1 answer, if not, don't add this survery
-            FMResultSet *check = [db executeQuery:@"select * from su_answers where client_survey_id = ?",[NSNumber numberWithInt:[rs intForColumn:@"client_survey_id"]]];
+            FMResultSet *check = [db executeQuery:@"select * from su_answers where client_survey_id = ? or survey_id = ?",[NSNumber numberWithInt:[rs intForColumn:@"client_survey_id"]],[NSNumber numberWithInt:[rs intForColumn:@"survey_id"]]];
             
             if([check next] == YES)
             {
@@ -37,7 +37,8 @@
                 
                 //get address details
                 NSNumber *clientAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_survey_address_id"]];
-                FMResultSet *rsAdd = [db executeQuery:@"select * from su_address where client_address_id = ?",clientAddressId];
+                NSNumber *addressId = [NSNumber numberWithInt:[rs intForColumn:@"survey_address_id"]];
+                FMResultSet *rsAdd = [db executeQuery:@"select * from su_address where client_address_id = ? or address_id = ?",clientAddressId,addressId];
                 
                 while ([rsAdd next]) {
                     [row setObject:[rsAdd resultDictionary] forKey:@"address"];

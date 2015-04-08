@@ -58,7 +58,7 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadNewItems) name:@"downloadNewItems" object:nil];
     
     //start reachability watchers
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reachabilityChanged:) name:kReachabilityChangedNotification object:nil];
     
     //Change the host name here to change the server you want to monitor.
 //    NSString *remoteHostName = [myDatabase.clientDictionary valueForKey:@"api_url"];
@@ -377,6 +377,13 @@
             
             
             break;
+        }
+            
+        case 14:
+        {
+            break;
+            
+            //download survey
         }
         
             

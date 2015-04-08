@@ -375,13 +375,68 @@
     postImage = [[PostImage alloc] init];
     DDLogVerbose(@"selectedContractTypesArr %@",selectedContractTypesArr);
     
-    for (int i = 0; i < selectedContractTypesArr.count; i ++) {
+    //recreate selectedContractTypesArr to only include ids found in contract_types
+    NSMutableArray *finalContractTypeIdArr = [[NSMutableArray alloc] init];
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsCt = [db executeQuery:@"select * from contract_type"];
+        while ([rsCt next]) {
+            NSNumber *theId = [NSNumber numberWithInt:[rsCt intForColumn:@"id"]];
+            
+            if([selectedContractTypesArr containsObject:theId])
+            {
+                [finalContractTypeIdArr addObject:theId];
+            }
+        }
+    }];
+    
+
+    for (int i = 0; i < finalContractTypeIdArr.count; i ++) {
         NSString *postal_code = [self.postalCodeTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *location = [self.addressTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *level = [self.levelTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *post_topic = [self.descriptionTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *severity = [self.severityBtn.titleLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSNumber *contract_type_id = [selectedContractTypesArr objectAtIndex:i];
+        NSNumber *contract_type_id = [finalContractTypeIdArr objectAtIndex:i];
+        
+        
+        //check if this contract_type_id is 6,7 or 8, then create crm
+        if([contract_type_id intValue] == 6 || [contract_type_id intValue] == 7 || [contract_type_id intValue] == 8)
+        {
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                FMResultSet *rsSv = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
+                
+                NSMutableString *subject = [[NSMutableString alloc] init];
+                NSMutableString *body = [[NSMutableString alloc] init];
+                NSNumber *clientSurveyAddressIdInfo;
+                NSDictionary *surveyInfoDict;
+                while ([rsSv next]) {
+                    clientSurveyAddressIdInfo = [NSNumber numberWithInt:[rsSv intForColumn:@"client_survey_address_id"]];
+                    
+                    surveyInfoDict = [rsSv resultDictionary];
+                }
+                
+                [subject appendString:[NSString stringWithFormat:@"CRM Feedback: %@ - %@",self.addressTextField.text,self.postalCodeTextField.text]];
+                
+                [body appendString:[NSString stringWithFormat:@"Feedback: %@ \n",self.descriptionTextView.text]];
+                [body appendString:[NSString stringWithFormat:@"Resident name: %@ \n",[surveyInfoDict valueForKey:@"resident_name"]]];
+                [body appendString:[NSString stringWithFormat:@"Survey date: %@ \n",[surveyInfoDict valueForKey:@"survey_date"]]];
+                [body appendString:[NSString stringWithFormat:@"Contact: %@ \n",[surveyInfoDict valueForKey:@"resident_contact"]]];
+                
+                BOOL insCrm = [db executeUpdate:@"insert into suv_crm(subject, body) values (?,?)",subject,body];
+                
+                if(!insCrm)
+                {
+                    *rollback = YES;
+                    return;
+                }
+
+            }];
+            
+            // this is crm, after insert
+            continue;
+        }
+        
+        
         
         //check if this contract_type_id exist in contract_type table
         __block BOOL contractFound = NO;
@@ -481,6 +536,20 @@
                 }
             }];
             
+            //we are finished doing the survey, update this survey to require upload!
+            if(pushFromSurveyAndModalFromFeedback == NO)
+            {
+                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                    BOOL up = [db executeUpdate:@"update su_survey set status = ?  where client_survey_id = ?",[NSNumber numberWithInt:1],surveyId];
+                    
+                    if(!up)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }];
+            }
+            
             [self dismissViewControllerAnimated:YES completion:^{
                
                 NSDictionary *surveyIdDict = @{@"surveyId":surveyId};
@@ -498,10 +567,18 @@
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                     Synchronize *sync = [Synchronize sharedManager];
                     [sync uploadPostFromSelf:NO];
+                    
+                    [sync uploadSurveyFromSelf:NO];
                 });
             }];
         }
     }
+}
+
+
+- (void)createCrmWithDictionary:(NSDictionary *)dict
+{
+    
 }
 
 @end

@@ -31,8 +31,6 @@
 
 - (void)kickStartSync;
 
-- (void)stopSynchronize;
-
 
 //upload
 
@@ -49,6 +47,8 @@
 - (void)uploadInspectionResultFromSelf:(BOOL)thisSelf;
 
 - (void)uploadSurveyFromSelf:(BOOL)thisSelf;
+
+- (void)uploadCrmFromSelf:(BOOL)thisSelf;
 
 //download
 

@@ -40,7 +40,6 @@
             residentAddressId = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_resident_address_id"]];
         }
         
-        
         if (surveyAddressId == zero && residentAddressId == zero) {
             self.selectedFeedBackLoc = @"others";
             

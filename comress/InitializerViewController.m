@@ -222,7 +222,8 @@
         }
         
         NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
-        
+        DDLogVerbose(@"params %@",params);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_posts] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *dict = [responseObject objectForKey:@"PostContainer"];
@@ -779,7 +780,8 @@
     self.processLabel.text = [NSString stringWithFormat:@"Downloading posts page... %d/%d",currentPage,totPage];
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
-    
+    DDLogVerbose(@"params %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_posts] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
         NSDictionary *dict = [responseObject objectForKey:@"PostContainer"];
@@ -803,9 +805,10 @@
             NSString *PostalCode = [dictPost valueForKey:@"PostalCode"];
             NSNumber *Severity = [NSNumber numberWithInt:[[dictPost valueForKey:@"Severity"] intValue]];
             NSDate *PostDate = [myDatabase createNSDateWithWcfDateString:[dictPost valueForKey:@"PostDate"]];
+            NSNumber *contractType = [dictPost valueForKey:@"PostGroup"];
 
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
-                BOOL qIns = [theDb executeUpdate:@"insert into post (status, block_id, level, address, post_by, post_id, post_topic, post_type, postal_code, severity, post_date, updated_on) values (?,?,?,?,?,?,?,?,?,?,?)",ActionStatus, BlkId, Level, Location, PostBy, PostId, PostTopic, PostType, PostalCode, Severity, PostDate, PostDate];
+                BOOL qIns = [theDb executeUpdate:@"insert into post (status, block_id, level, address, post_by, post_id, post_topic, post_type, postal_code, severity, post_date, updated_on, contract_type) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",ActionStatus, BlkId, Level, Location, PostBy, PostId, PostTopic, PostType, PostalCode, Severity, PostDate, PostDate, contractType];
                 
                 if(!qIns)
                 {

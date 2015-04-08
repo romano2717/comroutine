@@ -495,7 +495,7 @@
             }
         }];
         
-        int aver = sum / ratingsImageArray.count;
+        int aver = sum / surveyQuestions.count;
         
         ResidentInfoViewController *resident = [segue destinationViewController];
         

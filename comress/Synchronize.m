@@ -35,9 +35,9 @@
     [self uploadPostFromSelf:YES];
     syncKickstartTimerOutgoing = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(uploadPost) userInfo:nil repeats:YES];
 
-//    [self startDownload];
-//    downloadIsTriggeredBySelf = YES;
-//    syncKickstartTimerIncoming = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(startDownload) userInfo:nil repeats:YES];
+    [self startDownload];
+    downloadIsTriggeredBySelf = YES;
+    syncKickstartTimerIncoming = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(startDownload) userInfo:nil repeats:YES];
 }
 
 
@@ -106,6 +106,17 @@
                 jsonDate = (NSDate *)[rs4 dateForColumn:@"date"];
             }
             [self startDownloadCommentNotiForPage:1 totalPage:0 requestDate:jsonDate];
+            
+            
+            //download survey
+            FMResultSet *rs5 = [db executeQuery:@"select date from su_survey_last_req_date"];
+            
+            if([rs5 next])
+            {
+                jsonDate = (NSDate *)[rs5 dateForColumn:@"date"];
+            }
+            [self startDownloadSurveyPage:1 totalPage:0 requestDate:jsonDate];
+            
         }];
     });
 }
@@ -305,6 +316,14 @@
                     BOOL qComment = [theDb executeUpdate:@"update comment set post_id = ? where client_post_id = ?",postId, clientPostId];
                     
                     if(!qComment)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                    
+                    
+                    BOOL qFeedBackIssue = [theDb executeUpdate:@"update su_feedback_issue set post_id = ? where client_post_id = ?",postId, clientPostId];
+                    if(!qFeedBackIssue)
                     {
                         *rollback = YES;
                         return;
@@ -739,15 +758,19 @@
         NSNumber *requiredSync = [NSNumber numberWithInt:1];
         
         NSMutableDictionary *surveyDict = [[NSMutableDictionary alloc] init];
+        NSDictionary *surveyContainer;
         
-        FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey"];
+        FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc limit 0, 1",[NSNumber numberWithInt:0]];
         
         while ([rsSurvey next]) {
             int ClientSurveyId = [rsSurvey intForColumn:@"client_survey_id"];
             int ClientSurveyAddressId = [rsSurvey intForColumn:@"client_survey_address_id"];
             
-            NSDate *surveyNsDate = [NSDate dateWithTimeIntervalSinceNow:[rsSurvey doubleForColumn:@"survey_date"]];
-            NSString *surveyDateJsonString = [self serializedStringDateJson:surveyNsDate];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+            NSDate *surveyNsDate = [rsSurvey dateForColumn:@"survey_date"];
+            NSString *surveyDateJsonString = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [surveyNsDate timeIntervalSince1970],[formatter stringFromDate:surveyNsDate]];
+            
             NSString *ResidentName = [rsSurvey stringForColumn:@"resident_name"] ? [rsSurvey stringForColumn:@"resident_name"] : @"";
             NSString *ResidentAgeRange = [rsSurvey stringForColumn:@"resident_age_range"] ? [rsSurvey stringForColumn:@"resident_age_range"] : @"";
             NSString *ResidentGender = [rsSurvey stringForColumn:@"resident_gender"] ? [rsSurvey stringForColumn:@"resident_gender"] : @"";
@@ -784,21 +807,27 @@
             
             
             //get feedbacks issue
-            FMResultSet *rsFeedBack = [db executeQuery:@"select * from su_feedback_issue where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
-            NSMutableArray *feedbackListArray = [[NSMutableArray alloc] init];
-            while ([rsFeedBack next]) {
-                NSNumber *ClientFeedbackIssueId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_feedback_issue_id"]];
-                NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_feedback_id"]];
-                NSNumber *PostId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"post_id"]];
-                NSString *IssueDes = [rsFeedBack stringForColumn:@"issue_des"] ? [rsFeedBack stringForColumn:@"issue_des"] : @"";
+            FMResultSet *rsFeedbackIssuesList = [db executeQuery:@"select * from su_feedback where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
+            NSMutableArray *rsfiArr = [[NSMutableArray alloc] init];
+            while ([rsFeedbackIssuesList next]) {
+                NSNumber *client_feedback_id = [NSNumber numberWithInt:[rsFeedbackIssuesList intForColumn:@"client_feedback_id"]];
                 
-                NSDictionary *dictFeedback = @{@"ClientFeedbackIssueId":ClientFeedbackIssueId,@"ClientFeedbackId":ClientFeedbackId,@"PostId":PostId,@"IssueDes":IssueDes};
-                
-                [feedbackListArray addObject:dictFeedback];
+                //get su_feedback_issue
+                FMResultSet *rsFI = [db executeQuery:@"select * from su_feedback_issue where client_feedback_id = ?",client_feedback_id];
+
+                while ([rsFI next]) {
+                    NSNumber *ClientFeedbackIssueId = [NSNumber numberWithInt:[rsFI intForColumn:@"client_feedback_issue_id"]];
+                    NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[rsFI intForColumn:@"client_feedback_id"]];
+                    NSNumber *PostId = [NSNumber numberWithInt:[rsFI intForColumn:@"post_id"]];
+                    NSString *IssueDes = [rsFI stringForColumn:@"issue_des"];
+                    
+                    NSDictionary *rsFIDict = @{@"ClientFeedbackIssueId":ClientFeedbackIssueId,@"ClientFeedbackId":ClientFeedbackId,@"PostId":PostId,@"IssueDes":IssueDes};
+                    
+                    [rsfiArr addObject:rsFIDict];
+                }
             }
             
-            [surveyDict setObject:feedbackListArray forKey:@"FeedbackIssueList"];
-            
+            [surveyDict setObject:rsfiArr forKey:@"FeedbackIssueList"];
             
 
             
@@ -837,44 +866,124 @@
                 }
             }
             
+            [surveyDict setObject:addressArray forKey:@"AddressList"];
+            
             
             //get feedback
-
+            FMResultSet *rsFeedBack = [db executeQuery:@"select * from su_feedback where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
+            NSMutableArray *feedBackArray = [[NSMutableArray alloc] init];
             
+            while ([rsFeedBack next]) {
+                NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_feedback_id"]];
+                NSString *Description = [rsFeedBack stringForColumn:@"description"];
+                NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsFeedBack intForColumn:@"client_address_id"]];
+                
+                NSDictionary *dictFeedRow = @{@"ClientFeedbackId":ClientFeedbackId,@"Description":Description,@"ClientAddressId":ClientAddressId};
+                
+                [feedBackArray addObject:dictFeedRow];
+            }
             
-            [surveyDict setObject:addressArray forKey:@"AddressList"];
-        }
+            [surveyDict setObject:feedBackArray forKey:@"FeedbackList"];
+            
+            surveyContainer = @{@"surveyContainer":surveyDict};
+            
+             DDLogVerbose(@"surveyContainer %@",[myDatabase toJsonString:surveyContainer]);
+            
+        } //end of while ([rsSurvey next])
         
-        DDLogVerbose(@"surveyDict %@",surveyDict);
+       
         
-        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *topDict = (NSDictionary *)responseObject;
             
-            NSArray *AckInspectionResultObj = [topDict objectForKey:@"AckInspectionResultObj"];
+            NSDictionary *AckSurveyContainer = [topDict objectForKey:@"AckSurveyContainer"];
+            DDLogVerbose(@"AckSurveyContainer %@",AckSurveyContainer);
             
-            DDLogVerbose(@"AckInspectionResultObj %@",AckInspectionResultObj);
+            NSArray *AckAddressList = [AckSurveyContainer objectForKey:@"AckAddressList"];
+            NSArray *AckAnswerList = [AckSurveyContainer objectForKey:@"AckAnswerList"];
+            NSArray *AckFeedbackIssueList = [AckSurveyContainer objectForKey:@"AckFeedbackIssueList"];
+            NSArray *AckFeedbackList = [AckSurveyContainer objectForKey:@"AckFeedbackList"];
             
-            for (int i = 0; i < AckInspectionResultObj.count; i++) {
-                NSDictionary *dict = [AckInspectionResultObj objectAtIndex:i];
-                
-                NSNumber *CheckListId = [NSNumber numberWithInt:[[dict valueForKey:@"CheckListId"] intValue]];
-                NSNumber *ChkAreaId = [NSNumber numberWithInt:[[dict valueForKey:@"ChkAreaId"] intValue]];
-                NSNumber *ScheduleId = [NSNumber numberWithInt:[[dict valueForKey:@"ScheduleId"] intValue]];
-                BOOL Successful = [[dict valueForKey:@"Successful"] boolValue];
-                
-                if(Successful)
+            NSNumber *ClientSurveyId = [NSNumber numberWithInt:[[AckSurveyContainer valueForKey:@"ClientSurveyId"] intValue]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[AckSurveyContainer valueForKey:@"SurveyId"] intValue]];
+            
+            BOOL massUpdateOk = YES;
+            
+            //update survey
+            BOOL upSurvey = [db executeUpdate:@"update su_survey set survey_id = ? where client_survey_id = ?",SurveyId,ClientSurveyId];
+            if(!upSurvey)
+            {
+                *rollback = YES;
+                return;
+            }
+            
+            //update answers
+            for (int i = 0; i < AckAnswerList.count; i++) {
+                NSNumber *AnswerId = [NSNumber numberWithInt:[[[AckAnswerList objectAtIndex:i] valueForKey:@"AnswerId"] intValue]];
+                NSNumber *ClientAnswerId = [NSNumber numberWithInt:[[[AckAnswerList objectAtIndex:i] valueForKey:@"ClientAnswerId"] intValue]];
+                BOOL upAns = [db executeUpdate:@"update su_answers set answer_id = ? where client_answer_id = ?",AnswerId,ClientAnswerId];
+                if(!upAns)
                 {
-                    NSNumber *syncNotRequired = [NSNumber numberWithInt:0];
-                    BOOL up = [db executeUpdate:@"update ro_inspectionresult set w_required_sync = ? where w_checklistid = ? and w_chkareaid = ? and w_scheduleid = ?",syncNotRequired,CheckListId,ChkAreaId,ScheduleId];
-                    
-                    if(!up)
-                    {
-                        *rollback = YES;
-                        return;
-                    }
+                    *rollback = YES;
+                    massUpdateOk = NO;
+                    return;
                 }
             }
+            
+            
+            //update address
+            for (int i = 0; i < AckAddressList.count; i++) {
+                NSNumber *AddressId = [NSNumber numberWithInt:[[[AckAddressList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
+                NSNumber *ClientAddressId = [NSNumber numberWithInt:[[[AckAddressList objectAtIndex:i] valueForKey:@"ClientAddressId"] intValue]];
+                BOOL upAns = [db executeUpdate:@"update su_address set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
+                if(!upAns)
+                {
+                    *rollback = YES;
+                    massUpdateOk = NO;
+                    return;
+                }
+            }
+            
+            
+            //update AckFeedbackIssueList
+            for (int i = 0; i < AckFeedbackIssueList.count; i++) {
+
+                NSNumber *ClientFeedbackIssueId = [NSNumber numberWithInt:[[[AckFeedbackIssueList objectAtIndex:i] valueForKey:@"ClientFeedbackIssueId"] intValue]];
+                NSNumber *FeedbackIssueId = [NSNumber numberWithInt:[[[AckFeedbackIssueList objectAtIndex:i] valueForKey:@"FeedbackIssueId"] intValue]];
+                BOOL upAns = [db executeUpdate:@"update su_feedback_issue set feedback_issue_id = ? where client_feedback_issue_id = ?",FeedbackIssueId,ClientFeedbackIssueId];
+                if(!upAns)
+                {
+                    *rollback = YES;
+                    massUpdateOk = NO;
+                    return;
+                }
+            }
+            
+            
+            //update AckFeedbackList
+            for (int i = 0; i < AckFeedbackList.count; i++) {
+                NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[[[AckFeedbackList objectAtIndex:i] valueForKey:@"ClientFeedbackId"] intValue]];
+                NSNumber *FeedbackId = [NSNumber numberWithInt:[[[AckFeedbackList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
+                BOOL upAns = [db executeUpdate:@"update su_feedback set feedback_id = ? where client_feedback_id = ?",FeedbackId,ClientFeedbackId];
+                if(!upAns)
+                {
+                    *rollback = YES;
+                    massUpdateOk = NO;
+                    return;
+                }
+            }
+            
+            if(massUpdateOk == YES)
+            {
+                BOOL upSurveySync = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",requiredSync,ClientSurveyId];
+                if(!upSurveySync)
+                {
+                    *rollback = YES;
+                    return;
+                }
+            }
+            
             
             if(thisSelf)
             {
@@ -899,6 +1008,76 @@
         
     }];
 }
+
+
+- (void)startDownloadSurveyPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate
+{
+    __block int currentPage = page;
+    NSString *jsonDate = [self serializedStringDateJson:reqDate];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"Post params %@",params);
+    
+
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"ResturnSurveyContainer"];
+        
+        DDLogVerbose(@"new survey %@",dict);
+        
+        NSArray *AddressList = [dict objectForKey:@"AddressList"];
+        NSArray *AnswerList = [dict objectForKey:@"AnswerList"];
+        NSArray *FeedbackIssueList = [dict objectForKey:@"FeedbackIssueList"];
+        NSArray *FeedbackList = [dict objectForKey:@"FeedbackList"];
+        NSArray *SurveyList = [dict objectForKey:@"SurveyList"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        
+        NSDate *LastRequestDate = [myDatabase createNSDateWithWcfDateString:[dict valueForKey:@"LastRequestDate"]];
+        
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadSurveyPage:currentPage totalPage:totalPage requestDate:LastRequestDate];
+        }
+        else
+        {
+            
+            //update last request date
+            
+            
+            if(downloadIsTriggeredBySelf)
+            {
+                //start download again
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    
+                    NSDate *lrd = [self deserializeJsonDateString:[dict valueForKey:@"LastRequestDate"]];
+                    
+                    [self startDownloadSurveyPage:1 totalPage:0 requestDate:lrd];
+                });
+            }
+        }
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        if(downloadIsTriggeredBySelf)
+        {
+            //start download again
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                
+                NSDate *lrd = [self deserializeJsonDateString:jsonDate];
+                
+                [self startDownloadSurveyPage:1 totalPage:0 requestDate:lrd];
+            });
+        }
+    }];
+}
+
+
+
 
 
 #pragma mark - download new data from server

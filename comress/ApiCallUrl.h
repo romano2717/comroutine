@@ -85,6 +85,8 @@ static NSString *api_download_fed_questions = @"Survey/Question.svc/GetQuestions
 
 static NSString *api_upload_survey =  @"Survey/Survey.svc/UploadSurvey";
 
+static NSString *api_download_survey = @"Survey/Survey.svc/GetSurveys";
+
 
 
 #endif

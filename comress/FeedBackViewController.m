@@ -10,17 +10,24 @@
 
 @interface FeedBackViewController ()
 
+@property (nonatomic, strong) NSNumber *surveyAddressId;
+@property (nonatomic, strong) NSNumber *residentAddressId;
+
 @end
 
 @implementation FeedBackViewController
 
-@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode,pushFromSurveyAndModalFromFeedback;
+@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode,pushFromSurveyAndModalFromFeedback,blockId,surveyAddressId,residentAddressId,autoAssignToMeMaintenance,autoAssignToMeOthers;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
     myDatabase = [Database sharedMyDbManager];
+    
+    blocks = [[Blocks alloc] init];
+    
+    self.crmAssignArray = [NSArray arrayWithObjects:@"My self",@"General CRM", nil];
     
     //default selection
     self.selectedFeedBackLoc = @"survey";
@@ -31,10 +38,9 @@
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         FMResultSet *rsAdd = [db executeQuery:@"select * from su_survey where client_survey_id = ?",self.currentClientSurveyId];
        
-        NSNumber *surveyAddressId;
-        NSNumber *residentAddressId;
+
         NSNumber *zero = [NSNumber numberWithInt:0];
-        
+
         while ([rsAdd next]) {
             surveyAddressId = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_survey_address_id"]];
             residentAddressId = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_resident_address_id"]];
@@ -59,6 +65,25 @@
     }];
     
     
+    //by default, pre-fill the Others textfield with survey address
+    __block NSString *defSurveyAddress;
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsGetAdd = [db executeQuery:@"select * from su_address where client_address_id = ?",surveyAddressId];
+        while ([rsGetAdd next]) {
+            DDLogVerbose(@"%@",[rsGetAdd resultDictionary]);
+            defSurveyAddress = [rsGetAdd stringForColumn:@"address"];
+            postalCode = [rsGetAdd stringForColumn:@"postal_code"];
+        }
+        
+        //get the block id of this postal code
+        FMResultSet *rsGetBlockId = [db executeQuery:@"select * from blocks where postal_code = ?",postalCode];
+        while ([rsGetBlockId next]) {
+            blockId = [NSNumber numberWithInt:[rsGetBlockId intForColumn:@"block_id"]];
+        }
+    }];
+    self.othersAddTxtField.text = defSurveyAddress;
+    
+    
     //add border to the textview
     [[self.feedBackTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
     [[self.feedBackTextView layer] setBorderWidth:1];
@@ -70,7 +95,51 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(push_survey_detail:) name:@"push_survey_detail" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(go_back_to_survey) name:@"go_back_to_survey" object:nil];
     
+    [self generateData];
 }
+
+
+- (void)generateData
+{
+    self.addressArray = [[NSMutableArray alloc] init];
+    
+    NSArray *theBlocks = [blocks fetchBlocksWithBlockId:nil];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        [theBlocks enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+            NSString *block_noAndPostal = [NSString stringWithFormat:@"%@ %@",[obj valueForKey:@"block_no"],[obj valueForKey:@"postal_code"]] ;
+            NSString *street_name = [NSString stringWithFormat:@"%@ - %@",[obj valueForKey:@"street_name"],[obj valueForKey:@"postal_code"]];
+            
+            [self.addressArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:street_name,@"DisplayText",obj,@"CustomObject",block_noAndPostal,@"DisplaySubText", nil]];
+        }];
+        
+    });
+}
+
+#pragma mark MPGTextField Delegate Methods
+
+- (NSArray *)dataForPopoverInTextField:(MPGTextField *)textField
+{
+    return self.addressArray;
+}
+
+- (BOOL)textFieldShouldSelect:(MPGTextField *)textField
+{
+    return YES;
+}
+
+- (void)textField:(MPGTextField *)textField didEndEditingWithSelection:(NSDictionary *)result
+{
+    if([[result valueForKey:@"CustomObject"] isKindOfClass:[NSDictionary class]] == NO) //user typed some shit!
+        return;
+    
+    self.othersAddTxtField.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
+    
+    blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
+    
+}
+
 
 - (void)go_back_to_survey
 {
@@ -107,6 +176,12 @@
             [contractString appendString:[NSString stringWithFormat:@"%@, ",str]];
         }
         
+        if([self.selectedCrmAssignmentForMaintenance isEqualToString:@"General CRM"])
+            autoAssignToMeMaintenance = NO;
+        
+        if([self.selectedCrmAssignmentForOthers isEqualToString:@"General CRM"])
+            autoAssignToMeOthers = NO;
+        
         CreateIssueViewController *cvc = [segue destinationViewController];
         cvc.surveyId = currentClientSurveyId;
         cvc.feedBackId = sender;
@@ -114,6 +189,11 @@
         cvc.postalCode = postalCode;
         cvc.selectedContractTypesArr = self.selectedFeeBackTypeArr;
         cvc.selectedContractTypesString = contractString;
+        cvc.crmAutoAssignToMeMaintenance = autoAssignToMeMaintenance;
+        cvc.crmAutoAssignToMeOthers = autoAssignToMeOthers;
+        cvc.feedBackDescription = self.feedBackTextView.text;
+        cvc.blockId = blockId;
+        
         if(pushFromSurveyAndModalFromFeedback)
             cvc.pushFromSurveyAndModalFromFeedback = YES;
     }
@@ -190,6 +270,23 @@
         [oth setSelected:NO];
         
         self.selectedFeedBackLoc = @"survey";
+        
+        __block NSString *defSurveyAddress;
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rsGetAdd = [db executeQuery:@"select * from su_address where client_address_id = ?",surveyAddressId];
+            while ([rsGetAdd next]) {
+                DDLogVerbose(@"%@",[rsGetAdd resultDictionary]);
+                defSurveyAddress = [rsGetAdd stringForColumn:@"address"];
+                postalCode = [rsGetAdd stringForColumn:@"postal_code"];
+            }
+            
+            //get the block id of this postal code
+            FMResultSet *rsGetBlockId = [db executeQuery:@"select * from blocks where postal_code = ?",postalCode];
+            while ([rsGetBlockId next]) {
+                blockId = [NSNumber numberWithInt:[rsGetBlockId intForColumn:@"block_id"]];
+            }
+        }];
+        self.othersAddTxtField.text = defSurveyAddress;
     }
     else if (tag == 12)
     {
@@ -198,6 +295,24 @@
         [oth setSelected:NO];
         
         self.selectedFeedBackLoc = @"resident";
+        
+        __block NSString *defResidentAddress;
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rsGetAdd = [db executeQuery:@"select * from su_address where client_address_id = ?",residentAddressId];
+            while ([rsGetAdd next]) {
+                DDLogVerbose(@"%@",[rsGetAdd resultDictionary]);                
+                defResidentAddress = [rsGetAdd stringForColumn:@"address"];
+                postalCode = [rsGetAdd stringForColumn:@"postal_code"];
+            }
+            
+            //get the block id of this postal code
+            FMResultSet *rsGetBlockId = [db executeQuery:@"select * from blocks where postal_code = ?",postalCode];
+            while ([rsGetBlockId next]) {
+                blockId = [NSNumber numberWithInt:[rsGetBlockId intForColumn:@"block_id"]];
+            }
+        }];
+        self.othersAddTxtField.text = defResidentAddress;
+        
     }
     else if (tag == 13)
     {
@@ -206,6 +321,7 @@
         [sur setSelected:NO];
         
         self.selectedFeedBackLoc = @"others";
+        self.othersAddTxtField.text = @"";
     }
 }
 
@@ -240,28 +356,16 @@
             contractypeString = @"Pump";
             break;
             
-        case 5:
-            contractypeString = @"Mosquito";
-            break;
-            
-        case 19:
-            contractypeString = @"General";
-            break;
-            
         case 6:
-            contractypeString = @"LTA";
+            contractypeString = @"Maintenance";
             break;
             
         case 7:
-            contractypeString = @"HDB";
-            break;
-            
-        case 8:
             contractypeString = @"Others";
             break;
             
-        default:
-            contractypeString = @"General";
+        default: //19
+            contractypeString = @"None";
             break;
     }
     
@@ -293,11 +397,23 @@
 //        
 //    }
     
-    NSString *message = [NSString stringWithFormat:@"Are you sure you want to create %lu issues?",(unsigned long)self.selectedFeeBackTypeStringArr.count];
+    if(self.selectedFeeBackTypeStringArr.count > 0)
+    {
+        NSString *message = [NSString stringWithFormat:@"Are you sure you want to create %lu issues?",(unsigned long)self.selectedFeeBackTypeStringArr.count];
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes", nil];
+        
+        [alert show];
+    }
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes", nil];
-
-    [alert show];
+    else
+    {
+        NSString *message = @"Please select atleast one feedback related type.";
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
+        
+        [alert show];
+    }
 }
 
 
@@ -346,7 +462,7 @@
                 
                 
                 //save the 'Others' address
-                BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area) values (?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"]];
+                BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area,postal_code) values (?,?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"],postalCode];
                 
                 if(!ins)
                 {
@@ -377,10 +493,114 @@
         
         if(feedbackSaved)
         {
-            //segue to issues and pass selected contract types;
-            [self performSegueWithIdentifier:@"modal_create_issue" sender:feedBackId];
+            //check self.selectedFeeBackTypeArr
+            
+            BOOL allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = NO;
+            
+            if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && [self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]])
+            {
+                allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+            }
+            else if ([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && self.selectedFeeBackTypeArr.count == 1)
+            {
+                allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+            }
+            
+            else if ([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]] && self.selectedFeeBackTypeArr.count == 1)
+            {
+                allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+            }
+            
+            
+            BOOL onlyNoneIsSelectedDontCreateIssue = NO;
+            if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]] && self.selectedFeeBackTypeArr.count == 1)
+                onlyNoneIsSelectedDontCreateIssue = YES;
+            
+            
+            if(allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue)
+            {
+                for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
+                    //19 none
+                    //6 maint
+                    //7 others
+                    
+                    
+                    //save to su_feedback_issue
+                    NSNumber *typeId = [self.selectedFeeBackTypeArr objectAtIndex:i];
+                    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                        
+                        NSNumber *feedBackIssueIdForCrmDontNeedPostId = [NSNumber numberWithInt:0];
+                        
+                        if([typeId intValue] == 6)
+                        {
+                            BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-MAINTENANCE",[NSNumber numberWithBool:autoAssignToMeMaintenance]];
+                            
+                            if(!ins)
+                            {
+                                *rollback = YES;
+                                return ;
+                            }
+                        }
+                        else if([typeId intValue] == 7)
+                        {
+                            BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-OTHERS",[NSNumber numberWithBool:autoAssignToMeOthers]];
+                            
+                            if(!ins)
+                            {
+                                *rollback = YES;
+                                return ;
+                            }
+                        }
+                    }];
+                }
+                
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Issues have been raised." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+                [alert show];
+                
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+            else if (onlyNoneIsSelectedDontCreateIssue)
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Feedback is saved." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+                [alert show];
+                
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+            else //could be all comress issues or combination of crm and or combination of all
+            {
+                //segue to issues and pass selected contract types;
+                [self performSegueWithIdentifier:@"modal_create_issue" sender:feedBackId];
+            }
         }
     }
+}
+
+- (IBAction)crmAssign:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    
+    [self.view endEditing:YES];
+    
+    [ActionSheetStringPicker showPickerWithTitle:@"Assign CRM To:" rows:self.crmAssignArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
+        
+        if(btn.tag == 1)
+        {
+            self.selectedCrmAssignmentForMaintenance = [self.crmAssignArray objectAtIndex:selectedIndex];
+            autoAssignToMeMaintenance = YES;
+        }
+        
+        else
+        {
+            self.selectedCrmAssignmentForOthers = [self.crmAssignArray objectAtIndex:selectedIndex];
+            autoAssignToMeOthers = YES;
+        }
+        
+        
+        [btn setTitle:[NSString stringWithFormat:@" %@",[self.crmAssignArray objectAtIndex:selectedIndex]] forState:UIControlStateNormal];
+        
+    } cancelBlock:^(ActionSheetStringPicker *picker) {
+        
+    } origin:sender];
 }
 
 

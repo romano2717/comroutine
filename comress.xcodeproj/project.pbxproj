@@ -72,10 +72,17 @@
 		4D81D4681AB8352300A403C9 /* report@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4651AB8352300A403C9 /* report@2x.png */; };
 		4D81D4691AB8352300A403C9 /* unlocked@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4661AB8352300A403C9 /* unlocked@2x.png */; };
 		4D81D46A1AB8352300A403C9 /* locked@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D81D4671AB8352300A403C9 /* locked@2x.png */; };
+		4D85E69A1AD633FC00170D66 /* NearbyLocationsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D85E6991AD633FC00170D66 /* NearbyLocationsViewController.m */; };
+		4D85E6A81AD7832700170D66 /* CustomBadge.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D85E6A71AD7832700170D66 /* CustomBadge.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		4D85E6AB1AD7836600170D66 /* MESegmentedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D85E6AA1AD7836600170D66 /* MESegmentedControl.m */; };
+		4D85E6B01AD7930100170D66 /* threeOfThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AC1AD7930100170D66 /* threeOfThreeStars@2x.png */; };
+		4D85E6B11AD7930100170D66 /* twoOfThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AD1AD7930100170D66 /* twoOfThreeStars@2x.png */; };
+		4D85E6B21AD7930100170D66 /* oneOfThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AE1AD7930100170D66 /* oneOfThreeStars@2x.png */; };
+		4D85E6B31AD7930100170D66 /* noThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AF1AD7930100170D66 /* noThreeStars@2x.png */; };
+		4D85E6BB1AD7D85A00170D66 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6BA1AD7D85A00170D66 /* comress.sqlite */; };
 		4D878D271AD4FBD1000CC3FC /* logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D261AD4FBD1000CC3FC /* logo@2x.png */; };
 		4D878D291AD4FDC8000CC3FC /* top_tptclogo_new1.gif in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D281AD4FDC8000CC3FC /* top_tptclogo_new1.gif */; };
 		4D878D2B1AD50252000CC3FC /* jointlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D2A1AD50252000CC3FC /* jointlogo.png */; };
-		4D878D2D1AD5054B000CC3FC /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D2C1AD5054B000CC3FC /* comress.sqlite */; };
 		4D8AC95A1AAD8AB3008F7652 /* settings.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D8AC9591AAD8AB3008F7652 /* settings.png */; };
 		4D8AC95E1AAD8AE3008F7652 /* issue.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D8AC95B1AAD8AE3008F7652 /* issue.png */; };
 		4D8AC95F1AAD8AE3008F7652 /* crm.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D8AC95C1AAD8AE3008F7652 /* crm.png */; };
@@ -353,10 +360,20 @@
 		4D81D4651AB8352300A403C9 /* report@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "report@2x.png"; sourceTree = "<group>"; };
 		4D81D4661AB8352300A403C9 /* unlocked@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "unlocked@2x.png"; sourceTree = "<group>"; };
 		4D81D4671AB8352300A403C9 /* locked@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "locked@2x.png"; sourceTree = "<group>"; };
+		4D85E6981AD633FC00170D66 /* NearbyLocationsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NearbyLocationsViewController.h; sourceTree = "<group>"; };
+		4D85E6991AD633FC00170D66 /* NearbyLocationsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NearbyLocationsViewController.m; sourceTree = "<group>"; };
+		4D85E6A61AD7832700170D66 /* CustomBadge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomBadge.h; sourceTree = "<group>"; };
+		4D85E6A71AD7832700170D66 /* CustomBadge.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomBadge.m; sourceTree = "<group>"; };
+		4D85E6A91AD7836600170D66 /* MESegmentedControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MESegmentedControl.h; sourceTree = "<group>"; };
+		4D85E6AA1AD7836600170D66 /* MESegmentedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MESegmentedControl.m; sourceTree = "<group>"; };
+		4D85E6AC1AD7930100170D66 /* threeOfThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "threeOfThreeStars@2x.png"; sourceTree = "<group>"; };
+		4D85E6AD1AD7930100170D66 /* twoOfThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twoOfThreeStars@2x.png"; sourceTree = "<group>"; };
+		4D85E6AE1AD7930100170D66 /* oneOfThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "oneOfThreeStars@2x.png"; sourceTree = "<group>"; };
+		4D85E6AF1AD7930100170D66 /* noThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "noThreeStars@2x.png"; sourceTree = "<group>"; };
+		4D85E6BA1AD7D85A00170D66 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D878D261AD4FBD1000CC3FC /* logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo@2x.png"; sourceTree = "<group>"; };
 		4D878D281AD4FDC8000CC3FC /* top_tptclogo_new1.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = top_tptclogo_new1.gif; sourceTree = "<group>"; };
 		4D878D2A1AD50252000CC3FC /* jointlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = jointlogo.png; sourceTree = "<group>"; };
-		4D878D2C1AD5054B000CC3FC /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D8AC9591AAD8AB3008F7652 /* settings.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = settings.png; sourceTree = "<group>"; };
 		4D8AC95B1AAD8AE3008F7652 /* issue.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = issue.png; sourceTree = "<group>"; };
 		4D8AC95C1AAD8AE3008F7652 /* crm.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = crm.png; sourceTree = "<group>"; };
@@ -918,6 +935,17 @@
 			name = Initializer;
 			sourceTree = "<group>";
 		};
+		4D85E6A51AD7831D00170D66 /* custom segment badge */ = {
+			isa = PBXGroup;
+			children = (
+				4D85E6A91AD7836600170D66 /* MESegmentedControl.h */,
+				4D85E6AA1AD7836600170D66 /* MESegmentedControl.m */,
+				4D85E6A61AD7832700170D66 /* CustomBadge.h */,
+				4D85E6A71AD7832700170D66 /* CustomBadge.m */,
+			);
+			name = "custom segment badge";
+			sourceTree = "<group>";
+		};
 		4D8AC9871AAFE430008F7652 /* ISSUES */ = {
 			isa = PBXGroup;
 			children = (
@@ -1051,6 +1079,7 @@
 		4DA203EA1A79CC2B00C7E5C7 /* Libs */ = {
 			isa = PBXGroup;
 			children = (
+				4D85E6A51AD7831D00170D66 /* custom segment badge */,
 				4D337D511ACCD9B900F9C7AA /* shake animation */,
 				4D118A941AB988770062C129 /* load more */,
 				4D8AC98C1AAFE4B0008F7652 /* barcode scanner */,
@@ -1128,6 +1157,10 @@
 		4DA2041A1A79CF7400C7E5C7 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4D85E6AC1AD7930100170D66 /* threeOfThreeStars@2x.png */,
+				4D85E6AD1AD7930100170D66 /* twoOfThreeStars@2x.png */,
+				4D85E6AE1AD7930100170D66 /* oneOfThreeStars@2x.png */,
+				4D85E6AF1AD7930100170D66 /* noThreeStars@2x.png */,
 				4D878D2A1AD50252000CC3FC /* jointlogo.png */,
 				4D878D281AD4FDC8000CC3FC /* top_tptclogo_new1.gif */,
 				4D878D261AD4FBD1000CC3FC /* logo@2x.png */,
@@ -1195,7 +1228,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4D878D2C1AD5054B000CC3FC /* comress.sqlite */,
+				4D85E6BA1AD7D85A00170D66 /* comress.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1445,6 +1478,8 @@
 			children = (
 				4DA7E4781ACD3B1800C994E3 /* ResidentInfoViewController.h */,
 				4DA7E4791ACD3B1800C994E3 /* ResidentInfoViewController.m */,
+				4D85E6981AD633FC00170D66 /* NearbyLocationsViewController.h */,
+				4D85E6991AD633FC00170D66 /* NearbyLocationsViewController.m */,
 			);
 			name = "Resident info";
 			sourceTree = "<group>";
@@ -1691,9 +1726,11 @@
 				4DA7E4891ACEF5F400C994E3 /* en@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
 				4DE801A91AD26AAB008B0236 /* threestars@2x.png in Resources */,
+				4D85E6B21AD7930100170D66 /* oneOfThreeStars@2x.png in Resources */,
 				4D337D4C1ACBFFB200F9C7AA /* aver@2x.png in Resources */,
 				4DE801A61AD26AAB008B0236 /* nostars@2x.png in Resources */,
 				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,
+				4D85E6B31AD7930100170D66 /* noThreeStars@2x.png in Resources */,
 				4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */,
 				4D878D271AD4FBD1000CC3FC /* logo@2x.png in Resources */,
 				4D337D501ACBFFB200F9C7AA /* very_poor@2x.png in Resources */,
@@ -1704,6 +1741,7 @@
 				4DF666A81AA8596000C3B0FF /* newmsg.png in Resources */,
 				4DA208021A79DA0A00C7E5C7 /* JSQMessagesToolbarContentView.xib in Resources */,
 				4D91D6061A91CAA900A21DBA /* pin2.png in Resources */,
+				4D85E6BB1AD7D85A00170D66 /* comress.sqlite in Resources */,
 				4DE801AB1AD26AAB008B0236 /* fivestars@2x.png in Resources */,
 				4DA203E91A79CBF900C7E5C7 /* Main.storyboard in Resources */,
 				4D8AC95A1AAD8AB3008F7652 /* settings.png in Resources */,
@@ -1719,7 +1757,6 @@
 				4DE801A81AD26AAB008B0236 /* twostars@2x.png in Resources */,
 				4DA207DA1A79DA0A00C7E5C7 /* JSQMessagesAssets.bundle in Resources */,
 				4D337D2F1ACBE10800F9C7AA /* rating@2x.png in Resources */,
-				4D878D2D1AD5054B000CC3FC /* comress.sqlite in Resources */,
 				4D337D321ACBE8BC00F9C7AA /* radio_on@2x.png in Resources */,
 				4DA203D31A79CBA100C7E5C7 /* LaunchScreen.xib in Resources */,
 				4DA204211A79CF8800C7E5C7 /* btn_large.png in Resources */,
@@ -1727,6 +1764,7 @@
 				4DA7E48A1ACEF5F400C994E3 /* my@2x.png in Resources */,
 				4D8AC9691AAD8CD4008F7652 /* issue@2x.png in Resources */,
 				4DE801B11AD2753A008B0236 /* user168.png in Resources */,
+				4D85E6B11AD7930100170D66 /* twoOfThreeStars@2x.png in Resources */,
 				4DA204201A79CF8800C7E5C7 /* arrow.png in Resources */,
 				4D337D5E1ACCDE1300F9C7AA /* excellent_sel@2x.png in Resources */,
 				4D6424CA1AD3CF3800B6B974 /* mosquito@2x.png in Resources */,
@@ -1735,6 +1773,7 @@
 				4D337D4D1ACBFFB200F9C7AA /* excellent@2x.png in Resources */,
 				4DE801AA1AD26AAB008B0236 /* fourstars@2x.png in Resources */,
 				4D878D291AD4FDC8000CC3FC /* top_tptclogo_new1.gif in Resources */,
+				4D85E6B01AD7930100170D66 /* threeOfThreeStars@2x.png in Resources */,
 				4D6424CB1AD3CF3800B6B974 /* tree@2x.png in Resources */,
 				4DA207FF1A79DA0A00C7E5C7 /* JSQMessagesLoadEarlierHeaderView.xib in Resources */,
 				4D8AC96A1AAD8CD4008F7652 /* settings@2x.png in Resources */,
@@ -1802,6 +1841,7 @@
 				4D0717A11AB1707E0055191A /* BadgeLabel.m in Sources */,
 				4DD6FEA81A884CFF00CBBE1D /* UIImage+GIF.m in Sources */,
 				4DA207DE1A79DA0A00C7E5C7 /* UIColor+JSQMessages.m in Sources */,
+				4D85E6A81AD7832700170D66 /* CustomBadge.m in Sources */,
 				4DA207DD1A79DA0A00C7E5C7 /* NSString+JSQMessages.m in Sources */,
 				4DA203FB1A79CC5200C7E5C7 /* FMDatabasePool.m in Sources */,
 				4DD6FEA51A884CFF00CBBE1D /* SDWebImageManager.m in Sources */,
@@ -1840,6 +1880,7 @@
 				4DD6FEA61A884CFF00CBBE1D /* SDWebImagePrefetcher.m in Sources */,
 				4DA208001A79DA0A00C7E5C7 /* JSQMessagesMediaPlaceholderView.m in Sources */,
 				4DE265FF1A8471AA009C566F /* SWActionSheet.m in Sources */,
+				4D85E6AB1AD7836600170D66 /* MESegmentedControl.m in Sources */,
 				4DE801B41AD277A0008B0236 /* QuestionsTableViewCell.m in Sources */,
 				4DE801AF1AD26E5F008B0236 /* SurveyDetailViewController.m in Sources */,
 				4D6424BE1AD3B4B900B6B974 /* ResidentPopInfoViewController.m in Sources */,
@@ -1913,6 +1954,7 @@
 				4D91D5EF1A8FAA2500A21DBA /* PostStatusTableViewController.m in Sources */,
 				4D0AA0211AC5265300DC2886 /* CheckAreaHeader.m in Sources */,
 				4D81D4501AB6D3DB00A403C9 /* Scan_Check_List_Block.m in Sources */,
+				4D85E69A1AD633FC00170D66 /* NearbyLocationsViewController.m in Sources */,
 				4DE8018F1AD2505C008B0236 /* SurveyListingViewController.m in Sources */,
 				4D0717A41AB199120055191A /* Reachability.m in Sources */,
 				4DA203FA1A79CC5200C7E5C7 /* FMDatabaseAdditions.m in Sources */,

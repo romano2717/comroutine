@@ -9,6 +9,8 @@
 #import "SurveyViewController.h"
 #import "UIView+Shake.h"
 
+#define kBgQueue dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+
 
 @interface SurveyViewController ()
 
@@ -24,6 +26,7 @@
     
     myDatabase = [Database sharedMyDbManager];
     questions = [[Questions alloc] init];
+    self.foundPlacesFinalArray = [[NSMutableArray alloc] init];
     
     locale = @"en";
     
@@ -38,30 +41,24 @@
     
     [locationManager startUpdatingLocation];
     
-    
     UIImage *excellent = [UIImage imageNamed:@"excellent@2x.png"];
-    UIImage *good = [UIImage imageNamed:@"good@2x.png"];
     UIImage *average = [UIImage imageNamed:@"aver@2x.png"];
     UIImage *poor = [UIImage imageNamed:@"poor@2x.png"];
-    UIImage *very_poor = [UIImage imageNamed:@"very_poor@2x.png"];
-    
+
     UIImage *excellent_sel = [UIImage imageNamed:@"excellent_sel@2x.png"];
-    UIImage *good_sel = [UIImage imageNamed:@"good_sel@2x.png"];
     UIImage *average_sel = [UIImage imageNamed:@"aver_sel@2x.png"];
     UIImage *poor_sel = [UIImage imageNamed:@"poor_sel@2x.png"];
-    UIImage *very_poor_sel = [UIImage imageNamed:@"very_poor_sel@2x.png"];
+
+    ratingsImageArray = [NSArray arrayWithObjects:excellent,average,poor, nil];
+    ratingsImageSelectedArray = [NSArray arrayWithObjects:excellent_sel,average_sel,poor_sel, nil];
     
-    ratingsImageArray = [NSArray arrayWithObjects:excellent,good,average,poor,very_poor, nil];
-    ratingsImageSelectedArray = [NSArray arrayWithObjects:excellent_sel,good_sel,average_sel,poor_sel,very_poor_sel, nil];
-    
-    NSArray *en    = @[@"Excellent",@"Good",@"Average",@"Poor",@"Very poor"];
-    NSArray *cn    = @[@"非常好",@"良好",@"一般",@"差",@"非常差"];
-    NSArray *my    = @[@"cemerlang",@"baik",@"purata",@"miskin",@"sangat miskin"];
-    NSArray *ind = @[@"சிறந்த",@"நல்ல",@"சராசரி",@"ஏழை",@"மிக மோசமான"];
+    NSArray *en    = @[@"YES",@"NEUTRAL",@"NO"];
+    NSArray *cn    = @[@"是的好",@"中性",@"别"];
+    NSArray *my    = @[@"ya",@"berkecuali",@"tidak"];
+    NSArray *ind = @[@"ஆம்",@"நடுநிலை",@"எந்த"];
     
     ratingsStringArray = [NSArray arrayWithObjects:@{@"en":en},@{@"cn":cn},@{@"my":my},@{@"ind":ind},nil];
     
-
     [self checkQuestionsCount];
 }
 
@@ -159,20 +156,46 @@
     if(locationIsGood)
     {
         self.currentLocation = loc;
+        self.currentLocationFound = YES;
+        [locationManager stopUpdatingLocation];
         
-        [self reverseGeoCodeTheLocation:loc];
+        [self getNearbyBlocksWithinTheGrcForThisLocation:loc];
     }
 }
 
-
-- (void)reverseGeoCodeTheLocation:(CLLocation *)location
+- (void)getNearbyBlocksWithinTheGrcForThisLocation:(CLLocation *)location
 {
-    CLGeocoder *geoCoder = [[CLGeocoder alloc] init];
+    double current_lat = location.coordinate.latitude;
+    double current_lng = location.coordinate.longitude;
+
+//    double current_lat = 1.301435;
+//    double current_lng = 103.797132;
+
     
-    [geoCoder reverseGeocodeLocation:location completionHandler:^(NSArray *placemarks, NSError *error){
-        self.placemark = placemarks[0];
+    self.closeAreas = [[NSMutableArray alloc] init];
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *nearestBlocks = [db executeQuery:@"select * from blocks where latitude > 0 and longitude > 0"];
+        
+        while ([nearestBlocks next]) {
+            
+            NSDictionary *dict = [nearestBlocks resultDictionary];
+            
+            double lat = [nearestBlocks doubleForColumn:@"latitude"];
+            double lng = [nearestBlocks doubleForColumn:@"longitude"];
+            
+            double distance = (acos(sin(current_lat * M_PI / 180) * sin(lat * M_PI / 180) + cos(current_lat * M_PI / 180) * cos(lat * M_PI / 180) * cos((current_lng - lng) * M_PI / 180)) * 180 / M_PI) * 60 * 1.1515 * 1.609344;
+            
+            double distanceInMeters = distance * 1000;
+            
+            if(distanceInMeters <= 500) //500 m
+            {
+                [self.closeAreas addObject:dict];
+            }
+        }
     }];
 }
+
 
 
 #pragma mark - check spo sked
@@ -392,7 +415,8 @@
     UIImageView *imageView = (UIImageView *)[cell viewWithTag:1];
     UILabel *ratingLabel = (UILabel *)[cell viewWithTag:2];
     
-    imageView.image = (UIImage *)[ratingsImageArray objectAtIndex:indexPath.row];
+    UIImage *img = (UIImage *)[ratingsImageArray objectAtIndex:indexPath.row];
+    imageView.image = img;
     
     NSString *theLocale;
     for (int i = 0; i < ratingsStringArray.count; i++) {
@@ -423,24 +447,24 @@
     
     UIImageView *imageView = (UIImageView *)[cell viewWithTag:1];
     
-    if(selectedRating > 0) //reset the previously selected image
-    {
-        int index = 0;
-        for (UICollectionViewCell *cell in ratingsCollectionView.visibleCells) {
-            
-            UIImageView *imgv = (UIImageView *)[cell viewWithTag:1];
-            
-            imgv.image = [ratingsImageArray objectAtIndex:index];
-            
-            index++;
-        }
-    }
+//    if(selectedRating > 0) //reset the previously selected image
+//    {
+//        int index = 0;
+//        for (UICollectionViewCell *cell in ratingsCollectionView.visibleCells) {
+//            DDLogVerbose(@"index %d",index);
+//            UIImageView *imgv = (UIImageView *)[cell viewWithTag:1];
+//            
+//            imgv.image = [ratingsImageArray objectAtIndex:index];
+//            
+//            index++;
+//        }
+//    }
     
     //set to selected image
     [imageView shake:5 withDelta:5 andSpeed:0.1 shakeDirection:ShakeDirectionVertical completionHandler:^{
-        imageView.image = (UIImage *)[ratingsImageSelectedArray objectAtIndex:indexPath.row];
-        
-        selectedRating = (int)ratingsImageArray.count - (int) indexPath.row;
+//        imageView.image = (UIImage *)[ratingsImageSelectedArray objectAtIndex:indexPath.row];
+//        
+//        selectedRating = (int)ratingsImageArray.count - (int) indexPath.row;
         
 
         //go to next question
@@ -465,20 +489,24 @@
                 
                 [self setQuestionTextViewWithQuestion:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:locale]];
                 
-                if(selectedRating > 0) //reset the previously selected image
-                {
-                    int index = 0;
-                    for (UICollectionViewCell *cell in ratingsCollectionView.visibleCells) {
-                        
-                        UIImageView *imgv = (UIImageView *)[cell viewWithTag:1];
-                        
-                        imgv.image = [ratingsImageArray objectAtIndex:index];
-                        
-                        index++;
-                    }
-                }
+//                if(selectedRating > 0) //reset the previously selected image
+//                {
+//                    int index = 0;
+//                    for (UICollectionViewCell *cell in ratingsCollectionView.visibleCells) {
+//                        DDLogVerbose(@"index %d",index);
+//                        UIImageView *imgv = (UIImageView *)[cell viewWithTag:1];
+//                        
+//                        imgv.image = [ratingsImageArray objectAtIndex:index];
+//                        
+//                        index++;
+//                    }
+//                }
             }
         }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.ratingsCollectionView reloadData];
+        });
     }];
 }
 
@@ -495,6 +523,11 @@
     }
     else
     {
+        //we are moving away from this VC, stop the location service
+
+        [locationManager stopUpdatingLocation];
+        
+        
         //get all the rating for this current survey
         __block int sum = 0;
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -507,12 +540,25 @@
         
         int aver = sum / surveyQuestions.count;
         
+        //update the average rating of this survey
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            BOOL upAver = [db executeUpdate:@"update su_survey set average_rating = ? where client_survey_id = ?",[NSNumber numberWithInt:aver],[NSNumber numberWithLongLong:self.currentSurveyId]];
+            
+            if(!upAver)
+            {
+                *rollback = YES;
+                return;
+            }
+        }];
+        
+        
         ResidentInfoViewController *resident = [segue destinationViewController];
         
         resident.surveyId = [NSNumber numberWithLongLong:self.currentSurveyId];
         resident.currentLocation = self.currentLocation;
         resident.placemark = self.placemark;
         resident.currentSurveyId = self.currentSurveyId;
+        resident.foundPlacesArray = self.closeAreas;
         resident.averageRating = [NSNumber numberWithInt:aver];
     }
 }

@@ -48,8 +48,6 @@
 
 - (void)uploadSurveyFromSelf:(BOOL)thisSelf;
 
-- (void)uploadCrmFromSelf:(BOOL)thisSelf;
-
 //download
 
 - (void)startDownloadPostForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate;

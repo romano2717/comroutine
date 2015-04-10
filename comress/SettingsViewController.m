@@ -87,7 +87,7 @@
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 db.traceExecution = YES;
                 
-                NSArray *tableToDelete = @[@"ro_checkarea",@"ro_checkarea_last_req_date",@"ro_checklist",@"ro_checklist_last_req_date",@"ro_job",@"ro_job_last_req_date",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanchecklist_blk",@"ro_scanchecklist_blk_last_req_date",@"ro_scanchecklist_last_req_date",@"ro_schedule",@"ro_schedule_last_req_date",@"ro_user_blk",@"ro_user_blk_last_req_date",@"ro_inspectionresult",@"su_address",@"su_answers",@"su_feedback",@"su_feedback_issue",@"su_questions",@"su_questions_last_req_date",@"su_survey",@"blocks_user",@"blocks_user_last_request_date",@"comment",@"comment_noti",@"post",@"post_image",@"comment_last_request_date",@"comment_noti_last_request_date",@"post_image_last_request_date",@"post_last_request_date"];
+                NSArray *tableToDelete = @[@"ro_checkarea",@"ro_checkarea_last_req_date",@"ro_checklist",@"ro_checklist_last_req_date",@"ro_job",@"ro_job_last_req_date",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanblock",@"ro_scanchecklist",@"ro_scanchecklist_blk",@"ro_scanchecklist_blk_last_req_date",@"ro_scanchecklist_last_req_date",@"ro_schedule",@"ro_schedule_last_req_date",@"ro_user_blk",@"ro_user_blk_last_req_date",@"ro_inspectionresult",@"su_address",@"su_answers",@"su_feedback",@"su_feedback_issue",@"su_questions",@"su_questions_last_req_date",@"su_survey",@"blocks_user",@"blocks_user_last_request_date",@"comment",@"comment_noti",@"post",@"post_image",@"comment_last_request_date",@"comment_noti_last_request_date",@"post_image_last_request_date",@"post_last_request_date",@"blocks",@"blocks_last_request_date"];
                 
                 //clear tables
                 for (int i = 0; i < tableToDelete.count; i++) {
@@ -102,12 +102,22 @@
                 }
                 
                 
+                
+                BOOL upClient = [db executeUpdate:@"update client set initialise = ?",[NSNumber numberWithInt:0]];
+                if(!upClient)
+                {
+                    *rollback = YES;
+                    return;
+                }
+                
+                
                 BOOL q;
                 NSNumber *isActiveNo = [NSNumber numberWithInt:0];
                 
                 q = [db executeUpdate:@"update users set is_active = ? where guid = ?",isActiveNo,[myDatabase.clientDictionary valueForKey:@"user_guid"]];
                 
                 myDatabase.userBlocksInitComplete = 0;
+                myDatabase.initializingComplete = 0;
                 
                 if(!q)
                 {

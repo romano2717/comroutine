@@ -23,7 +23,7 @@
     NSMutableArray *surveyArr = [[NSMutableArray alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select * from su_survey order by survey_date desc"];
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc",[NSNumber numberWithInt:0]];
         
         while ([rs next]) {
             //check if this survey got atleast 1 answer, if not, don't add this survery
@@ -38,13 +38,17 @@
                 //get address details
                 NSNumber *clientAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_survey_address_id"]];
                 NSNumber *addressId = [NSNumber numberWithInt:[rs intForColumn:@"survey_address_id"]];
-                FMResultSet *rsAdd = [db executeQuery:@"select * from su_address where client_address_id = ? or address_id = ?",clientAddressId,addressId];
+                FMResultSet *rsAdd = [db executeQuery:@"select * from su_address where client_address_id != ? and (client_address_id = ? or address_id = ?)",[NSNumber numberWithInt:0],clientAddressId,addressId];
+                
+                BOOL thereIsAnAddress = NO;
                 
                 while ([rsAdd next]) {
+                    thereIsAnAddress = YES;
                     [row setObject:[rsAdd resultDictionary] forKey:@"address"];
                 }
                 
-                [surveyArr addObject:row];
+                if(thereIsAnAddress)
+                    [surveyArr addObject:row];
             }
         }
     }];

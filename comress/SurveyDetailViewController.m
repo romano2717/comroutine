@@ -33,16 +33,12 @@
             averageRating = [rs intForColumn:@"average_rating"];
         }
         
-        if(averageRating >= 5)
-            self.averageRatingImageView.image = [UIImage imageNamed:@"fivestars@2x"];
-        if(averageRating <= 4)
-            self.averageRatingImageView.image = [UIImage imageNamed:@"fourstars@2x"];
         if(averageRating <= 3)
-            self.averageRatingImageView.image = [UIImage imageNamed:@"threestars@2x"];
+            self.averageRatingImageView.image = [UIImage imageNamed:@"threeOfThreeStars@2x"];
         if(averageRating <= 2)
-            self.averageRatingImageView.image = [UIImage imageNamed:@"twostars@2x"];
+            self.averageRatingImageView.image = [UIImage imageNamed:@"twoOfThreeStars@2x"];
         if(averageRating <= 1)
-            self.averageRatingImageView.image = [UIImage imageNamed:@"onestar@2x"];
+            self.averageRatingImageView.image = [UIImage imageNamed:@"oneOfThreeStars@2x"];
         
     }];
     
@@ -51,16 +47,23 @@
 
 - (IBAction)popResidentInfForThisSurvey:(id)sender
 {
-    NSDictionary *residentInfo = [survey surveDetailForId:surveyId];
-    
-    ResidentPopInfoViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"ResidentPopInfoViewController"];
-    postInfoVc.residentInfo = residentInfo;
-    
-    popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
-    popover.arrowDirection = FPPopoverArrowDirectionRight;
-    popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
-    
-    [popover presentPopoverFromView:sender];
+    @try {
+        NSDictionary *residentInfo = [survey surveDetailForId:surveyId];
+        
+        ResidentPopInfoViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"ResidentPopInfoViewController"];
+        postInfoVc.residentInfo = residentInfo;
+        
+        popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
+        popover.arrowDirection = FPPopoverArrowDirectionUp;
+        popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
+        [popover presentPopoverFromView:self.navigationController.navigationBar];
+    }
+    @catch (NSException *exception) {
+        DDLogVerbose(@"%@ [%@-%@]",exception,THIS_FILE,THIS_METHOD);
+    }
+    @finally {
+
+    }
 }
 
 -(void) viewWillDisappear:(BOOL)animated

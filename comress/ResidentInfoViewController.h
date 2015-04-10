@@ -12,19 +12,31 @@
 #import "Database.h"
 #import "FeedBackViewController.h"
 #import "SurveyDetailViewController.h"
+#import "FPPopoverController.h"
+#import "FPPopoverKeyboardResponsiveController.h"
+#import "NearbyLocationsViewController.h"
+#import "MBProgressHUD.h"
+#import "MPGTextField.h"
+#import "Blocks.h"
 
-@interface ResidentInfoViewController : UIViewController<UIAlertViewDelegate>
+@class ResidentInfoViewController;
+
+@interface ResidentInfoViewController : UIViewController<UIAlertViewDelegate,UIPopoverPresentationControllerDelegate,FPPopoverControllerDelegate,CLLocationManagerDelegate,MPGTextFieldDelegate>
 {
     Database *myDatabase;
+    Blocks *blocks;
+    FPPopoverKeyboardResponsiveController *popover;
+    CLLocationManager *locationManager;
 }
 
-@property (nonatomic, weak) IBOutlet UITextField *surveyAddressTxtFld;
+@property (nonatomic, weak) IBOutlet MPGTextField *surveyAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *areaTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *residentNameTxFld;
 
 @property (nonatomic, weak) IBOutlet UITextField *residentAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *unitNoTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *contactNoTxFld;
+@property (nonatomic, weak) IBOutlet UITextField *emailTxFld;
 
 @property (nonatomic, weak) IBOutlet UIButton *ageBtn;
 @property (nonatomic, weak) IBOutlet UIButton *raceBtn;
@@ -41,6 +53,26 @@
 @property (nonatomic) long long currentSurveyId;
 
 @property (nonatomic, strong) NSNumber *averageRating;
+
+@property (nonatomic, weak) IBOutlet UIView *disclaimerView;
+
+@property (nonatomic) BOOL didAcceptTerms;
+
+@property (nonatomic, strong) NSArray *foundPlacesArray;
+
+@property (nonatomic) BOOL currentLocationFound;
+
+@property (nonatomic) BOOL dismissPopupByReload; //don't validate postal code;
+
+@property (nonatomic, strong) NSMutableArray *closeAreas;
+
+@property (nonatomic, strong) NSMutableArray *addressArray;
+
+@property (nonatomic, strong) NSNumber *blockId;
+
+-(void)selectedTableRow:(NSUInteger)rowNum;
+
+-(void)closePopUpWithLocationReload:(BOOL) reload;
 
 
 

@@ -33,20 +33,21 @@
             
             double timeStamp = [[survey valueForKey:@"survey_date"] doubleValue];
             NSDate *date = [NSDate dateWithTimeIntervalSince1970:timeStamp];
-            self.dateLabel.text = [NSString stringWithFormat:@"%@",date];
+            
+            NSDateFormatter *format = [[NSDateFormatter alloc] init];
+            [format setDateFormat:@"dd-MMM-YYYY h:mm"];
+            NSString *datestring = [format stringFromDate:date];
+            
+            self.dateLabel.text = [NSString stringWithFormat:@"%@",datestring];
             
             int rating = [[survey valueForKey:@"average_rating"] intValue];
 
-            if(rating >= 5)
-                self.ratingImageView.image = [UIImage imageNamed:@"fivestars@2x"];
-            if(rating <= 4)
-                self.ratingImageView.image = [UIImage imageNamed:@"fourstars@2x"];
             if(rating <= 3)
-                self.ratingImageView.image = [UIImage imageNamed:@"threestars@2x"];
+                self.ratingImageView.image = [UIImage imageNamed:@"threeOfThreeStars@2x"];
             if(rating <= 2)
-                self.ratingImageView.image = [UIImage imageNamed:@"twostars@2x"];
+                self.ratingImageView.image = [UIImage imageNamed:@"twoOfThreeStars@2x"];
             if(rating <= 1)
-                self.ratingImageView.image = [UIImage imageNamed:@"onestar@2x"];
+                self.ratingImageView.image = [UIImage imageNamed:@"oneOfThreeStars@2x"];
         }
         
         

@@ -7,6 +7,7 @@
 //
 
 #import "InitializerViewController.h"
+#import <math.h>
 
 @interface InitializerViewController ()
 {
@@ -874,19 +875,38 @@
             NSString *PostalCode = [dictBlock valueForKey:@"PostalCode"];
             NSString *StreetName = [dictBlock valueForKey:@"StreetName"];
             NSNumber *lat = [dictBlock valueForKey:@"Latitude"];
-            NSNumber *lon = [dictBlock valueForKey:@"Latitude"];
+            NSNumber *lon = [dictBlock valueForKey:@"Longitude"];
+            
+//            cos_lat = cos(lat * PI / 180)
+//            sin_lat = sin(lat * PI / 180)
+//            cos_lng = cos(lng * PI / 180)
+//            sin_lng = sin(lng * PI / 180)
+            
+            
+            double cos_lat = cos([[dictBlock valueForKey:@"Latitude"] doubleValue] * M_PI / 180);
+            double sin_lat = sin([[dictBlock valueForKey:@"Latitude"] doubleValue] * M_PI / 180);
+            double cos_lng = cos([[dictBlock valueForKey:@"Longitude"] doubleValue] * M_PI / 180);
+            double sin_lng = sin([[dictBlock valueForKey:@"Longitude"] doubleValue] * M_PI / 180);
+            
+            NSNumber *cos_lat_val = [NSNumber numberWithDouble:cos_lat];
+            NSNumber *cos_lng_val = [NSNumber numberWithDouble:cos_lng];
+            NSNumber *sin_lat_val = [NSNumber numberWithDouble:sin_lat];
+            NSNumber *sin_lng_val = [NSNumber numberWithDouble:sin_lng];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
                 
                 FMResultSet *blockIsExist = [theDb executeQuery:@"select block_id from blocks where block_id = ?",BlkId];
                 if([blockIsExist next] == NO)
                 {
-                    BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name, latitude, longitude) values (?,?,?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName,lat,lon];
-                    
-                    if(!qBlockIns)
+                    if(lat > 0 && lon > 0)
                     {
-                        *rollback = YES;
-                        return;
+                        BOOL qBlockIns = [theDb executeUpdate:@"insert into blocks (block_id, block_no, is_own_block, postal_code, street_name, latitude, longitude,cos_lat,cos_lng,sin_lat,sin_lng) values (?,?,?,?,?,?,?,?,?,?,?)",BlkId,BlkNo,IsOwnBlk,PostalCode,StreetName,lat,lon,cos_lat_val,cos_lng_val,sin_lat_val,sin_lng_val];
+                        
+                        if(!qBlockIns)
+                        {
+                            *rollback = YES;
+                            return;
+                        }
                     }
                 }
             }];

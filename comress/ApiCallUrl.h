@@ -13,6 +13,8 @@ static NSString * AFkey_allowInvalidCertificates = @"allowInvalidCertificates";
 
 static NSString *google_api_key = @"AIzaSyDAD3ZNjQ4n3AfqV-IIOklSiLbmyfX7IWo";
 
+static NSString *google_ios_api_key = @"AIzaSyBp8nNVujNkbk13h2W05vJDZYOPvlhdiLE"; //we use this for google places api
+
 
 static NSString *api_activationUrl = @"http://fmit.com.sg/comressmainservice/AddressManager.svc/json/GetUrlAddress/?group=";
 
@@ -90,6 +92,8 @@ static NSString *api_upload_survey =  @"Survey/Survey.svc/UploadSurvey";
 static NSString *api_download_survey = @"Survey/Survey.svc/GetSurveys";
 
 static NSString *api_upload_crm = @"Survey/Survey.svc/UploadCRMIssue";
+
+static NSString *api_download_feedback_issues = @"Survey/Survey.svc/GetFeedbackIssues";
 
 
 #endif

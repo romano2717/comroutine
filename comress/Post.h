@@ -34,7 +34,7 @@
 
 - (long long)savePostWithDictionary:(NSDictionary *)dict forBlockId:(NSNumber *)blockId;
 
-- (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst;
+- (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst onlyOverDue:(BOOL)onlyOverDue;
 
 - (NSArray *)postsToSend;
 

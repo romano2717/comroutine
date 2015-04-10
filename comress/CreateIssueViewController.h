@@ -60,4 +60,8 @@
 
 @property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
 
+@property (nonatomic) BOOL crmAutoAssignToMeMaintenance;
+@property (nonatomic) BOOL crmAutoAssignToMeOthers;
+
+@property (nonatomic, strong) NSString *feedBackDescription;
 @end

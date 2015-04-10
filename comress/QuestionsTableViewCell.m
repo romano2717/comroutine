@@ -28,16 +28,12 @@
     
     int rating = [[dict valueForKey:@"rating"] intValue];
     
-    if(rating >= 5)
-        self.ratingImageView.image = [UIImage imageNamed:@"excellent@2x"];
-    if(rating <= 4)
-        self.ratingImageView.image = [UIImage imageNamed:@"good@2x"];
     if(rating <= 3)
-        self.ratingImageView.image = [UIImage imageNamed:@"aver@2x"];
+        self.ratingImageView.image = [UIImage imageNamed:@"excellent@2x"];
     if(rating <= 2)
-        self.ratingImageView.image = [UIImage imageNamed:@"poor@2x"];
+        self.ratingImageView.image = [UIImage imageNamed:@"aver@2x"];
     if(rating <= 1)
-        self.ratingImageView.image = [UIImage imageNamed:@"very_poor@2x"];
+        self.ratingImageView.image = [UIImage imageNamed:@"poor@2x"];
 }
 
 @end

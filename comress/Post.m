@@ -116,9 +116,11 @@ contract_type;
     return posClienttId;
 }
 
-- (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst
+- (NSArray *)fetchIssuesWithParams:(NSDictionary *)params forPostId:(NSNumber *)postId filterByBlock:(BOOL)filter newIssuesFirst:(BOOL)newIssuesFirst onlyOverDue:(BOOL)onlyOverDue
 {
     @try {
+        int __block overDueIssues = 0;
+        
         myDatabase.allPostWasSeen = YES;
         
         NSMutableArray *arr = [[NSMutableArray alloc] init];
@@ -139,15 +141,46 @@ contract_type;
          */
         NSMutableString *q;
         
-        if(postId == nil)
-            q = [[NSMutableString alloc] initWithString:@"select * from post where post_type = 1 "]; //post_type = 1 is ISSUES
-        else
-            q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where client_post_id = %@ ",postId]];
+        NSDate *now = [NSDate date];
+        NSDate *daysAgo = [now dateByAddingTimeInterval:-overDueDays*24*60*60];
+        double timestampDaysAgo = [daysAgo timeIntervalSince1970];
+        
+        NSNumber *finishedStatus = [NSNumber numberWithInt:4];
+        
+        if(postId == nil) //for listing
+        {
+            if(onlyOverDue == NO)
+            {
+                if(filter == YES) //ME, don't display overdue
+                    q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where post_type = 1 and post_date >= %f and status != %@ ",timestampDaysAgo,finishedStatus] ]; //post_type = 1 is ISSUES
+                else // Others
+                    q = [[NSMutableString alloc] initWithString:@"select * from post where post_type = 1 " ]; //post_type = 1 is ISSUES
+            }
+            
+            else
+            {
+                q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where post_type = 1 and post_date <= '%f' and status != %@ ",timestampDaysAgo, finishedStatus]]; //post_type = 1 is ISSUES
+            }
+        }
+        
+        else //for chat
+        {
+            if(onlyOverDue == NO)
+            {
+                q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where client_post_id = %@ ",postId]];
+            }
+            else
+            {
+                q = [[NSMutableString alloc] initWithString:[NSString stringWithFormat:@"select * from post where client_post_id = %@ and post_date <= '%f' and status != %@ ",postId,timestampDaysAgo,finishedStatus]];
+            }
+        }
+        
         
         if([params valueForKey:@"order"])
         {
             [q appendString:[params valueForKey:@"order"]];
         }
+        
         
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
             FMResultSet *rsPost = [db executeQuery:q];
@@ -184,6 +217,9 @@ contract_type;
                 }
                 
                 [postChild setObject:[rsPost resultDictionary] forKey:@"post"];
+                
+                if(onlyOverDue == YES)
+                    overDueIssues ++;
                 
                 
                 //check if this post is not yet read by the user
@@ -289,6 +325,12 @@ contract_type;
             }
         }
         
+        DDLogVerbose(@"overdue %d",overDueIssues);
+        if(overDueIssues > 0)
+        {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"thereAreOVerDueIssues" object:nil userInfo:@{@"count":[NSNumber numberWithInt:overDueIssues]}];
+        }
+        
         if(mutArr.count == arr.count)
             return mutArr;
         
@@ -296,7 +338,7 @@ contract_type;
         {
             [[NSNotificationCenter defaultCenter] postNotificationName:@"allPostWasSeen" object:nil];
         }
-        
+       
         return arr;
     }
     @catch (NSException *exception) {

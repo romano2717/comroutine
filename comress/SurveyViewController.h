@@ -44,4 +44,12 @@
 
 @property (nonatomic, strong) CLPlacemark *placemark;
 
+@property (nonatomic, strong) NSArray *placesArray;
+
+@property (nonatomic, strong) NSMutableArray *foundPlacesFinalArray;
+
+@property (nonatomic) BOOL currentLocationFound;
+
+@property (nonatomic, strong) NSMutableArray *closeAreas;
+
 @end

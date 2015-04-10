@@ -25,7 +25,7 @@
 
 @implementation CreateIssueViewController
 
-@synthesize surveyId,surveyDetail,postalCode,postalCodeFound,blockId,selectedContractTypesArr,scrollView,pushFromSurveyAndModalFromFeedback,selectedContractTypesString,feedBackId;
+@synthesize surveyId,surveyDetail,postalCode,postalCodeFound,blockId,selectedContractTypesArr,scrollView,pushFromSurveyAndModalFromFeedback,selectedContractTypesString,feedBackId,crmAutoAssignToMeMaintenance,crmAutoAssignToMeOthers,feedBackDescription;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -55,6 +55,23 @@
     [[self.descriptionTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
     [[self.descriptionTextView layer] setBorderWidth:1];
     [[self.descriptionTextView layer] setCornerRadius:15];
+    
+    self.descriptionTextView.text = feedBackDescription;
+    
+    
+    //check the address from feedback
+    __block NSString *addressFromFeedBack;
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsCheckAdd = [db executeQuery:@"select * from blocks where block_id = ?",blockId];
+        while ([rsCheckAdd next]) {
+            addressFromFeedBack = [rsCheckAdd stringForColumn:@"street_name"];
+            postalCode = [rsCheckAdd stringForColumn:@"postal_code"];
+        }
+    }];
+    self.addressTextField.text = addressFromFeedBack;
+    self.postalCodeTextField.text = postalCode;
+    
+    
     
     [self generateData];
     
@@ -175,6 +192,9 @@
 
 - (void)textField:(MPGTextField *)textField didEndEditingWithSelection:(NSDictionary *)result
 {
+    if([[result valueForKey:@"CustomObject"] isKindOfClass:[NSDictionary class]] == NO) //user typed some shit!
+        return;
+    
     self.postalCodeTextField.text = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
     self.addressTextField.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
     
@@ -361,6 +381,8 @@
 #pragma mark Save new issue to local db
 - (IBAction)postNewIssue:(id)sender
 {
+    __block BOOL popThisVcBack = NO; //use this bool when this vc is pushed from survey detail
+    
     if(blockId ==  0 || blockId == nil)
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Issue" message:[NSString stringWithFormat:@"Postal code %@ was not found in our system. Continue to create issue by searching for the correct Postal Code",postalCode] delegate:self cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
@@ -375,67 +397,13 @@
     postImage = [[PostImage alloc] init];
     DDLogVerbose(@"selectedContractTypesArr %@",selectedContractTypesArr);
     
-    //recreate selectedContractTypesArr to only include ids found in contract_types
-    NSMutableArray *finalContractTypeIdArr = [[NSMutableArray alloc] init];
-    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rsCt = [db executeQuery:@"select * from contract_type"];
-        while ([rsCt next]) {
-            NSNumber *theId = [NSNumber numberWithInt:[rsCt intForColumn:@"id"]];
-            
-            if([selectedContractTypesArr containsObject:theId])
-            {
-                [finalContractTypeIdArr addObject:theId];
-            }
-        }
-    }];
-    
-
-    for (int i = 0; i < finalContractTypeIdArr.count; i ++) {
+    for (int i = 0; i < selectedContractTypesArr.count; i ++) {
         NSString *postal_code = [self.postalCodeTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *location = [self.addressTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *level = [self.levelTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *post_topic = [self.descriptionTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         NSString *severity = [self.severityBtn.titleLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSNumber *contract_type_id = [finalContractTypeIdArr objectAtIndex:i];
-        
-        
-        //check if this contract_type_id is 6,7 or 8, then create crm
-        if([contract_type_id intValue] == 6 || [contract_type_id intValue] == 7 || [contract_type_id intValue] == 8)
-        {
-            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-                FMResultSet *rsSv = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
-                
-                NSMutableString *subject = [[NSMutableString alloc] init];
-                NSMutableString *body = [[NSMutableString alloc] init];
-                NSNumber *clientSurveyAddressIdInfo;
-                NSDictionary *surveyInfoDict;
-                while ([rsSv next]) {
-                    clientSurveyAddressIdInfo = [NSNumber numberWithInt:[rsSv intForColumn:@"client_survey_address_id"]];
-                    
-                    surveyInfoDict = [rsSv resultDictionary];
-                }
-                
-                [subject appendString:[NSString stringWithFormat:@"CRM Feedback: %@ - %@",self.addressTextField.text,self.postalCodeTextField.text]];
-                
-                [body appendString:[NSString stringWithFormat:@"Feedback: %@ \n",self.descriptionTextView.text]];
-                [body appendString:[NSString stringWithFormat:@"Resident name: %@ \n",[surveyInfoDict valueForKey:@"resident_name"]]];
-                [body appendString:[NSString stringWithFormat:@"Survey date: %@ \n",[surveyInfoDict valueForKey:@"survey_date"]]];
-                [body appendString:[NSString stringWithFormat:@"Contact: %@ \n",[surveyInfoDict valueForKey:@"resident_contact"]]];
-                
-                BOOL insCrm = [db executeUpdate:@"insert into suv_crm(subject, body) values (?,?)",subject,body];
-                
-                if(!insCrm)
-                {
-                    *rollback = YES;
-                    return;
-                }
-
-            }];
-            
-            // this is crm, after insert
-            continue;
-        }
-        
+        NSNumber *contract_type_id = [selectedContractTypesArr objectAtIndex:i];
         
         
         //check if this contract_type_id exist in contract_type table
@@ -447,7 +415,62 @@
         }];
         
         if(contractFound == NO)
+        {
+            if([contract_type_id intValue] != 19) //none. no need to filter for valid contract types since valid onces will not go this area
+            {
+                //save to su_feedback_issue
+                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                    
+                    NSNumber *feedBackIssueIdForCrmDontNeedPostId = [NSNumber numberWithInt:0];
+                    
+                    if([contract_type_id intValue] == 6)
+                    {
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM ISSUE MAINTENANCE",[NSNumber numberWithBool:crmAutoAssignToMeMaintenance]];
+                        
+                        if(!ins)
+                        {
+                            *rollback = YES;
+                            return ;
+                        }
+                        else
+                            popThisVcBack = YES;
+                    }
+                    else if([contract_type_id intValue] == 7)
+                    {
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM ISSUE OTHERS",[NSNumber numberWithBool:crmAutoAssignToMeOthers]];
+                        
+                        if(!ins)
+                        {
+                            *rollback = YES;
+                            return ;
+                        }
+                        else
+                            popThisVcBack = YES;
+                    }
+                }];
+            }
+            else
+                popThisVcBack = YES;
+            
+            
+            if(popThisVcBack == YES && i >= selectedContractTypesArr.count - 1) //last loop
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Issues have been raised." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+                [alert show];
+                
+                [self dismissViewControllerAnimated:YES completion:^{
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        Synchronize *sync = [Synchronize sharedManager];
+                        [sync uploadPostFromSelf:NO];
+                        
+                        [sync uploadSurveyFromSelf:NO];
+                    });
+                }];
+            }
+            
             continue;
+        }
+        
         
         
         //continue
@@ -481,7 +504,7 @@
         
         NSDictionary *dict = [NSDictionary dictionaryWithObjectsAndKeys:post_topic,@"post_topic",post_by,@"post_by",post_date,@"post_date",post_type,@"post_type",severityNumber,@"severity",@"0",@"status",location,@"address",level,@"level",postal_code,@"postal_code",blockId,@"block_id",post_date,@"updated_on",[NSNumber numberWithBool:YES],@"seen",contract_type_id,@"contract_type", nil];
         
-        
+
         long long lastClientPostId =  [post savePostWithDictionary:dict];
         
         NSNumber *lastClientPostIdID = [NSNumber numberWithLongLong:lastClientPostId];
@@ -527,6 +550,7 @@
             
             //save to su_feedback_issue
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
                 BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des) values (?,?,?)",feedBackId,lastClientPostIdID,post_topic];
                 
                 if(!ins)
@@ -534,6 +558,7 @@
                     *rollback = YES;
                     return ;
                 }
+               
             }];
             
             //we are finished doing the survey, update this survey to require upload!
@@ -572,7 +597,8 @@
                 });
             }];
         }
-    }
+        
+    }//end of for loop
 }
 
 

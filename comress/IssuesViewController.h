@@ -13,6 +13,8 @@
 #import "Comment.h"
 #import "Users.h"
 #import "Database.h"
+#import "MESegmentedControl.h"
+
 
 @interface IssuesViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,IssuesChatViewControllerDelegate>
 {
@@ -24,6 +26,6 @@
 }
 
 @property (nonatomic, weak) IBOutlet UITableView *issuesTable;
-@property (nonatomic, weak) IBOutlet UISegmentedControl *segment;
+@property (nonatomic, weak) IBOutlet MESegmentedControl *segment;
 @property (nonatomic, weak) IBOutlet UIButton *bulbButton;
 @end

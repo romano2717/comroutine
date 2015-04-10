@@ -7,6 +7,7 @@
 //
 
 #import "IssuesViewController.h"
+#import "CustomBadge.h"
 
 @interface IssuesViewController ()
 {
@@ -50,6 +51,15 @@
     
     //turn on bulb icon for new unread posts
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(toggleBulbIcon:) name:@"toggleBulbIcon" object:nil];
+    
+    //overdue issues indicator
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(thereAreOVerDueIssues:) name:@"thereAreOVerDueIssues" object:nil];
+}
+
+- (void)thereAreOVerDueIssues:(NSNotification *)notif
+{
+    int badge = [[[notif userInfo] valueForKey:@"count"] intValue];
+    [self.segment setBadgeNumber:badge forSegmentAtIndex:2];
 }
 
 - (void)toggleBulbIcon:(NSNotification *)notif
@@ -188,9 +198,13 @@
                 dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
             }
 
-            else
+            else if(self.segment.selectedSegmentIndex == 1)
             {
                 dict = (NSDictionary *)[[self.postsArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+            }
+            else
+            {
+                dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
             }
             
             postId = [NSNumber numberWithInt:[[[dict allKeys] objectAtIndex:0] intValue]];
@@ -204,6 +218,10 @@
         BOOL isFiltered = NO;
         
         if(self.segment.selectedSegmentIndex == 0)
+            isFiltered = YES;
+        else if(self.segment.selectedSegmentIndex == 1)
+            isFiltered = NO;
+        else
             isFiltered = YES;
         
         IssuesChatViewController *issuesVc = [segue destinationViewController];
@@ -230,17 +248,17 @@
         if(self.segment.selectedSegmentIndex == 0)
         {
             if(newIssuesUp)
-                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:YES]];
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:YES onlyOverDue:NO]];
             else
-                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:NO]];
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:NO onlyOverDue:NO]];
         }
         
-        else
+        else if(self.segment.selectedSegmentIndex == 1)
         {
             if(newIssuesUp)
-                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:NO newIssuesFirst:YES]];
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:NO newIssuesFirst:YES onlyOverDue:NO]];
             else
-                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:NO newIssuesFirst:NO]];
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:NO newIssuesFirst:NO onlyOverDue:NO]];
             
             NSMutableArray *sectionHeaders = [[NSMutableArray alloc] init];
             
@@ -285,6 +303,13 @@
             
             self.postsArray = groupedPost;
         }
+        else
+        {
+            if(newIssuesUp)
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:YES onlyOverDue:YES]];
+            else
+                self.postsArray = [[NSMutableArray alloc] initWithArray:[post fetchIssuesWithParams:params forPostId:nil filterByBlock:YES newIssuesFirst:NO onlyOverDue:YES]];
+        }
         
         dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [self.issuesTable reloadData];
@@ -325,8 +350,11 @@
     
     if(self.segment.selectedSegmentIndex == 0)
         count = 1;
-    else
+    else if(self.segment.selectedSegmentIndex == 1)
         count = self.sectionHeaders.count;
+    else
+        count = 1;
+        
     
     return count;
 }
@@ -338,8 +366,10 @@
     
     if(self.segment.selectedSegmentIndex == 0)
         count = self.postsArray.count;
-    else
+    else if(self.segment.selectedSegmentIndex == 1)
         count = [[self.postsArray objectAtIndex:section] count];
+    else
+        count = self.postsArray.count;
 
     return count;
 }
@@ -353,8 +383,10 @@
         
         if(self.segment.selectedSegmentIndex == 0)
             dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
-        else
+        else if(self.segment.selectedSegmentIndex == 1)
             dict = (NSDictionary *)[[self.postsArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+        else
+            dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
         
         [cell initCellWithResultSet:dict];
         
@@ -445,9 +477,14 @@
         dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
         clickedPostId = [NSNumber numberWithInt:[[[dict allKeys] objectAtIndex:0] intValue]];
     }
-    else
+    else if(self.segment.selectedSegmentIndex == 1)
     {
         dict = (NSDictionary *)[[self.postsArray objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+        clickedPostId = [NSNumber numberWithInt:[[[dict allKeys] objectAtIndex:0] intValue]];
+    }
+    else
+    {
+        dict = (NSDictionary *)[self.postsArray objectAtIndex:indexPath.row];
         clickedPostId = [NSNumber numberWithInt:[[[dict allKeys] objectAtIndex:0] intValue]];
     }
     

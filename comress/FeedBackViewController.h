@@ -11,10 +11,13 @@
 #import "Database.h"
 #import "CreateIssueViewController.h"
 #import "Survey.h"
+#import "MPGTextField.h"
+#import "Blocks.h"
 
-@interface FeedBackViewController : UIViewController<UIScrollViewDelegate,UIAlertViewDelegate>
+@interface FeedBackViewController : UIViewController<UIScrollViewDelegate,UIAlertViewDelegate,MPGTextFieldDelegate>
 {
     Database *myDatabase;
+    Blocks *blocks;    
 }
 @property (nonatomic)BOOL pushFromSurvey;
 @property (nonatomic)BOOL pushFromSurveyDetail;
@@ -28,7 +31,7 @@
 @property (nonatomic, weak) IBOutlet UIButton *feedBackToLocSurveyAddBtn;
 @property (nonatomic, weak) IBOutlet UIButton *feedBackToLocResidentAddBtn;
 @property (nonatomic, weak) IBOutlet UIButton *feedBackToLocOthersAddBtn;
-@property (nonatomic, weak) IBOutlet UITextField *othersAddTxtField;
+@property (nonatomic, weak) IBOutlet MPGTextField *othersAddTxtField;
 
 @property (nonatomic, weak) IBOutlet UISegmentedControl *segment;
 
@@ -39,5 +42,17 @@
 @property (nonatomic, strong) NSString *postalCode;
 
 @property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
+
+@property (nonatomic, weak) IBOutlet UIButton *crmAssginBtn;
+
+@property (nonatomic, strong) NSArray *crmAssignArray;
+@property (nonatomic, strong) NSString *selectedCrmAssignmentForMaintenance;
+@property (nonatomic, strong) NSString *selectedCrmAssignmentForOthers;
+
+@property (nonatomic, strong) NSMutableArray *addressArray;
+@property (nonatomic, strong) NSNumber *blockId;
+
+@property (nonatomic) BOOL autoAssignToMeMaintenance;
+@property (nonatomic) BOOL autoAssignToMeOthers;
 
 @end

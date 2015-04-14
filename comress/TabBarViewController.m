@@ -23,8 +23,11 @@
     // Do any additional setup after loading the view.
     
     myDatabase = [Database sharedMyDbManager];
-    
-    
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated

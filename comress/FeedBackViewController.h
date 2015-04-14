@@ -40,6 +40,7 @@
 @property (nonatomic, strong) NSMutableArray *selectedFeeBackTypeStringArr;
 
 @property (nonatomic, strong) NSString *postalCode;
+@property (nonatomic, strong) NSString *residentPostalCode;
 
 @property (nonatomic) BOOL pushFromSurveyAndModalFromFeedback;
 

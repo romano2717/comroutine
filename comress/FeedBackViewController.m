@@ -17,7 +17,7 @@
 
 @implementation FeedBackViewController
 
-@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode,pushFromSurveyAndModalFromFeedback,blockId,surveyAddressId,residentAddressId,autoAssignToMeMaintenance,autoAssignToMeOthers;
+@synthesize currentClientSurveyId,pushFromSurvey,pushFromSurveyDetail,postalCode,pushFromSurveyAndModalFromFeedback,blockId,surveyAddressId,residentAddressId,autoAssignToMeMaintenance,autoAssignToMeOthers,residentPostalCode;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -87,6 +87,42 @@
     self.othersAddTxtField.text = defSurveyAddress;
     
     
+    
+    //validate if the postalCode is within the GRC
+    __block BOOL invalidSurveyPostalCode = NO;
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from blocks where postal_code = ?",self.postalCode];
+        
+        if([rs next] == NO) //does not exist
+        {
+            invalidSurveyPostalCode = YES;
+        }
+    }];
+    
+    if(invalidSurveyPostalCode == YES)
+    {
+        UIButton *btn = (UIButton *)[self.view viewWithTag:11];
+        btn.enabled = NO;
+    }
+    
+    
+    //validate if the self.residentPostalCode is within the GRC
+    __block BOOL invalidResidentPostalCode = NO;
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from blocks where postal_code = ?",self.residentPostalCode];
+        
+        if([rs next] == NO) //does not exist
+        {
+            invalidResidentPostalCode = YES;
+        }
+    }];
+    
+    if(invalidResidentPostalCode == YES)
+    {
+        UIButton *btn = (UIButton *)[self.view viewWithTag:12];
+        btn.enabled = NO;
+    }
+    
     //add border to the textview
     [[self.feedBackTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
     [[self.feedBackTextView layer] setBorderWidth:1];
@@ -135,12 +171,16 @@
 - (void)textField:(MPGTextField *)textField didEndEditingWithSelection:(NSDictionary *)result
 {
     if([[result valueForKey:@"CustomObject"] isKindOfClass:[NSDictionary class]] == NO) //user typed some shit!
+    {
+        postalCode = @"-1";
         return;
+    }
+    
     
     self.othersAddTxtField.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
     
     blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
-    
+    postalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
 }
 
 
@@ -221,8 +261,8 @@
     //only if push from survey since survey is in landscape mode
     if(pushFromSurvey)
     {
-        NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
-        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+//        NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationLandscapeLeft];
+//        [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     }
     
     if(pushFromSurveyDetail == NO)
@@ -290,6 +330,7 @@
             }
         }];
         self.othersAddTxtField.text = defSurveyAddress;
+        
     }
     else if (tag == 12)
     {
@@ -298,6 +339,8 @@
         [oth setSelected:NO];
         
         self.selectedFeedBackLoc = @"resident";
+        
+        postalCode = self.residentPostalCode;
         
         __block NSString *defResidentAddress;
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -314,6 +357,9 @@
                 blockId = [NSNumber numberWithInt:[rsGetBlockId intForColumn:@"block_id"]];
             }
         }];
+        
+        postalCode = self.residentPostalCode;
+        
         self.othersAddTxtField.text = defResidentAddress;
         
     }
@@ -325,6 +371,8 @@
         
         self.selectedFeedBackLoc = @"others";
         self.othersAddTxtField.text = @"";
+        postalCode = @"-1";
+        self.residentPostalCode = @"-1";
     }
 }
 
@@ -427,18 +475,7 @@
 
 - (IBAction)addFeedBack:(id)sender
 {
-    
-//    NSArray *comressTypes = @[[NSNumber numberWithInt:2],[NSNumber numberWithInt:3],[NSNumber numberWithInt:4],[NSNumber numberWithInt:5]];
-//    
-//    int foundComressTypes = 0;
-//    
-//    for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
-//        NSNumber *selected = [self.selectedFeeBackTypeArr objectAtIndex:i];
-//        
-//        if([comressTypes containsObject:selected])
-//            foundComressTypes ++;
-//        
-//    }
+    [self.view endEditing:YES];
     
     if(self.selectedFeeBackTypeStringArr.count > 0)
     {

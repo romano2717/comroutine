@@ -68,13 +68,30 @@
 - (void)textField:(MPGTextField *)textField didEndEditingWithSelection:(NSDictionary *)result
 {
     if([[result valueForKey:@"CustomObject"] isKindOfClass:[NSDictionary class]] == NO) //user typed some shit!
+    {
+        if([textField isEqual:self.surveyAddressTxtFld])
+            self.postalCode = @"-1";
+        else if ([textField isEqual:self.residentAddressTxtFld])
+            self.residentPostalCode = @"-1";
+        
         return;
+    }
     
-    self.surveyAddressTxtFld.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
     
-    blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
-    self.postalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
-    
+    if([textField isEqual:self.surveyAddressTxtFld])
+    {
+        self.surveyAddressTxtFld.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
+        
+        blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
+        self.postalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
+    }
+    else if ([textField isEqual:self.residentAddressTxtFld])
+    {
+        self.residentAddressTxtFld.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
+        
+        blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
+        self.residentPostalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
+    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -90,6 +107,7 @@
     {
         //update survey as data_protection = 0;
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            db.traceExecution = YES;
             BOOL upSu = [db executeUpdate:@"update su_survey set data_protection = ? where client_survey_id = ?",[NSNumber numberWithInt:0],surveyId];
             if(!upSu)
             {
@@ -129,6 +147,7 @@
         FeedBackViewController *fvc = [segue destinationViewController];
         fvc.currentClientSurveyId =  [NSNumber numberWithLongLong:currentSurveyId];
         fvc.postalCode = self.postalCode;
+        fvc.residentPostalCode = self.residentPostalCode;
     }
     else if([segue.identifier isEqualToString:@"push_survey_detail"])
     {
@@ -200,6 +219,7 @@
     self.surveyAddressTxtFld.text = [topLocation valueForKey:@"street_name"];
     self.residentAddressTxtFld.text = [topLocation valueForKey:@"street_name"];
     self.postalCode = [topLocation valueForKey:@"postal_code"];
+    self.residentPostalCode = [topLocation valueForKey:@"postal_code"];
     
     
     NearbyLocationsViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"NearbyLocationsViewController"];
@@ -428,7 +448,7 @@
         {
             [self saveResidentAdressWithSegueToFeedback:YES];
         }
-        else
+        else if(buttonIndex == 2)
         {
             [self saveResidentAdressWithSegueToFeedback:NO];
         }

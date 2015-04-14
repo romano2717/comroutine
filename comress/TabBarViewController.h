@@ -13,7 +13,7 @@
 #import "Users.h"
 #import "Blocks.h"
 
-@interface TabBarViewController : UITabBarController
+@interface TabBarViewController : UITabBarController<UITabBarControllerDelegate>
 {
     Database *myDatabase;
     Users *user;

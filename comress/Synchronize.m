@@ -771,7 +771,7 @@
         NSDictionary *surveyContainer;
         
         BOOL doUpload = NO;
-                                                                                // and survey_address_id = 0
+
         FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc limit 0, 1",[NSNumber numberWithInt:1]];
         
         while ([rsSurvey next]) {
@@ -792,7 +792,7 @@
             int ClientResidentAddressId = [rsSurvey intForColumn:@"client_resident_address_id"];
             NSString *ResidentContact = [rsSurvey stringForColumn:@"resident_contact"] ? [rsSurvey stringForColumn:@"resident_contact"] : @"" ;
             NSString *ResidentEmail = [rsSurvey stringForColumn:@"resident_email"] ? [rsSurvey stringForColumn:@"resident_email"] : @"" ;
-            NSNumber *DataProtection = [NSNumber numberWithInt:[rsSurvey intForColumn:@"DataProtection"]];
+            NSNumber *DataProtection = [NSNumber numberWithInt:[rsSurvey intForColumn:@"data_protection"]];
             
             [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyId] forKey:@"ClientSurveyId"];
             [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyAddressId] forKey:@"ClientSurveyAddressId"];
@@ -823,7 +823,6 @@
             [surveyDict setObject:answersArray forKey:@"AnswerList"];
             
             
-            
             //get feedbacks issue
             FMResultSet *rsFeedbackIssuesList = [db executeQuery:@"select * from su_feedback where client_survey_id = ?",[NSNumber numberWithInt:ClientSurveyId]];
             NSMutableArray *rsfiArr = [[NSMutableArray alloc] init];
@@ -849,7 +848,6 @@
             [surveyDict setObject:rsfiArr forKey:@"FeedbackIssueList"];
             
 
-            
             //get the addresses base on survey
             FMResultSet *rsAddressSurvey = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:ClientResidentAddressId]];
             NSMutableArray *addressArray = [[NSMutableArray alloc] init];
@@ -859,7 +857,7 @@
                 NSString *Location = [rsAddressSurvey stringForColumn:@"address"] ? [rsAddressSurvey stringForColumn:@"address"] : @"";
                 NSString *UnitNo = [rsAddressSurvey stringForColumn:@"unit_no"] ? [rsAddressSurvey stringForColumn:@"unit_no"] : @"";
                 NSString *SpecifyArea = [rsAddressSurvey stringForColumn:@"specify_area"] ? [rsAddressSurvey stringForColumn:@"specify_area"] : @"";
-                NSString *PostalCode = [rsAddressSurvey stringForColumn:@"postal_code"] ? [rsAddressSurvey stringForColumn:@"postal_code"] : @"";
+                NSString *PostalCode = [rsAddressSurvey stringForColumn:@"postal_code"] ? [rsAddressSurvey stringForColumn:@"postal_code"] : @"0";
                 
                 NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
                 
@@ -879,7 +877,7 @@
                     NSString *Location = [rsAddFeedBack stringForColumn:@"address"] ? [rsAddFeedBack stringForColumn:@"address"] : @"";
                     NSString *UnitNo = [rsAddFeedBack stringForColumn:@"unit_no"] ? [rsAddFeedBack stringForColumn:@"unit_no"] : @"";
                     NSString *SpecifyArea = [rsAddFeedBack stringForColumn:@"specify_area"] ? [rsAddFeedBack stringForColumn:@"specify_area"] : @"";
-                    NSString *PostalCode = [rsAddressFeedback stringForColumn:@"PostalCode"] ? [rsAddFeedBack stringForColumn:@"PostalCode"] : @"";
+                    NSString *PostalCode = [rsAddressFeedback stringForColumn:@"PostalCode"] ? [rsAddFeedBack stringForColumn:@"PostalCode"] : @"0";
                     
                     NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
                     
@@ -925,6 +923,8 @@
             return;
         }
         
+        
+        
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
             NSDictionary *topDict = (NSDictionary *)responseObject;
@@ -969,12 +969,18 @@
                 NSNumber *AddressId = [NSNumber numberWithInt:[[[AckAddressList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
                 NSNumber *ClientAddressId = [NSNumber numberWithInt:[[[AckAddressList objectAtIndex:i] valueForKey:@"ClientAddressId"] intValue]];
                 BOOL upAns = [db executeUpdate:@"update su_address set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
+                
+
                 if(!upAns)
                 {
                     *rollback = YES;
                     massUpdateOk = NO;
                     return;
                 }
+                
+                //update survey_address_id and resident_address_id
+                BOOL upSuAdds = [db executeUpdate:@"update su_survey set survey_address_id = ? where client_survey_address_id = ?",AddressId,ClientAddressId];
+                BOOL upSuAdds2 = [db executeUpdate:@"update su_survey set resident_address_id = ? where client_resident_address_id = ?",AddressId,ClientAddressId];
             }
             
             
@@ -1044,89 +1050,89 @@
 #pragma mark - upload resident info edit
 - (void)uploadResidentInfoEditForSurveyId:(NSNumber *)surveyId
 {
-    
-        NSMutableDictionary *surveyContainer = [[NSMutableDictionary alloc] init];
-//        {
-//            "surveyContainer" : {
-//                "SurveyId" : 1
-//                , "ResidentName" : "Resident 2"
-//                , "ResidentAgeRange" : "Above 70"
-//                , "ResidentGender" : "F"
-//                , "ResidentRace" : "Others"
-//                , "ResidentContact" : "82828282"
-//                , "ResidentEmail" : "r@email.com"
-//                , "ClientResidentAddressId" : 10
-//                , "ResidentAddressId" : 0
-//                , "AddressList" : [
-//                                   {"ClientAddressId" : 10, "AddressId" : 0, "Location" : "354 Ave 8, Ang Mo Kio Singapore 560354" , "UnitNo" : "#15-01" , "SpecifyArea" : "near lift lobby", "PostalCode": 424354 }
-//                                   ]
-//            }
-//        }
+    NSMutableDictionary *surveyContainer = [[NSMutableDictionary alloc] init];
+
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
         
-        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
+        NSMutableArray *addressArray = [[NSMutableArray alloc] init];
+        
+        while ([rs next]) {
+            NSNumber *SurveyId = [NSNumber numberWithInt:[rs intForColumn:@"survey_id"]];
+            NSString *ResidentName = [rs stringForColumn:@"resident_name"] ? [rs stringForColumn:@"resident_name"] : @"";
+            NSString *ResidentAgeRange = [rs stringForColumn:@"resident_age_range"] ? [rs stringForColumn:@"resident_age_range"] : @"";
+            NSString *ResidentGender = [rs stringForColumn:@"resident_gender"] ? [rs stringForColumn:@"resident_gender"] : @"";
+            NSString *ResidentRace = [rs stringForColumn:@"resident_race"] ? [rs stringForColumn:@"resident_race"] : @"";
+            NSString *ResidentContact = [rs stringForColumn:@"resident_contact"] ? [rs stringForColumn:@"resident_contact"] : @"";
+            NSString *ResidentEmail = [rs stringForColumn:@"resident_email"] ? [rs stringForColumn:@"resident_email"] : @"";
+            NSNumber *ClientResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_resident_address_id"]];
+            NSNumber *ResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"resident_address_id"]];
             
-            NSMutableArray *addressArray = [[NSMutableArray alloc] init];
             
-            while ([rs next]) {
-                NSNumber *SurveyId = [NSNumber numberWithInt:[rs intForColumn:@"survey_id"]];
-                NSString *ResidentName = [rs stringForColumn:@"resident_name"];
-                NSString *ResidentAgeRange = [rs stringForColumn:@"resident_age_range"];
-                NSString *ResidentGender = [rs stringForColumn:@"resident_gender"];
-                NSString *ResidentRace = [rs stringForColumn:@"resident_race"];
-                NSString *ResidentContact = [rs stringForColumn:@"resident_contact"];
-                NSString *ResidentEmail = [rs stringForColumn:@"resident_email"];
-                NSNumber *ClientResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_resident_address_id"]];
-                NSNumber *ResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"resident_address_id"]];
+            [surveyContainer setObject:SurveyId forKey:@"SurveyId"];
+            [surveyContainer setObject:ResidentName forKey:@"ResidentName"];
+            [surveyContainer setObject:ResidentAgeRange forKey:@"ResidentAgeRange"];
+            [surveyContainer setObject:ResidentGender forKey:@"ResidentGender"];
+            [surveyContainer setObject:ResidentRace forKey:@"ResidentRace"];
+            [surveyContainer setObject:ResidentContact forKey:@"ResidentContact"];
+            [surveyContainer setObject:ResidentEmail forKey:@"ResidentEmail"];
+            [surveyContainer setObject:ClientResidentAddressId forKey:@"ClientResidentAddressId"];
+            [surveyContainer setObject:ResidentAddressId forKey:@"ResidentAddressId"];
+            
+            //get address
+            FMResultSet *rsAddres = [db executeQuery:@"select * from su_address where client_address_id = ?",ClientResidentAddressId];
+            
+            while ([rsAddres next]) {
+                NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"client_address_id"]];
+                NSNumber *AddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"address_id"]];
+                NSString *Location = [rsAddres stringForColumn:@"address"];
+                NSString *UnitNo = [rsAddres stringForColumn:@"unit_no"];
+                NSString *SpecifyArea = [rsAddres stringForColumn:@"specify_area"];
+                NSString *PostalCode = [rsAddres stringForColumn:@"postal_code"];
                 
+                NSDictionary *dictAd = @{@"ClientAddressId" : ClientAddressId, @"AddressId" : AddressId, @"Location" : Location , @"UnitNo" : UnitNo , @"SpecifyArea" : SpecifyArea, @"PostalCode": PostalCode };
                 
-                [surveyContainer setObject:SurveyId forKey:@"SurveyId"];
-                [surveyContainer setObject:ResidentName forKey:@"ResidentName"];
-                [surveyContainer setObject:ResidentAgeRange forKey:@"ResidentAgeRange"];
-                [surveyContainer setObject:ResidentGender forKey:@"ResidentGender"];
-                [surveyContainer setObject:ResidentRace forKey:@"ResidentRace"];
-                [surveyContainer setObject:ResidentContact forKey:@"ResidentContact"];
-                [surveyContainer setObject:ResidentEmail forKey:@"ResidentEmail"];
-                [surveyContainer setObject:ClientResidentAddressId forKey:@"ClientResidentAddressId"];
-                [surveyContainer setObject:ResidentAddressId forKey:@"ResidentAddressId"];
-                
-                //get address
-                FMResultSet *rsAddres = [db executeQuery:@"select * from su_address where client_address_id = ?",ClientResidentAddressId];
-                
-                while ([rsAddres next]) {
-                    NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"client_address_id"]];
-                    NSNumber *AddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"address_id"]];
-                    NSString *Location = [rsAddres stringForColumn:@"address"];
-                    NSString *UnitNo = [rsAddres stringForColumn:@"unit_no"];
-                    NSString *SpecifyArea = [rsAddres stringForColumn:@"specify_area"];
-                    NSString *PostalCode = [rsAddres stringForColumn:@"postal_code"];
-                    
-                    NSDictionary *dictAd = @{@"ClientAddressId" : ClientAddressId, @"AddressId" : AddressId, @"Location" : Location , @"UnitNo" : UnitNo , @"SpecifyArea" : SpecifyArea, @"PostalCode": PostalCode };
-                    
-                    [addressArray addObject:dictAd];
-                }
-                
-                [surveyContainer setObject:addressArray forKey:@"AddressList"];
+                [addressArray addObject:dictAd];
             }
-        }];
-        
-        DDLogVerbose(@"inspectionResultList to send %@",[myDatabase toJsonString:surveyContainer]);
-//        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_resident_info_edit] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//            //{"AckAddress":[{"AddressId":5,"ClientAddressId":10}]}
-//            
-//            NSDictionary *topDict = (NSDictionary *)responseObject;
-//            NSArray *AckAddress = [topDict obje]
-//
-//            
-//
-//            
-//            
-//        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//            
-//            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
-//        }];
+            
+            [surveyContainer setObject:addressArray forKey:@"AddressList"];
+        }
+    }];
     
 
+    NSDictionary *surveyDict = @{@"surveyContainer" : surveyContainer};
+    
+    DDLogVerbose(@"surveyContainer %@",[myDatabase toJsonString:surveyDict]);
+    DDLogVerbose(@"guid %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_resident_info_edit] parameters:surveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *topDict = (NSDictionary *)responseObject;
+        
+        NSArray *AckAddress = [topDict objectForKey:@"AckAddress"];
+        
+        for (int i = 0; i < AckAddress.count; i++) {
+            NSDictionary *dict = [AckAddress objectAtIndex:i];
+            NSNumber *AddressId = [NSNumber numberWithInt:[[dict valueForKey:@"AddressId"] intValue]];
+            NSNumber *ClientAddressId = [NSNumber numberWithInt:[[dict valueForKey:@"ClientAddressId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                
+                BOOL upAddId = [db executeUpdate:@"update su_address set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
+                
+                if(!upAddId)
+                {
+                    *rollback = YES;
+                    return;
+                }
+            }];
+        }
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error,THIS_FILE,THIS_METHOD);
+    }];
 }
 
 
@@ -1253,8 +1259,6 @@
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
     DDLogVerbose(@"Post params %@",params);
-    
-
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
         

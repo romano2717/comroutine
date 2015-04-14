@@ -222,13 +222,13 @@
 - (IBAction)save:(id)sender
 {
     //change status of this survey as 1 to upload this survey
-    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        BOOL requireSync = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",[NSNumber numberWithInt:1], surveyId];
-        if (!requireSync) {
-            *rollback = YES;
-            return;
-        }
-    }];
+//    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+//        BOOL requireSync = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",[NSNumber numberWithInt:1], surveyId];
+//        if (!requireSync) {
+//            *rollback = YES;
+//            return;
+//        }
+//    }];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         NSString *resident_name = self.residentNameTxtFld.text;

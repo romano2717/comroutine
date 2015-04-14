@@ -154,7 +154,7 @@
 
 - (IBAction)addFeedBack:(id)sender
 {
-    [self performSegueWithIdentifier:@"modal_resident_info_edit" sender:self];
+    [self performSegueWithIdentifier:@"push_add_feedback" sender:self];
 }
 
 

@@ -62,7 +62,7 @@
     //check the address from feedback
     __block NSString *addressFromFeedBack;
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rsCheckAdd = [db executeQuery:@"select * from blocks where block_id = ?",blockId];
+        FMResultSet *rsCheckAdd = [db executeQuery:@"select * from blocks where postal_code = ?",postalCode];
         while ([rsCheckAdd next]) {
             addressFromFeedBack = [rsCheckAdd stringForColumn:@"street_name"];
             postalCode = [rsCheckAdd stringForColumn:@"postal_code"];
@@ -381,7 +381,24 @@
 #pragma mark Save new issue to local db
 - (IBAction)postNewIssue:(id)sender
 {
+    NSString *postal_code = [self.postalCodeTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *location = [self.addressTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *level = [self.levelTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *post_topic = [self.descriptionTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    NSString *severity = [self.severityBtn.titleLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    
     __block BOOL popThisVcBack = NO; //use this bool when this vc is pushed from survey detail
+    
+    
+    //get the blockid of this postal code
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        FMResultSet *rsBlkId = [db executeQuery:@"select * from blocks where postal_code = ?",postal_code];
+        while ([rsBlkId next]) {
+            blockId = [NSNumber numberWithInt:[rsBlkId intForColumn:@"block_id"]];
+        }
+    }];
+    
     
     if(blockId ==  0 || blockId == nil)
     {
@@ -398,13 +415,8 @@
     DDLogVerbose(@"selectedContractTypesArr %@",selectedContractTypesArr);
     
     for (int i = 0; i < selectedContractTypesArr.count; i ++) {
-        NSString *postal_code = [self.postalCodeTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSString *location = [self.addressTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSString *level = [self.levelTextField.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSString *post_topic = [self.descriptionTextView.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        NSString *severity = [self.severityBtn.titleLabel.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+       
         NSNumber *contract_type_id = [selectedContractTypesArr objectAtIndex:i];
-        
         
         //check if this contract_type_id exist in contract_type table
         __block BOOL contractFound = NO;

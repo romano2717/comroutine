@@ -17,7 +17,7 @@
 
 @implementation ResidentInfoViewController
 
-@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didAcceptTerms,foundPlacesArray,blockId;
+@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didTakeActionOnDataPrivacyTerms,foundPlacesArray,blockId;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -88,16 +88,34 @@
     
     if(btn.tag == 20) //decline
     {
-        [self.navigationController popToRootViewControllerAnimated:YES];
+        //update survey as data_protection = 0;
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            BOOL upSu = [db executeUpdate:@"update su_survey set data_protection = ? where client_survey_id = ?",[NSNumber numberWithInt:0],surveyId];
+            if(!upSu)
+            {
+                *rollback = YES;
+                return;
+            }
+        }];
     }
-    
     else //proceed
     {
-        didAcceptTerms = YES;
-        self.disclaimerView.hidden = YES;
-        
-        [self preFillOtherInfo];
+       //update survey as data_protection = 1;
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            BOOL upSu = [db executeUpdate:@"update su_survey set data_protection = ? where client_survey_id = ?",[NSNumber numberWithInt:1],surveyId];
+            if(!upSu)
+            {
+                *rollback = YES;
+                return;
+            }
+        }];
     }
+    
+    self.disclaimerView.hidden = YES;
+    
+    didTakeActionOnDataPrivacyTerms = YES;
+    
+    [self preFillOtherInfo];
 }
 
 
@@ -389,11 +407,11 @@
 
 - (IBAction)action:(id)sender
 {
-    if(didAcceptTerms == NO)
+    if(didTakeActionOnDataPrivacyTerms == NO)
         return;
     
     //alert
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action" message:@"Select what to do next" delegate:self cancelButtonTitle:nil otherButtonTitles:@"Add Feedback",@"Done", nil];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action" message:@"Select what to do next" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Add Feedback",@"Done", nil];
     
     [alert show];
 }
@@ -406,7 +424,7 @@
     }
     else
     {
-        if(buttonIndex == 0)
+        if(buttonIndex == 1)
         {
             [self saveResidentAdressWithSegueToFeedback:YES];
         }

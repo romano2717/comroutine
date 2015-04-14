@@ -62,6 +62,24 @@
     [self checkQuestionsCount];
 }
 
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+{
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+         UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+         DDLogVerbose(@"orientation %ld",orientation);
+         [ratingsCollectionView reloadData];
+         
+     } completion:^(id<UIViewControllerTransitionCoordinatorContext> context)
+     {
+         
+     }];
+    
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+    
+    
+}
+
 - (void)saveSurvey
 {
     //save this as new survey
@@ -433,6 +451,17 @@
 
 #pragma mark <UICollectionViewDelegate>
 
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
+{
+    UIInterfaceOrientation orientation = [[UIApplication sharedApplication] statusBarOrientation];
+
+    DDLogVerbose(@"orientation %ld",orientation);
+    if(orientation == 4  || orientation == 5)
+        return UIEdgeInsetsMake(0, 150, 0, 0);
+    
+    return UIEdgeInsetsMake(0, 30, 0, 0);
+}
+
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
     return YES;
 }
@@ -462,11 +491,9 @@
     
     //set to selected image
     [imageView shake:5 withDelta:5 andSpeed:0.1 shakeDirection:ShakeDirectionVertical completionHandler:^{
-//        imageView.image = (UIImage *)[ratingsImageSelectedArray objectAtIndex:indexPath.row];
-//        
-//        selectedRating = (int)ratingsImageArray.count - (int) indexPath.row;
-        
 
+        selectedRating = (int)ratingsImageArray.count - (int) indexPath.row;
+        
         //go to next question
         if(self.currentQuestionIndex < surveyQuestions.count)
         {

@@ -56,7 +56,7 @@
 
 @property (nonatomic, weak) IBOutlet UIView *disclaimerView;
 
-@property (nonatomic) BOOL didAcceptTerms;
+@property (nonatomic) BOOL didTakeActionOnDataPrivacyTerms;
 
 @property (nonatomic, strong) NSArray *foundPlacesArray;
 

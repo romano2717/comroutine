@@ -7,20 +7,45 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MPGTextField.h"
+#import "Database.h"
+#import "Survey.h"
+#import "Blocks.h"
 
-@interface ResidentPopInfoViewController : UIViewController
+@interface ResidentPopInfoViewController : UIViewController<MPGTextFieldDelegate>
+{
+    Database *myDatabase;
+    Survey *mySurvey;
+    Blocks *blocks;
+}
+@property (nonatomic, strong) NSNumber *surveyId;
 
-@property (nonatomic, strong) NSDictionary *residentInfo;
+@property (nonatomic, weak) IBOutlet MPGTextField *surveyAddressTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *areaTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *residentNameTxtFld;
+@property (nonatomic, weak) IBOutlet UIButton *ageBtn;
+@property (nonatomic, weak) IBOutlet UIButton *genderBtn;
+@property (nonatomic, weak) IBOutlet UIButton *raceBtn;
+@property (nonatomic, weak) IBOutlet UITextField *residentAddressTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *unitNoTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *contactTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *emailTxFld;
 
-@property (nonatomic, weak) IBOutlet UILabel *surveyAddressLabel;
-@property (nonatomic, weak) IBOutlet UILabel *areaLabel;
-@property (nonatomic, weak) IBOutlet UILabel *residentNameLabel;
-@property (nonatomic, weak) IBOutlet UILabel *ageLabel;
-@property (nonatomic, weak) IBOutlet UILabel *genderLabel;
-@property (nonatomic, weak) IBOutlet UILabel *raceLabel;
-@property (nonatomic, weak) IBOutlet UILabel *residentAddressLabel;
-@property (nonatomic, weak) IBOutlet UILabel *unitNoLabel;
-@property (nonatomic, weak) IBOutlet UILabel *contactLabel;
+@property (nonatomic, strong) NSString *selectedGender;
+@property (nonatomic, strong) NSString *selectedRace;
+@property (nonatomic, strong) NSString *selectedAgeRange;
+
+@property (nonatomic, strong) NSArray *ageRangeArray;
+@property (nonatomic, strong) NSArray *raceArray;
+
+@property (nonatomic) long long client_resident_address_id;
+@property (nonatomic) long long client_survey_address_id;
+
+@property (nonatomic, strong) NSString *surveyAddressPostalCode;
+@property (nonatomic, strong) NSString *residentAddressPostalCode;
+
+@property (nonatomic, strong) NSMutableArray *addressArray;
+@property (nonatomic, strong) NSNumber *blockId;
 
 
 @end

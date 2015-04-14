@@ -41,29 +41,18 @@
             self.averageRatingImageView.image = [UIImage imageNamed:@"oneOfThreeStars@2x"];
         
     }];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
     
     [self fetchSurveyDetail];
 }
 
 - (IBAction)popResidentInfForThisSurvey:(id)sender
 {
-    @try {
-        NSDictionary *residentInfo = [survey surveDetailForId:surveyId];
-        
-        ResidentPopInfoViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"ResidentPopInfoViewController"];
-        postInfoVc.residentInfo = residentInfo;
-        
-        popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
-        popover.arrowDirection = FPPopoverArrowDirectionUp;
-        popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
-        [popover presentPopoverFromView:self.navigationController.navigationBar];
-    }
-    @catch (NSException *exception) {
-        DDLogVerbose(@"%@ [%@-%@]",exception,THIS_FILE,THIS_METHOD);
-    }
-    @finally {
-
-    }
+    [self performSegueWithIdentifier:@"modal_resident_info_edit" sender:surveyId];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -121,6 +110,11 @@
         fvc.currentClientSurveyId = surveyId;
         fvc.pushFromSurveyDetail = YES;
     }
+    else if ([segue.identifier isEqualToString:@"modal_resident_info_edit"])
+    {
+        ResidentPopInfoViewController *rpvc = [segue destinationViewController];
+        rpvc.surveyId = surveyId;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -160,7 +154,7 @@
 
 - (IBAction)addFeedBack:(id)sender
 {
-    [self performSegueWithIdentifier:@"push_add_feedback" sender:self];
+    [self performSegueWithIdentifier:@"modal_resident_info_edit" sender:self];
 }
 
 

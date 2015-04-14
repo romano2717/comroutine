@@ -29,6 +29,9 @@
     
     self.crmAssignArray = [NSArray arrayWithObjects:@"My self",@"General CRM", nil];
     
+    autoAssignToMeMaintenance = YES;
+    autoAssignToMeOthers = YES;
+    
     //default selection
     self.selectedFeedBackLoc = @"survey";
     UIButton *btnSurveyDef = (UIButton *)[self.view viewWithTag:11];
@@ -331,6 +334,13 @@
     
     NSNumber *tag = [NSNumber numberWithInt:(int)btn.tag];
     
+    UIButton *btnCons = (UIButton *)[self.view viewWithTag:1];
+    UIButton *btnHort = (UIButton *)[self.view viewWithTag:2];
+    UIButton *btnPump = (UIButton *)[self.view viewWithTag:4];
+    UIButton *btnMain = (UIButton *)[self.view viewWithTag:6];
+    UIButton *btnOthers = (UIButton *)[self.view viewWithTag:7];
+    
+    
     if([self.selectedFeeBackTypeArr containsObject:tag] == NO)
     {
         [self.selectedFeeBackTypeArr addObject:tag];
@@ -340,6 +350,39 @@
         [self.selectedFeeBackTypeArr removeObject:tag];
     }
     
+    
+    if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]]) //none
+    {
+        [self.selectedFeeBackTypeArr removeAllObjects];
+        [self.selectedFeeBackTypeStringArr removeAllObjects];
+        
+        [self.selectedFeeBackTypeArr addObject:tag];
+        
+        DDLogVerbose(@"%@",self.selectedFeeBackTypeArr);
+        
+        [btnCons setSelected:NO];
+        [btnHort setSelected:NO];
+        [btnPump setSelected:NO];
+        [btnMain setSelected:NO];
+        [btnOthers setSelected:NO];
+        
+        btnCons.enabled = NO;
+        btnHort.enabled = NO;
+        btnPump.enabled = NO;
+        btnMain.enabled = NO;
+        btnOthers.enabled = NO;
+    }
+    else
+    {
+        btnCons.enabled = YES;
+        btnHort.enabled = YES;
+        btnPump.enabled = YES;
+        btnMain.enabled = YES;
+        btnOthers.enabled = YES;
+    }
+    
+    
+    //configure!
     //add contract type strings
     NSString *contractypeString;
     int intTag = [tag intValue];
@@ -399,102 +442,16 @@
     
     if(self.selectedFeeBackTypeStringArr.count > 0)
     {
-        NSString *message = [NSString stringWithFormat:@"Are you sure you want to create %lu issues?",(unsigned long)self.selectedFeeBackTypeStringArr.count];
+        BOOL onlyNoneIsSelectedDontCreateIssue = NO;
+        if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]] && self.selectedFeeBackTypeArr.count == 1)
+            onlyNoneIsSelectedDontCreateIssue = YES;
         
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes", nil];
-        
-        [alert show];
-    }
-    
-    else
-    {
-        NSString *message = @"Please select atleast one feedback related type.";
-        
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
-        
-        [alert show];
-    }
-}
-
-
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    if(buttonIndex == 1) //YES!
-    {
-        //save feedback!
-        __block NSNumber *feedBackId;
-        __block BOOL feedbackSaved = NO;
-        
-        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            
-            //get the client_survey_address_id and client_resident_address_id from survey using self.currentClientSurveyId
-            
-            FMResultSet *rsAdd = [db executeQuery:@"select * from su_survey where client_survey_id = ?",self.currentClientSurveyId];
-            NSNumber *client_survey_address_id;
-            NSNumber *client_resident_address_id;
-            
-            while ([rsAdd next]) {
-                client_survey_address_id = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_survey_address_id"]];
-                client_resident_address_id = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_resident_address_id"]];
-            }
-            
-            
-            NSNumber *client_address_id;
-            
-            if([self.selectedFeedBackLoc isEqualToString:@"survey"])
-            {
-                client_address_id = client_survey_address_id;
-            }
-            else if ([self.selectedFeedBackLoc isEqualToString:@"resident"])
-            {
-                client_address_id = client_resident_address_id;
-            }
-            else
-            {
-                //get address info of this client_address_id
-                FMResultSet *rsAddInfo = [db executeQuery:@"select * from su_address where client_address_id = ?",client_address_id];
-                
-                NSDictionary *dictAddInfo;
-                
-                while ([rsAddInfo next]) {
-                    dictAddInfo = [rsAddInfo resultDictionary];
-                }
-                
-                
-                //save the 'Others' address
-                BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area,postal_code) values (?,?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"],postalCode];
-                
-                if(!ins)
-                {
-                    *rollback = YES;
-                    return;
-                }
-                
-                client_address_id = [NSNumber numberWithLongLong:[db lastInsertRowId]];
-            }
-            
-            //finally, save the feedback
-            
-            BOOL insFeedBack = [db executeUpdate:@"insert into su_feedback (client_survey_id,description,client_address_id) values (?,?,?)",currentClientSurveyId,self.feedBackTextView.text,client_address_id];
-            
-            if(!insFeedBack)
-            {
-                *rollback = YES;
-                return;
-            }
-            else
-            {
-                feedbackSaved = YES;
-                
-                feedBackId = [NSNumber numberWithLongLong:[db lastInsertRowId]];
-            }
-        }];
-        
-        
-        if(feedbackSaved)
+        if(onlyNoneIsSelectedDontCreateIssue == YES)
         {
-            //check self.selectedFeeBackTypeArr
-            
+            [self saveFeedBack];
+        }
+        else
+        {
             BOOL allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = NO;
             
             if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && [self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]])
@@ -512,65 +469,205 @@
             }
             
             
-            BOOL onlyNoneIsSelectedDontCreateIssue = NO;
-            if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]] && self.selectedFeeBackTypeArr.count == 1)
-                onlyNoneIsSelectedDontCreateIssue = YES;
-            
-            
-            if(allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue)
-            {
-                for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
-                    //19 none
-                    //6 maint
-                    //7 others
-                    
-                    
-                    //save to su_feedback_issue
-                    NSNumber *typeId = [self.selectedFeeBackTypeArr objectAtIndex:i];
-                    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-                        
-                        NSNumber *feedBackIssueIdForCrmDontNeedPostId = [NSNumber numberWithInt:0];
-                        
-                        if([typeId intValue] == 6)
-                        {
-                            BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-MAINTENANCE",[NSNumber numberWithBool:autoAssignToMeMaintenance]];
-                            
-                            if(!ins)
-                            {
-                                *rollback = YES;
-                                return ;
-                            }
-                        }
-                        else if([typeId intValue] == 7)
-                        {
-                            BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-OTHERS",[NSNumber numberWithBool:autoAssignToMeOthers]];
-                            
-                            if(!ins)
-                            {
-                                *rollback = YES;
-                                return ;
-                            }
-                        }
-                    }];
+            //do we have post?
+            int postCounter = 0;
+            for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
+                NSNumber *postType = [self.selectedFeeBackTypeArr objectAtIndex:i];
+                
+                if([postType intValue] == 1 || [postType intValue] == 2 || [postType intValue] == 4)
+                {
+                    postCounter++;
                 }
-                
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Issues have been raised." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
-                [alert show];
-                
-                [self.navigationController popViewControllerAnimated:YES];
             }
-            else if (onlyNoneIsSelectedDontCreateIssue)
+            
+            NSString *message;
+            
+            if(allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue == YES)
+                message = @"Save feedback and raise this issue(s)?";
+            else
+                message = [NSString stringWithFormat:@"Are you sure you want to create %d issues?",postCounter];
+                
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:self cancelButtonTitle:@"No" otherButtonTitles:@"Yes", nil];
+            
+            [alert show];
+        }
+    }
+    else
+    {
+        NSString *message = @"Please select atleast one feedback related type.";
+        
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:message delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Okay", nil];
+        
+        [alert show];
+    }
+}
+
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if(buttonIndex == 1) //YES!
+    {
+        [self saveFeedBack];
+    }
+}
+
+
+- (void)saveFeedBack
+{
+    //save feedback!
+    __block NSNumber *feedBackId;
+    __block BOOL feedbackSaved = NO;
+    
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        //get the client_survey_address_id and client_resident_address_id from survey using self.currentClientSurveyId
+        
+        FMResultSet *rsAdd = [db executeQuery:@"select * from su_survey where client_survey_id = ?",self.currentClientSurveyId];
+        NSNumber *client_survey_address_id;
+        NSNumber *client_resident_address_id;
+        
+        while ([rsAdd next]) {
+            client_survey_address_id = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_survey_address_id"]];
+            client_resident_address_id = [NSNumber numberWithInt:[rsAdd intForColumn:@"client_resident_address_id"]];
+        }
+        
+        
+        NSNumber *client_address_id;
+        
+        if([self.selectedFeedBackLoc isEqualToString:@"survey"])
+        {
+            client_address_id = client_survey_address_id;
+        }
+        else if ([self.selectedFeedBackLoc isEqualToString:@"resident"])
+        {
+            client_address_id = client_resident_address_id;
+        }
+        else
+        {
+            //get address info of this client_address_id
+            FMResultSet *rsAddInfo = [db executeQuery:@"select * from su_address where client_address_id = ?",client_address_id];
+            
+            NSDictionary *dictAddInfo;
+            
+            while ([rsAddInfo next]) {
+                dictAddInfo = [rsAddInfo resultDictionary];
+            }
+            
+            
+            //save the 'Others' address
+            BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area,postal_code) values (?,?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"],postalCode];
+            
+            if(!ins)
             {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Feedback is saved." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
-                [alert show];
+                *rollback = YES;
+                return;
+            }
+            
+            client_address_id = [NSNumber numberWithLongLong:[db lastInsertRowId]];
+        }
+        
+        //finally, save the feedback
+        
+        BOOL insFeedBack = [db executeUpdate:@"insert into su_feedback (client_survey_id,description,client_address_id) values (?,?,?)",currentClientSurveyId,self.feedBackTextView.text,client_address_id];
+        
+        if(!insFeedBack)
+        {
+            *rollback = YES;
+            return;
+        }
+        else
+        {
+            feedbackSaved = YES;
+            
+            feedBackId = [NSNumber numberWithLongLong:[db lastInsertRowId]];
+        }
+    }];
+    
+    
+    if(feedbackSaved)
+    {
+        //check self.selectedFeeBackTypeArr
+        
+        BOOL allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = NO;
+        
+        if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && [self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]])
+        {
+            allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+        }
+        else if ([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && self.selectedFeeBackTypeArr.count == 1)
+        {
+            allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+        }
+        
+        else if ([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]] && self.selectedFeeBackTypeArr.count == 1)
+        {
+            allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
+        }
+        
+        
+        BOOL onlyNoneIsSelectedDontCreateIssue = NO;
+        if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]] && self.selectedFeeBackTypeArr.count == 1)
+            onlyNoneIsSelectedDontCreateIssue = YES;
+        
+        
+
+        
+        
+        if(allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue)
+        {
+            for (int i = 0; i < self.selectedFeeBackTypeArr.count; i++) {
+                //19 none
+                //6 maint
+                //7 others
                 
-                [self.navigationController popViewControllerAnimated:YES];
+                
+                //save to su_feedback_issue
+                NSNumber *typeId = [self.selectedFeeBackTypeArr objectAtIndex:i];
+                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                    
+                    NSNumber *feedBackIssueIdForCrmDontNeedPostId = [NSNumber numberWithInt:0];
+                    
+                    if([typeId intValue] == 6)
+                    {
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-MAINTENANCE",[NSNumber numberWithBool:autoAssignToMeMaintenance]];
+                        
+                        if(!ins)
+                        {
+                            *rollback = YES;
+                            return ;
+                        }
+                    }
+                    else if([typeId intValue] == 7)
+                    {
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-OTHERS",[NSNumber numberWithBool:autoAssignToMeOthers]];
+                        
+                        if(!ins)
+                        {
+                            *rollback = YES;
+                            return ;
+                        }
+                    }
+                }];
             }
-            else //could be all comress issues or combination of crm and or combination of all
-            {
-                //segue to issues and pass selected contract types;
-                [self performSegueWithIdentifier:@"modal_create_issue" sender:feedBackId];
-            }
+            
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Issues have been raised." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+            [alert show];
+            
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        
+        else if (onlyNoneIsSelectedDontCreateIssue)
+        {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feedback" message:@"Feedback is saved." delegate:nil cancelButtonTitle:nil otherButtonTitles:@"Ok", nil];
+            [alert show];
+            
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        
+        else //could be all comress issues or combination of crm and or combination of all
+        {
+            //segue to issues and pass selected contract types;
+            [self performSegueWithIdentifier:@"modal_create_issue" sender:feedBackId];
         }
     }
 }
@@ -581,26 +678,62 @@
     
     [self.view endEditing:YES];
     
-    [ActionSheetStringPicker showPickerWithTitle:@"Assign CRM To:" rows:self.crmAssignArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
-        
-        if(btn.tag == 1)
+//    [ActionSheetStringPicker showPickerWithTitle:@"Assign CRM To:" rows:self.crmAssignArray initialSelection:0 doneBlock:^(ActionSheetStringPicker *picker, NSInteger selectedIndex, id selectedValue) {
+//        
+//        if(btn.tag == 1)
+//        {
+//            self.selectedCrmAssignmentForMaintenance = [self.crmAssignArray objectAtIndex:selectedIndex];
+//            autoAssignToMeMaintenance = YES;
+//        }
+//        
+//        else
+//        {
+//            self.selectedCrmAssignmentForOthers = [self.crmAssignArray objectAtIndex:selectedIndex];
+//            autoAssignToMeOthers = YES;
+//        }
+//        
+//        
+//        [btn setTitle:[NSString stringWithFormat:@" %@",[self.crmAssignArray objectAtIndex:selectedIndex]] forState:UIControlStateNormal];
+//        
+//    } cancelBlock:^(ActionSheetStringPicker *picker) {
+//        
+//    } origin:sender];
+    
+    
+    
+    
+    if(btn.tag == 1)
+    {
+        if(autoAssignToMeMaintenance == YES)
         {
-            self.selectedCrmAssignmentForMaintenance = [self.crmAssignArray objectAtIndex:selectedIndex];
+            autoAssignToMeMaintenance = NO;
+            [btn setTitle:@"General Crm" forState:UIControlStateNormal];
+        }
+
+        else
+        {
             autoAssignToMeMaintenance = YES;
+            [btn setTitle:@"My self" forState:UIControlStateNormal];
+        }
+        
+        
+
+    }
+    else
+    {
+        if(autoAssignToMeOthers == YES)
+        {
+            autoAssignToMeOthers = NO;
+            [btn setTitle:@"General Crm" forState:UIControlStateNormal];
         }
         
         else
         {
-            self.selectedCrmAssignmentForOthers = [self.crmAssignArray objectAtIndex:selectedIndex];
             autoAssignToMeOthers = YES;
+            [btn setTitle:@"My self" forState:UIControlStateNormal];
         }
         
-        
-        [btn setTitle:[NSString stringWithFormat:@" %@",[self.crmAssignArray objectAtIndex:selectedIndex]] forState:UIControlStateNormal];
-        
-    } cancelBlock:^(ActionSheetStringPicker *picker) {
-        
-    } origin:sender];
+    }
 }
 
 

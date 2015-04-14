@@ -183,6 +183,7 @@ contract_type;
         
         
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            db.traceExecution = YES;
             FMResultSet *rsPost = [db executeQuery:q];
             
             while ([rsPost next]) {
@@ -193,7 +194,7 @@ contract_type;
                 NSMutableDictionary *postDict = [[NSMutableDictionary alloc] init];
                 NSMutableDictionary *postChild = [[NSMutableDictionary alloc] init];
                 
-                if([rsPost boolForColumn:@"seen"] == NO) //if we found at leas one we flag it to no
+                if([rsPost boolForColumn:@"seen"] == NO && onlyOverDue == YES) //if we found at leas one we flag it to no
                     myDatabase.allPostWasSeen = NO;
                 
                 /*
@@ -447,7 +448,7 @@ contract_type;
     
     myDatabase = [Database sharedMyDbManager];
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-
+        db.traceExecution = YES;
         //update this post as seen
         NSNumber *wasSeen = [NSNumber numberWithBool:YES];
 
@@ -468,6 +469,7 @@ contract_type;
             *rollback = YES;
             return;
         }
+        DDLogVerbose(@"rows affected %d",[db changes]);
     }];
     
     Synchronize *sync = [Synchronize sharedManager];
@@ -483,7 +485,7 @@ contract_type;
 -(NSArray *)fetchPostsForBlockId:(NSNumber *)blockId
 {
     @try {
-        myDatabase.allPostWasSeen = YES;
+        //myDatabase.allPostWasSeen = YES;
         
         NSMutableArray *arr = [[NSMutableArray alloc] init];
         
@@ -503,8 +505,9 @@ contract_type;
                 NSMutableDictionary *postDict = [[NSMutableDictionary alloc] init];
                 NSMutableDictionary *postChild = [[NSMutableDictionary alloc] init];
                 
-                if([rsPost boolForColumn:@"seen"] == NO) //if we found at leas one we flag it to no
-                    myDatabase.allPostWasSeen = NO;
+                
+                //if([rsPost boolForColumn:@"seen"] == NO) //if we found at leas one we flag it to no
+                  //  myDatabase.allPostWasSeen = NO;
                 
                 [postChild setObject:[rsPost resultDictionary] forKey:@"post"];
                 
@@ -599,10 +602,10 @@ contract_type;
         if(mutArr.count == arr.count)
             return mutArr;
         
-        if(myDatabase.allPostWasSeen)
-        {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"allPostWasSeen" object:nil];
-        }
+        //if(myDatabase.allPostWasSeen)
+        //{
+           // [[NSNotificationCenter defaultCenter] postNotificationName:@"allPostWasSeen" object:nil];
+        //}
         
         return arr;
     }

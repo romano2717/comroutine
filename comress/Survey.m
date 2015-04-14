@@ -23,7 +23,7 @@
     NSMutableArray *surveyArr = [[NSMutableArray alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc",[NSNumber numberWithInt:0]];
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey order by survey_date desc"];
         
         while ([rs next]) {
             //check if this survey got atleast 1 answer, if not, don't add this survery
@@ -38,7 +38,11 @@
                 //get address details
                 NSNumber *clientAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_survey_address_id"]];
                 NSNumber *addressId = [NSNumber numberWithInt:[rs intForColumn:@"survey_address_id"]];
-                FMResultSet *rsAdd = [db executeQuery:@"select * from su_address where client_address_id != ? and (client_address_id = ? or address_id = ?)",[NSNumber numberWithInt:0],clientAddressId,addressId];
+                FMResultSet *rsAdd;
+                if([addressId intValue] > 0)
+                    rsAdd = [db executeQuery:@"select * from su_address where client_address_id != ? and (client_address_id = ? or address_id = ?)",[NSNumber numberWithInt:0],clientAddressId,addressId];
+                else
+                    rsAdd = [db executeQuery:@"select * from su_address where client_address_id != ? and (client_address_id = ?)",[NSNumber numberWithInt:0],clientAddressId];
                 
                 BOOL thereIsAnAddress = NO;
                 
@@ -47,7 +51,7 @@
                     [row setObject:[rsAdd resultDictionary] forKey:@"address"];
                 }
                 
-                if(thereIsAnAddress)
+                //if(thereIsAnAddress) //no address means the resident decline the data policy terms, consider it an anonymous survey
                     [surveyArr addObject:row];
             }
         }
@@ -76,7 +80,7 @@
     else
     {
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            FMResultSet *rs = [db executeQuery:@"select * from su_feedback where client_survey_id = ?",surveyId];
+            FMResultSet *rs = [db executeQuery:@"select * from su_feedback where client_survey_id = ? order by client_feedback_id desc",surveyId];
             
             while ([rs next]) {
                 NSMutableDictionary *row = [[NSMutableDictionary alloc] init];

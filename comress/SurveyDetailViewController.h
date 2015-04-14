@@ -33,4 +33,6 @@
 
 @property (nonatomic) BOOL pushFromIssue;
 
+@property (nonatomic, weak) IBOutlet UIButton *residentInfoBtn;
+
 @end

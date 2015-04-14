@@ -381,9 +381,17 @@
             
         case 14:
         {
-            break;
-            
             //download survey
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                FMResultSet *rs5 = [db executeQuery:@"select date from su_survey_last_req_date"];
+                
+                if([rs5 next])
+                {
+                    jsonDate = (NSDate *)[rs5 dateForColumn:@"date"];
+                }
+                [sync startDownloadSurveyPage:1 totalPage:0 requestDate:jsonDate];
+            }];
+            break;
         }
         
             

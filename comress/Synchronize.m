@@ -771,7 +771,7 @@
         NSDictionary *surveyContainer;
         
         BOOL doUpload = NO;
-        
+                                                                                // and survey_address_id = 0
         FMResultSet *rsSurvey = [db executeQuery:@"select * from su_survey where status = ? order by survey_date desc limit 0, 1",[NSNumber numberWithInt:1]];
         
         while ([rsSurvey next]) {
@@ -792,6 +792,7 @@
             int ClientResidentAddressId = [rsSurvey intForColumn:@"client_resident_address_id"];
             NSString *ResidentContact = [rsSurvey stringForColumn:@"resident_contact"] ? [rsSurvey stringForColumn:@"resident_contact"] : @"" ;
             NSString *ResidentEmail = [rsSurvey stringForColumn:@"resident_email"] ? [rsSurvey stringForColumn:@"resident_email"] : @"" ;
+            NSNumber *DataProtection = [NSNumber numberWithInt:[rsSurvey intForColumn:@"DataProtection"]];
             
             [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyId] forKey:@"ClientSurveyId"];
             [surveyDict setObject:[NSNumber numberWithInt:ClientSurveyAddressId] forKey:@"ClientSurveyAddressId"];
@@ -803,6 +804,7 @@
             [surveyDict setObject:[NSNumber numberWithInt:ClientResidentAddressId] forKey:@"ClientResidentAddressId"];
             [surveyDict setObject:ResidentContact forKey:@"ResidentContact"];
             [surveyDict setObject:ResidentEmail forKey:@"ResidentEmail"];
+            [surveyDict setObject:DataProtection forKey:@"DataProtection"];
             
             
             //get answers list
@@ -1037,6 +1039,94 @@
         }];
         
     }];
+}
+
+#pragma mark - upload resident info edit
+- (void)uploadResidentInfoEditForSurveyId:(NSNumber *)surveyId
+{
+    
+        NSMutableDictionary *surveyContainer = [[NSMutableDictionary alloc] init];
+//        {
+//            "surveyContainer" : {
+//                "SurveyId" : 1
+//                , "ResidentName" : "Resident 2"
+//                , "ResidentAgeRange" : "Above 70"
+//                , "ResidentGender" : "F"
+//                , "ResidentRace" : "Others"
+//                , "ResidentContact" : "82828282"
+//                , "ResidentEmail" : "r@email.com"
+//                , "ClientResidentAddressId" : 10
+//                , "ResidentAddressId" : 0
+//                , "AddressList" : [
+//                                   {"ClientAddressId" : 10, "AddressId" : 0, "Location" : "354 Ave 8, Ang Mo Kio Singapore 560354" , "UnitNo" : "#15-01" , "SpecifyArea" : "near lift lobby", "PostalCode": 424354 }
+//                                   ]
+//            }
+//        }
+        
+        [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+            FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
+            
+            NSMutableArray *addressArray = [[NSMutableArray alloc] init];
+            
+            while ([rs next]) {
+                NSNumber *SurveyId = [NSNumber numberWithInt:[rs intForColumn:@"survey_id"]];
+                NSString *ResidentName = [rs stringForColumn:@"resident_name"];
+                NSString *ResidentAgeRange = [rs stringForColumn:@"resident_age_range"];
+                NSString *ResidentGender = [rs stringForColumn:@"resident_gender"];
+                NSString *ResidentRace = [rs stringForColumn:@"resident_race"];
+                NSString *ResidentContact = [rs stringForColumn:@"resident_contact"];
+                NSString *ResidentEmail = [rs stringForColumn:@"resident_email"];
+                NSNumber *ClientResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_resident_address_id"]];
+                NSNumber *ResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"resident_address_id"]];
+                
+                
+                [surveyContainer setObject:SurveyId forKey:@"SurveyId"];
+                [surveyContainer setObject:ResidentName forKey:@"ResidentName"];
+                [surveyContainer setObject:ResidentAgeRange forKey:@"ResidentAgeRange"];
+                [surveyContainer setObject:ResidentGender forKey:@"ResidentGender"];
+                [surveyContainer setObject:ResidentRace forKey:@"ResidentRace"];
+                [surveyContainer setObject:ResidentContact forKey:@"ResidentContact"];
+                [surveyContainer setObject:ResidentEmail forKey:@"ResidentEmail"];
+                [surveyContainer setObject:ClientResidentAddressId forKey:@"ClientResidentAddressId"];
+                [surveyContainer setObject:ResidentAddressId forKey:@"ResidentAddressId"];
+                
+                //get address
+                FMResultSet *rsAddres = [db executeQuery:@"select * from su_address where client_address_id = ?",ClientResidentAddressId];
+                
+                while ([rsAddres next]) {
+                    NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"client_address_id"]];
+                    NSNumber *AddressId = [NSNumber numberWithInt:[rsAddres intForColumn:@"address_id"]];
+                    NSString *Location = [rsAddres stringForColumn:@"address"];
+                    NSString *UnitNo = [rsAddres stringForColumn:@"unit_no"];
+                    NSString *SpecifyArea = [rsAddres stringForColumn:@"specify_area"];
+                    NSString *PostalCode = [rsAddres stringForColumn:@"postal_code"];
+                    
+                    NSDictionary *dictAd = @{@"ClientAddressId" : ClientAddressId, @"AddressId" : AddressId, @"Location" : Location , @"UnitNo" : UnitNo , @"SpecifyArea" : SpecifyArea, @"PostalCode": PostalCode };
+                    
+                    [addressArray addObject:dictAd];
+                }
+                
+                [surveyContainer setObject:addressArray forKey:@"AddressList"];
+            }
+        }];
+        
+        DDLogVerbose(@"inspectionResultList to send %@",[myDatabase toJsonString:surveyContainer]);
+//        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_resident_info_edit] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//            //{"AckAddress":[{"AddressId":5,"ClientAddressId":10}]}
+//            
+//            NSDictionary *topDict = (NSDictionary *)responseObject;
+//            NSArray *AckAddress = [topDict obje]
+//
+//            
+//
+//            
+//            
+//        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//            
+//            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+//        }];
+    
+
 }
 
 
@@ -1296,7 +1386,7 @@
             NSNumber *SurveyAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyAddressId"] intValue]];
             NSDate *SurveyDate = [myDatabase createNSDateWithWcfDateString:[[SurveyList objectAtIndex:i] valueForKey:@"SurveyDate"]];
             NSNumber *SurveyId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
-            
+            NSNumber *DataProtection = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"DataProtection"] intValue]];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 
@@ -1304,7 +1394,7 @@
                 
                 if([rsCheck next] == NO)
                 {
-                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id,resident_contact,resident_email) values (?,?,?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId,ResidentContact,ResidentEmail];
+                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id,resident_contact,resident_email,data_protection) values (?,?,?,?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId,ResidentContact,ResidentEmail,DataProtection];
                     
                     if(!insAdd)
                     {

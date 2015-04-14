@@ -95,6 +95,8 @@ static NSString *api_upload_crm = @"Survey/Survey.svc/UploadCRMIssue";
 
 static NSString *api_download_feedback_issues = @"Survey/Survey.svc/GetFeedbackIssues";
 
+static NSString *api_upload_resident_info_edit = @"Survey/Survey.svc/UpdateResidentInfo";
+
 
 #endif
 

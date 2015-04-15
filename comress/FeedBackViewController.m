@@ -627,7 +627,7 @@
         
         BOOL allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = NO;
         
-        if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && [self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]])
+        if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:6]] && [self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:7]] && self.selectedFeeBackTypeArr.count == 2)
         {
             allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue = YES;
         }
@@ -645,10 +645,6 @@
         BOOL onlyNoneIsSelectedDontCreateIssue = NO;
         if([self.selectedFeeBackTypeArr containsObject:[NSNumber numberWithInt:19]] && self.selectedFeeBackTypeArr.count == 1)
             onlyNoneIsSelectedDontCreateIssue = YES;
-        
-        
-
-        
         
         if(allAreCrmDontCreateIssuAndInsertDirectylyToFeedbackIssue)
         {

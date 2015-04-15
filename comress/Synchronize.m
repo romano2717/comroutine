@@ -765,6 +765,7 @@
 #pragma mark - upload survey
 - (void)uploadSurveyFromSelf:(BOOL)thisSelf
 {
+    
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         
         NSMutableDictionary *surveyDict = [[NSMutableDictionary alloc] init];
@@ -847,12 +848,28 @@
             
             [surveyDict setObject:rsfiArr forKey:@"FeedbackIssueList"];
             
-
-            //get the addresses base on survey
-            FMResultSet *rsAddressSurvey = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:ClientResidentAddressId]];
+            //get address
             NSMutableArray *addressArray = [[NSMutableArray alloc] init];
             
+            //get the addresses base on survey address
+            FMResultSet *rsAddressSurvey = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:ClientSurveyAddressId]];
+            
             while ([rsAddressSurvey next]) {
+                NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddressSurvey intForColumn:@"client_address_id"]];
+                NSString *Location = [rsAddressSurvey stringForColumn:@"address"] ? [rsAddressSurvey stringForColumn:@"address"] : @"";
+                NSString *UnitNo = [rsAddressSurvey stringForColumn:@"unit_no"] ? [rsAddressSurvey stringForColumn:@"unit_no"] : @"";
+                NSString *SpecifyArea = [rsAddressSurvey stringForColumn:@"specify_area"] ? [rsAddressSurvey stringForColumn:@"specify_area"] : @"";
+                NSString *PostalCode = [rsAddressSurvey stringForColumn:@"postal_code"] ? [rsAddressSurvey stringForColumn:@"postal_code"] : @"0";
+                
+                NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
+                
+                [addressArray addObject:dictAddSurvey];
+            }
+            
+            //get the addresses base on resident address
+            FMResultSet *rsAddressSurvey2 = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:ClientResidentAddressId]];
+            
+            while ([rsAddressSurvey2 next]) {
                 NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddressSurvey intForColumn:@"client_address_id"]];
                 NSString *Location = [rsAddressSurvey stringForColumn:@"address"] ? [rsAddressSurvey stringForColumn:@"address"] : @"";
                 NSString *UnitNo = [rsAddressSurvey stringForColumn:@"unit_no"] ? [rsAddressSurvey stringForColumn:@"unit_no"] : @"";

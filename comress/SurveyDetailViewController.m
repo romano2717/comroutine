@@ -115,6 +115,13 @@
         ResidentPopInfoViewController *rpvc = [segue destinationViewController];
         rpvc.surveyId = surveyId;
     }
+    else if([segue.identifier isEqualToString:@"push_feedback_info"])
+    {
+        NSDictionary *dict = (NSDictionary *)sender;
+        FeedBackInfoViewController *fivc = [segue destinationViewController];
+        NSNumber *feedBackId = [NSNumber numberWithInt:[[[dict objectForKey:@"feedback"] valueForKey:@"client_feedback_id"] intValue]];
+        fivc.feedbackId = feedBackId;
+    }
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -152,6 +159,15 @@
     }
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.segment.selectedSegmentIndex == 1) {
+        NSDictionary *dict = [self.dataArray objectAtIndex:indexPath.row];
+        
+        [self performSegueWithIdentifier:@"push_feedback_info" sender:dict];
+    }
+}
+
 - (IBAction)addFeedBack:(id)sender
 {
     [self performSegueWithIdentifier:@"push_add_feedback" sender:self];
@@ -163,8 +179,6 @@
     UIButton *btn = (UIButton *)sender;
     
     int tag = (int)btn.tag;
-    
-    
 }
 
 

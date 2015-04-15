@@ -597,7 +597,11 @@
                 }
                 else
                 {
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"push_survey_detail" object:nil userInfo:surveyIdDict];
+                    //base on wireframe
+                    //[[NSNotificationCenter defaultCenter] postNotificationName:@"push_survey_detail" object:nil userInfo:surveyIdDict];
+                    
+                    //not base on wireframe, go back to previous vc(resident info)
+                    [[NSNotificationCenter defaultCenter] postNotificationName:@"go_back_to_survey" object:nil userInfo:surveyIdDict];
                 }
                 
                 

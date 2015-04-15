@@ -14,6 +14,7 @@
 #import "FeedBackViewController.h"
 #import "FPPopoverKeyboardResponsiveController.h"
 #import "ResidentPopInfoViewController.h"
+#import "FeedBackInfoViewController.h"
 
 @interface SurveyDetailViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 {

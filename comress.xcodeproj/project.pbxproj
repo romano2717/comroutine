@@ -37,6 +37,9 @@
 		4D118AC91ABBF96D0062C129 /* CheckListHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AC71ABBF96D0062C129 /* CheckListHeader.m */; };
 		4D1FCE191ADB9C1E005381FA /* residentInfo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1FCE181ADB9C1E005381FA /* residentInfo.png */; };
 		4D1FCE1B1ADB9D18005381FA /* user@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1FCE1A1ADB9D18005381FA /* user@2x.png */; };
+		4D2604FD1ADE169800C8E140 /* FeedBackInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2604FC1ADE169800C8E140 /* FeedBackInfoViewController.m */; };
+		4D2605001ADE367C00C8E140 /* Feedback.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2604FF1ADE367C00C8E140 /* Feedback.m */; };
+		4D2605061ADE627200C8E140 /* comress_final_struc_empty.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D2605051ADE627200C8E140 /* comress_final_struc_empty.sqlite */; };
 		4D337D2F1ACBE10800F9C7AA /* rating@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D337D2E1ACBE10800F9C7AA /* rating@2x.png */; };
 		4D337D321ACBE8BC00F9C7AA /* radio_on@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D337D301ACBE8BC00F9C7AA /* radio_on@2x.png */; };
 		4D337D331ACBE8BC00F9C7AA /* radio_off@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D337D311ACBE8BC00F9C7AA /* radio_off@2x.png */; };
@@ -81,7 +84,6 @@
 		4D85E6B11AD7930100170D66 /* twoOfThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AD1AD7930100170D66 /* twoOfThreeStars@2x.png */; };
 		4D85E6B21AD7930100170D66 /* oneOfThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AE1AD7930100170D66 /* oneOfThreeStars@2x.png */; };
 		4D85E6B31AD7930100170D66 /* noThreeStars@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6AF1AD7930100170D66 /* noThreeStars@2x.png */; };
-		4D85E6BF1ADB6FB400170D66 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D85E6BE1ADB6FB400170D66 /* comress.sqlite */; };
 		4D878D271AD4FBD1000CC3FC /* logo@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D261AD4FBD1000CC3FC /* logo@2x.png */; };
 		4D878D291AD4FDC8000CC3FC /* top_tptclogo_new1.gif in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D281AD4FDC8000CC3FC /* top_tptclogo_new1.gif */; };
 		4D878D2B1AD50252000CC3FC /* jointlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D878D2A1AD50252000CC3FC /* jointlogo.png */; };
@@ -312,6 +314,11 @@
 		4D118AC81ABBF96D0062C129 /* CheckListHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListHeader.h; sourceTree = "<group>"; };
 		4D1FCE181ADB9C1E005381FA /* residentInfo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = residentInfo.png; sourceTree = "<group>"; };
 		4D1FCE1A1ADB9D18005381FA /* user@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "user@2x.png"; sourceTree = "<group>"; };
+		4D2604FB1ADE169800C8E140 /* FeedBackInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedBackInfoViewController.h; sourceTree = "<group>"; };
+		4D2604FC1ADE169800C8E140 /* FeedBackInfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeedBackInfoViewController.m; sourceTree = "<group>"; };
+		4D2604FE1ADE367C00C8E140 /* Feedback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Feedback.h; sourceTree = "<group>"; };
+		4D2604FF1ADE367C00C8E140 /* Feedback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Feedback.m; sourceTree = "<group>"; };
+		4D2605051ADE627200C8E140 /* comress_final_struc_empty.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress_final_struc_empty.sqlite; sourceTree = "<group>"; };
 		4D337D2E1ACBE10800F9C7AA /* rating@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "rating@2x.png"; sourceTree = "<group>"; };
 		4D337D301ACBE8BC00F9C7AA /* radio_on@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "radio_on@2x.png"; sourceTree = "<group>"; };
 		4D337D311ACBE8BC00F9C7AA /* radio_off@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "radio_off@2x.png"; sourceTree = "<group>"; };
@@ -374,7 +381,6 @@
 		4D85E6AD1AD7930100170D66 /* twoOfThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "twoOfThreeStars@2x.png"; sourceTree = "<group>"; };
 		4D85E6AE1AD7930100170D66 /* oneOfThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "oneOfThreeStars@2x.png"; sourceTree = "<group>"; };
 		4D85E6AF1AD7930100170D66 /* noThreeStars@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "noThreeStars@2x.png"; sourceTree = "<group>"; };
-		4D85E6BE1ADB6FB400170D66 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
 		4D878D261AD4FBD1000CC3FC /* logo@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "logo@2x.png"; sourceTree = "<group>"; };
 		4D878D281AD4FDC8000CC3FC /* top_tptclogo_new1.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = top_tptclogo_new1.gif; sourceTree = "<group>"; };
 		4D878D2A1AD50252000CC3FC /* jointlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = jointlogo.png; sourceTree = "<group>"; };
@@ -859,6 +865,8 @@
 				4D337D641ACCED6300F9C7AA /* Questions.m */,
 				4DE801901AD2508F008B0236 /* Survey.h */,
 				4DE801911AD2508F008B0236 /* Survey.m */,
+				4D2604FE1ADE367C00C8E140 /* Feedback.h */,
+				4D2604FF1ADE367C00C8E140 /* Feedback.m */,
 			);
 			name = Data;
 			sourceTree = "<group>";
@@ -1234,7 +1242,7 @@
 		4DA204251A79CF8C00C7E5C7 /* db */ = {
 			isa = PBXGroup;
 			children = (
-				4D85E6BE1ADB6FB400170D66 /* comress.sqlite */,
+				4D2605051ADE627200C8E140 /* comress_final_struc_empty.sqlite */,
 			);
 			name = db;
 			sourceTree = "<group>";
@@ -1601,6 +1609,8 @@
 				4DE801B61AD277AD008B0236 /* FeedbackTableViewCell.m */,
 				4D6424BC1AD3B4B900B6B974 /* ResidentPopInfoViewController.h */,
 				4D6424BD1AD3B4B900B6B974 /* ResidentPopInfoViewController.m */,
+				4D2604FB1ADE169800C8E140 /* FeedBackInfoViewController.h */,
+				4D2604FC1ADE169800C8E140 /* FeedBackInfoViewController.m */,
 			);
 			name = "Survey Detail";
 			sourceTree = "<group>";
@@ -1750,7 +1760,6 @@
 				4D91D6061A91CAA900A21DBA /* pin2.png in Resources */,
 				4DE801AB1AD26AAB008B0236 /* fivestars@2x.png in Resources */,
 				4DA203E91A79CBF900C7E5C7 /* Main.storyboard in Resources */,
-				4D85E6BF1ADB6FB400170D66 /* comress.sqlite in Resources */,
 				4D1FCE1B1ADB9D18005381FA /* user@2x.png in Resources */,
 				4D8AC95A1AAD8AB3008F7652 /* settings.png in Resources */,
 				4DA7E48B1ACEF5F400C994E3 /* hi@2x.png in Resources */,
@@ -1781,6 +1790,7 @@
 				4D337D4D1ACBFFB200F9C7AA /* excellent@2x.png in Resources */,
 				4DE801AA1AD26AAB008B0236 /* fourstars@2x.png in Resources */,
 				4D878D291AD4FDC8000CC3FC /* top_tptclogo_new1.gif in Resources */,
+				4D2605061ADE627200C8E140 /* comress_final_struc_empty.sqlite in Resources */,
 				4D85E6B01AD7930100170D66 /* threeOfThreeStars@2x.png in Resources */,
 				4D6424CB1AD3CF3800B6B974 /* tree@2x.png in Resources */,
 				4DA207FF1A79DA0A00C7E5C7 /* JSQMessagesLoadEarlierHeaderView.xib in Resources */,
@@ -1837,6 +1847,7 @@
 				4D91D5E81A8F37AF00A21DBA /* FPPopoverView.m in Sources */,
 				4D81D4531AB6D56000A403C9 /* Job.m in Sources */,
 				4DA207E91A79DA0A00C7E5C7 /* JSQMessagesToolbarButtonFactory.m in Sources */,
+				4D2604FD1ADE169800C8E140 /* FeedBackInfoViewController.m in Sources */,
 				4DA207FE1A79DA0A00C7E5C7 /* JSQMessagesLoadEarlierHeaderView.m in Sources */,
 				4DA207F61A79DA0A00C7E5C7 /* JSQMessagesCollectionViewCell.m in Sources */,
 				4DD6FEAA1A884CFF00CBBE1D /* UIImage+WebP.m in Sources */,
@@ -1847,6 +1858,7 @@
 				4DA204121A79CC5B00C7E5C7 /* AFHTTPRequestOperationManager.m in Sources */,
 				4DA207E31A79DA0A00C7E5C7 /* JSQMessagesViewController.m in Sources */,
 				4D0717A11AB1707E0055191A /* BadgeLabel.m in Sources */,
+				4D2605001ADE367C00C8E140 /* Feedback.m in Sources */,
 				4DD6FEA81A884CFF00CBBE1D /* UIImage+GIF.m in Sources */,
 				4DA207DE1A79DA0A00C7E5C7 /* UIColor+JSQMessages.m in Sources */,
 				4D85E6A81AD7832700170D66 /* CustomBadge.m in Sources */,

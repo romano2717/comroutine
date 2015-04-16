@@ -1,4 +1,4 @@
-//
+	//
 //  SurveyViewController.m
 //  comress
 //
@@ -500,7 +500,7 @@
             [self saveSurvey];
             
             //save this answer
-            [self saveSurveyQuestionWithRating:[NSNumber numberWithInt:selectedRating]  forQuestionId:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"id"]];
+            [self saveSurveyQuestionWithRating:[NSNumber numberWithInt:selectedRating]  forQuestionId:[[surveyQuestions objectAtIndex:self.currentQuestionIndex] valueForKey:@"question_id"]];
             
             if(self.currentQuestionIndex == surveyQuestions.count - 1)//last question
             {

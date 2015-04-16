@@ -29,9 +29,9 @@
     self.ageRangeArray = [NSArray arrayWithObjects:@"Above 70",@"50 to 70",@"30 to 50",@"18 to 30",@"below 18", nil];
     self.raceArray = [NSArray arrayWithObjects:@"Chinese",@"Malay",@"Indian",@"Other", nil];
     
-    [self registerForKeyboardNotifications];
-    
     [self generateData];
+    
+    self.scrollView.keyboardDismissMode = UIScrollViewKeyboardDismissModeOnDrag;
 }
 
 
@@ -45,7 +45,7 @@
         
         [theBlocks enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             NSString *block_noAndPostal = [NSString stringWithFormat:@"%@ %@",[obj valueForKey:@"block_no"],[obj valueForKey:@"postal_code"]] ;
-            NSString *street_name = [NSString stringWithFormat:@"%@ - %@",[obj valueForKey:@"street_name"],[obj valueForKey:@"postal_code"]];
+            NSString *street_name = [NSString stringWithFormat:@"%@ - %@ %@",[obj valueForKey:@"street_name"],[obj valueForKey:@"block_no"],[obj valueForKey:@"postal_code"]];
             
             [self.addressArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:street_name,@"DisplayText",obj,@"CustomObject",block_noAndPostal,@"DisplaySubText", nil]];
         }];
@@ -54,6 +54,25 @@
 }
 
 #pragma mark MPGTextField Delegate Methods
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    //move resident textfield up to give more space for auto suggest
+    if(textField.tag == 300)
+    {
+        CGRect residentTextFieldRect = textField.frame;
+        CGRect scrollViewFrame = self.scrollView.frame;
+        
+        [self.scrollView scrollRectToVisible:CGRectMake(scrollViewFrame.origin.x, residentTextFieldRect.origin.y - 10, scrollViewFrame.size.width, scrollViewFrame.size.height) animated:YES];
+        
+        textField.text = @"";
+    }
+    
+    else if (textField.tag == 100) //survey address
+    {
+        textField.text = @"";
+    }
+}
 
 - (NSArray *)dataForPopoverInTextField:(MPGTextField *)textField
 {
@@ -70,13 +89,14 @@
     if([[result valueForKey:@"CustomObject"] isKindOfClass:[NSDictionary class]] == NO) //user typed some shit!
     {
         if([textField isEqual:self.surveyAddressTxtFld])
-            self.postalCode = @"-1";
+            self.postalCode = @"-1"; //because tree got 0 postal code
         else if ([textField isEqual:self.residentAddressTxtFld])
-            self.residentPostalCode = @"-1";
+            self.residentPostalCode = @"-1"; //because tree got 0 postal code
         
         return;
     }
     
+    DDLogVerbose(@"result %@",result);
     
     if([textField isEqual:self.surveyAddressTxtFld])
     {
@@ -167,6 +187,8 @@
     
     NSNumber *value = [NSNumber numberWithInt:UIInterfaceOrientationPortrait];
     [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
+    
+    self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.view.frame) * 1.5);
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -174,40 +196,8 @@
     [super viewWillDisappear:animated];
     
     [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
-}
-
-- (void)registerForKeyboardNotifications {
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillShow:)
-                                                 name:UIKeyboardWillShowNotification object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillHide:)
-                                                 name:UIKeyboardWillHideNotification object:nil];
-}
-
-- (void)keyboardWillShow:(NSNotification*)aNotification {
-    NSDictionary* info = [aNotification userInfo];
-    CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-    
-    CGRect aRect = self.view.frame;
-    aRect.size.height -= kbSize.height;
-    
-    [UIView animateWithDuration: 0.3 animations: ^{
-        self.view.frame = aRect;
-    }];
-}
-     
-- (void)keyboardWillHide:(NSNotification*)aNotification {
-         NSDictionary* info = [aNotification userInfo];
-         CGSize kbSize = [[info objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-         
-         CGRect aRect = self.view.frame;
-         aRect.size.height += kbSize.height;
-         
-         [UIView animateWithDuration: 0.3 animations: ^{
-             self.view.frame = aRect;
-         }];
+    [locationManager stopUpdatingLocation];
 }
 
 - (void)preFillOtherInfo
@@ -425,6 +415,7 @@
     }
 }
 
+//this method is replaced by - (IBAction)residentInfoAction:(id)sender
 - (IBAction)action:(id)sender
 {
     if(didTakeActionOnDataPrivacyTerms == NO)
@@ -446,17 +437,29 @@
     {
         if(buttonIndex == 1)
         {
-            [self saveResidentAdressWithSegueToFeedback:YES];
+            [self saveResidentAdressWithSegueToFeedback:YES forBtnAction:@"feedback"];
         }
         else if(buttonIndex == 2)
         {
-            [self saveResidentAdressWithSegueToFeedback:NO];
+            [self saveResidentAdressWithSegueToFeedback:NO forBtnAction:@"done"];
         }
     }
     
 }
 
-- (void)saveResidentAdressWithSegueToFeedback:(BOOL)goToFeedback
+- (IBAction)residentInfoAction:(id)sender
+{
+    UIButton *btn = (UIButton *)sender;
+    
+    if (btn.tag == 1)
+        [self saveResidentAdressWithSegueToFeedback:YES forBtnAction:@"feedback"];
+
+    else
+        [self saveResidentAdressWithSegueToFeedback:NO forBtnAction:@"done"];
+        
+}
+
+- (void)saveResidentAdressWithSegueToFeedback:(BOOL)goToFeedback forBtnAction:(NSString *)action
 {
 
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -470,54 +473,64 @@
         NSString *resident_contact = self.contactNoTxFld.text;
         NSString *resident_email = self.emailTxFld.text;
         
-        BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area, postal_code) values (?,?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode];
-        
-        if(!insSurveyAddress)
+        BOOL up;
+//        if([action isEqualToString:@"feedback"])
+//        {
+            BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area, postal_code) values (?,?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode];
+            
+            if(!insSurveyAddress)
+            {
+                *rollback = YES;
+                return;
+            }
+            
+            long long lastSurveyAddressId = [db lastInsertRowId];
+            
+            
+            BOOL insResidentAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area,postal_code) values (?,?,?,?)",self.residentAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.residentPostalCode];
+            
+            if(!insResidentAddress)
+            {
+                *rollback = YES;
+                return;
+            }
+            
+            long long lastResidentAddressId = [db lastInsertRowId];
+            
+            //get survey address
+            FMResultSet *rsSurveyAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithLongLong:lastSurveyAddressId]];
+            NSDictionary *surveyAddressDict;
+            
+            while ([rsSurveyAddress next]) {
+                surveyAddressDict = [rsSurveyAddress resultDictionary];
+            }
+            
+            //get resident address
+            FMResultSet *rsResidentAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithLongLong:lastResidentAddressId]];
+            NSDictionary *residentAddressDict;
+            
+            while ([rsResidentAddress next]) {
+                residentAddressDict = [rsResidentAddress resultDictionary];
+            }
+            
+            
+            //update su_survey
+            NSNumber *client_survey_address_id = [NSNumber numberWithInt:[[surveyAddressDict valueForKey:@"client_address_id"] intValue]];
+            NSNumber *client_resident_address_id = [NSNumber numberWithInt:[[residentAddressDict valueForKey:@"client_address_id"] intValue]];
+            
+            up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?, resident_email = ? where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,resident_email,[NSNumber numberWithLongLong:currentSurveyId]];
+//        }
+        if ([action isEqualToString:@"done"])
         {
-            *rollback = YES;
-            return;
+            up = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ? ",[NSNumber numberWithInt:1],[NSNumber numberWithLongLong:currentSurveyId]];
+            
+            //survey is Done!
+            //upload this survey
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                Synchronize *sync = [Synchronize sharedManager];
+                [sync uploadSurveyFromSelf:NO];
+            });
         }
-        
-        long long lastSurveyAddressId = [db lastInsertRowId];
-        
-        
-        BOOL insResidentAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area,postal_code) values (?,?,?,?)",self.residentAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode];
-        
-        if(!insResidentAddress)
-        {
-            *rollback = YES;
-            return;
-        }
-        
-        long long lastResidentAddressId = [db lastInsertRowId];
-        
-        //get survey address
-        FMResultSet *rsSurveyAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithLongLong:lastSurveyAddressId]];
-        NSDictionary *surveyAddressDict;
-        
-        while ([rsSurveyAddress next]) {
-            surveyAddressDict = [rsSurveyAddress resultDictionary];
-        }
-        
-        //get resident address
-        FMResultSet *rsResidentAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithLongLong:lastResidentAddressId]];
-        NSDictionary *residentAddressDict;
-        
-        while ([rsResidentAddress next]) {
-            residentAddressDict = [rsResidentAddress resultDictionary];
-        }
-        
-        
-        //update su_survey
-        NSNumber *client_survey_address_id = [NSNumber numberWithInt:[[surveyAddressDict valueForKey:@"client_address_id"] intValue]];
-        NSNumber *client_resident_address_id = [NSNumber numberWithInt:[[residentAddressDict valueForKey:@"client_address_id"] intValue]];
-        
-        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?, status = ?, resident_email = ? where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,[NSNumber numberWithInt:1],resident_email,[NSNumber numberWithLongLong:currentSurveyId]];
-        
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            Synchronize *sync = [Synchronize sharedManager];
-            [sync uploadSurveyFromSelf:NO];
-        });
         
         if(!up)
         {

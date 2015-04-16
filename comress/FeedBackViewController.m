@@ -148,12 +148,26 @@
         
         [theBlocks enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             NSString *block_noAndPostal = [NSString stringWithFormat:@"%@ %@",[obj valueForKey:@"block_no"],[obj valueForKey:@"postal_code"]] ;
-            NSString *street_name = [NSString stringWithFormat:@"%@ - %@",[obj valueForKey:@"street_name"],[obj valueForKey:@"postal_code"]];
+            NSString *street_name = [NSString stringWithFormat:@"%@ - %@ %@",[obj valueForKey:@"street_name"],[obj valueForKey:@"block_no"],[obj valueForKey:@"postal_code"]];
             
             [self.addressArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:street_name,@"DisplayText",obj,@"CustomObject",block_noAndPostal,@"DisplaySubText", nil]];
         }];
         
     });
+}
+
+- (void)textFieldDidBeginEditing:(UITextField *)textField
+{
+    //move resident textfield up to give more space for auto suggest
+    if(textField.tag == 300)
+    {
+        CGRect residentTextFieldRect = textField.frame;
+        CGRect scrollViewFrame = self.scrollView.frame;
+        
+        [self.scrollView scrollRectToVisible:CGRectMake(scrollViewFrame.origin.x, residentTextFieldRect.origin.y - 10, scrollViewFrame.size.width, scrollViewFrame.size.height) animated:YES];
+        
+        textField.text = @"";
+    }
 }
 
 #pragma mark MPGTextField Delegate Methods
@@ -279,6 +293,8 @@
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
+    
+    self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.view.frame) * 1.5);
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView

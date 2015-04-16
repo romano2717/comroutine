@@ -14,7 +14,7 @@
 #import "MPGTextField.h"
 #import "Blocks.h"
 
-@interface FeedBackViewController : UIViewController<UIScrollViewDelegate,UIAlertViewDelegate,MPGTextFieldDelegate>
+@interface FeedBackViewController : UIViewController<UIScrollViewDelegate,UIAlertViewDelegate,MPGTextFieldDelegate,UIScrollViewDelegate>
 {
     Database *myDatabase;
     Blocks *blocks;    

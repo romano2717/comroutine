@@ -67,7 +67,7 @@
     if(segment == 0)
     {
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            FMResultSet *rs = [db executeQuery:@"select * from su_answers sa, su_questions sq where sa.client_survey_id = ? and sa.question_id = sq.id",surveyId];
+            FMResultSet *rs = [db executeQuery:@"select * from su_answers sa, su_questions sq where sa.client_survey_id = ? and sa.question_id = sq.question_id",surveyId];
             
             while ([rs next]) {
                 [arr addObject:[rs resultDictionary]];

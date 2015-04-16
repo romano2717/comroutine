@@ -21,13 +21,14 @@
 
 @class ResidentInfoViewController;
 
-@interface ResidentInfoViewController : UIViewController<UIAlertViewDelegate,UIPopoverPresentationControllerDelegate,FPPopoverControllerDelegate,CLLocationManagerDelegate,MPGTextFieldDelegate>
+@interface ResidentInfoViewController : UIViewController<UIAlertViewDelegate,UIPopoverPresentationControllerDelegate,FPPopoverControllerDelegate,CLLocationManagerDelegate,MPGTextFieldDelegate,UITextFieldDelegate>
 {
     Database *myDatabase;
     Blocks *blocks;
     FPPopoverKeyboardResponsiveController *popover;
     CLLocationManager *locationManager;
 }
+@property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
 
 @property (nonatomic, weak) IBOutlet MPGTextField *surveyAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *areaTxtFld;

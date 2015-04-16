@@ -437,7 +437,7 @@
                     
                     if([contract_type_id intValue] == 6)
                     {
-                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM ISSUE MAINTENANCE",[NSNumber numberWithBool:crmAutoAssignToMeMaintenance]];
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-MAINTENANCE",[NSNumber numberWithBool:crmAutoAssignToMeMaintenance]];
                         
                         if(!ins)
                         {
@@ -449,7 +449,7 @@
                     }
                     else if([contract_type_id intValue] == 7)
                     {
-                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM ISSUE OTHERS",[NSNumber numberWithBool:crmAutoAssignToMeOthers]];
+                        BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des,auto_assignme) values (?,?,?,?)",feedBackId,feedBackIssueIdForCrmDontNeedPostId,@"CRM-OTHERS",[NSNumber numberWithBool:crmAutoAssignToMeOthers]];
                         
                         if(!ins)
                         {
@@ -563,7 +563,15 @@
             //save to su_feedback_issue
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 
-                BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des) values (?,?,?)",feedBackId,lastClientPostIdID,post_topic];
+                //get the contract type of this post and use it as value for issue_des
+                NSString *contracTypeString;
+                FMResultSet *rsGetContractStr = [db executeQuery:@"select * from contract_type where id = ?",contract_type_id];
+                while ([rsGetContractStr next]) {
+                    contracTypeString = [rsGetContractStr stringForColumn:@"contract"];
+                }
+                
+                
+                BOOL ins = [db executeUpdate:@"insert into su_feedback_issue (client_feedback_id,client_post_id,issue_des) values (?,?,?)",feedBackId,lastClientPostIdID,contracTypeString];
                 
                 if(!ins)
                 {
@@ -576,15 +584,18 @@
             //we are finished doing the survey, update this survey to require upload!
             if(pushFromSurveyAndModalFromFeedback == NO)
             {
-                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-                    BOOL up = [db executeUpdate:@"update su_survey set status = ?  where client_survey_id = ?",[NSNumber numberWithInt:1],surveyId];
-                    
-                    if(!up)
-                    {
-                        *rollback = YES;
-                        return;
-                    }
-                }];
+                /*
+                    the updating of survey is moved to uploadPostFromSelf after successful uploading of post
+                 */
+//                [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+//                    BOOL up = [db executeUpdate:@"update su_survey set status = ?  where client_survey_id = ?",[NSNumber numberWithInt:1],surveyId];
+//                    
+//                    if(!up)
+//                    {
+//                        *rollback = YES;
+//                        return;
+//                    }
+//                }];
             }
             
             [self dismissViewControllerAnimated:YES completion:^{
@@ -603,14 +614,15 @@
                     //not base on wireframe, go back to previous vc(resident info)
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"go_back_to_survey" object:nil userInfo:surveyIdDict];
                 }
+
+                //let the auto sync do the upload
                 
-                
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                    Synchronize *sync = [Synchronize sharedManager];
-                    [sync uploadPostFromSelf:NO];
-                    
-                    [sync uploadSurveyFromSelf:NO];
-                });
+//                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                    Synchronize *sync = [Synchronize sharedManager];
+//                    [sync uploadPostFromSelf:NO];
+//                    
+//                    [sync uploadSurveyFromSelf:NO];
+//                });
             }];
         }
         

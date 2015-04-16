@@ -1,4 +1,5 @@
 //
+
 //  Synchronize.m
 //  comress
 //
@@ -31,11 +32,12 @@
 
 - (void)kickStartSync
 {
-    //outgoing
-    [self uploadPostFromSelf:YES];
-    syncKickstartTimerOutgoing = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(uploadPost) userInfo:nil repeats:YES];
 
-    [self startDownload];
+    //outgoing
+    //[self uploadPostFromSelf:YES];
+    syncKickstartTimerOutgoing = [NSTimer scheduledTimerWithTimeInterval:30.0 target:self selector:@selector(uploadPost) userInfo:nil repeats:YES];
+
+    //[self startDownload];
     downloadIsTriggeredBySelf = YES;
     syncKickstartTimerIncoming = [NSTimer scheduledTimerWithTimeInterval:3.0 target:self selector:@selector(startDownload) userInfo:nil repeats:YES];
 }
@@ -56,7 +58,7 @@
         return;
     
     if([syncKickstartTimerIncoming isValid])
-        [syncKickstartTimerIncoming invalidate]; //init is done, no need for timer. post, comment and image will recurse automatically.
+        [syncKickstartTimerIncoming invalidate]; //init is done, no need for timer. post, comment, image, etc will recurse automatically.
     
     //incoming
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -338,6 +340,28 @@
                     {
                         *rollback = YES;
                         return;
+                    }
+                    else
+                    {
+                        //update the status of this survey so we can upload it
+                        FMResultSet *rsGetIssueFeedBackIssueDets = [db executeQuery:@"select client_feedback_id from su_feedback_issue where post_id = ?",postId];
+                        NSNumber *clientSurveyIdForThisPost;
+                        
+                        while ([rsGetIssueFeedBackIssueDets next]) {
+                            FMResultSet *rsGetFeedBackDets = [db executeQuery:@"select client_survey_id from su_feedback where client_feedback_id = ?",[NSNumber numberWithInt:[rsGetIssueFeedBackIssueDets intForColumn:@"client_feedback_id"]]];
+                            
+                            while ([rsGetFeedBackDets next]) {
+                                clientSurveyIdForThisPost = [NSNumber numberWithInt:[rsGetFeedBackDets intForColumn:@"client_survey_id"]];
+                            }
+                        }
+                        
+                        BOOL upSurvey = [db executeUpdate:@"update su_survey set status = ? where client_survey_id = ?",[NSNumber numberWithInt:1],clientSurveyIdForThisPost];
+                        
+                        if(!upSurvey)
+                        {
+                            *rollback = YES;
+                            return;
+                        }
                     }
                 }];
             }
@@ -765,7 +789,6 @@
 #pragma mark - upload survey
 - (void)uploadSurveyFromSelf:(BOOL)thisSelf
 {
-    
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         
         NSMutableDictionary *surveyDict = [[NSMutableDictionary alloc] init];
@@ -836,7 +859,16 @@
                 while ([rsFI next]) {
                     NSNumber *ClientFeedbackIssueId = [NSNumber numberWithInt:[rsFI intForColumn:@"client_feedback_issue_id"]];
                     NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[rsFI intForColumn:@"client_feedback_id"]];
+                    
                     NSNumber *PostId = [NSNumber numberWithInt:[rsFI intForColumn:@"post_id"]];
+                    NSNumber *ClientPostId = [NSNumber numberWithInt:[rsFI intForColumn:@"client_post_id"]];
+                    
+                    if([ClientPostId intValue] > 0 && [PostId intValue] == 0) //this post was not yet uploaded, don't upload this survey
+                    {
+                        doUpload = NO;
+                        continue;
+                    }
+                    
                     NSString *IssueDes = [rsFI stringForColumn:@"issue_des"];
                     NSNumber *AutoAssignMe = [NSNumber numberWithBool:[rsFI boolForColumn:@"auto_assignme"]];
                     
@@ -870,11 +902,11 @@
             FMResultSet *rsAddressSurvey2 = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:ClientResidentAddressId]];
             
             while ([rsAddressSurvey2 next]) {
-                NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddressSurvey intForColumn:@"client_address_id"]];
-                NSString *Location = [rsAddressSurvey stringForColumn:@"address"] ? [rsAddressSurvey stringForColumn:@"address"] : @"";
-                NSString *UnitNo = [rsAddressSurvey stringForColumn:@"unit_no"] ? [rsAddressSurvey stringForColumn:@"unit_no"] : @"";
-                NSString *SpecifyArea = [rsAddressSurvey stringForColumn:@"specify_area"] ? [rsAddressSurvey stringForColumn:@"specify_area"] : @"";
-                NSString *PostalCode = [rsAddressSurvey stringForColumn:@"postal_code"] ? [rsAddressSurvey stringForColumn:@"postal_code"] : @"0";
+                NSNumber *ClientAddressId = [NSNumber numberWithInt:[rsAddressSurvey2 intForColumn:@"client_address_id"]];
+                NSString *Location = [rsAddressSurvey2 stringForColumn:@"address"] ? [rsAddressSurvey2 stringForColumn:@"address"] : @"";
+                NSString *UnitNo = [rsAddressSurvey2 stringForColumn:@"unit_no"] ? [rsAddressSurvey2 stringForColumn:@"unit_no"] : @"";
+                NSString *SpecifyArea = [rsAddressSurvey2 stringForColumn:@"specify_area"] ? [rsAddressSurvey2 stringForColumn:@"specify_area"] : @"";
+                NSString *PostalCode = [rsAddressSurvey2 stringForColumn:@"postal_code"] ? [rsAddressSurvey2 stringForColumn:@"postal_code"] : @"0";
                 
                 NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
                 
@@ -939,8 +971,6 @@
             
             return;
         }
-        
-        
         
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
             
@@ -1559,12 +1589,18 @@
                         *rollback = YES;
                         return;
                     }
+                    
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",PostBy,PostTopic]];
+                    });
                 }
             }];
-
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",PostBy,PostTopic]];
-            });
+            
+            // we move this inside valid post insert
+            
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",PostBy,PostTopic]];
+//            });
         }
         
         if(currentPage < totalPage)
@@ -1876,6 +1912,13 @@
                     }
                     else
                         newCommentSaved = YES;
+                    
+                    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                        if([CommentType intValue] == 2)
+                            [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : Photo Message",CommentBy]];
+                        else
+                            [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",CommentBy,CommentString]];
+                    });
                 }
             }];
             
@@ -1883,13 +1926,13 @@
             {
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"reloadChatView" object:nil];
             }
-            
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                if([CommentType intValue] == 2)
-                    [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : Photo Message",CommentBy]];
-                else
-                    [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",CommentBy,CommentString]];
-            });
+            //we move this inside valid insert
+//            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//                if([CommentType intValue] == 2)
+//                    [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : Photo Message",CommentBy]];
+//                else
+//                    [self notifyLocallyWithMessage:[NSString stringWithFormat:@"%@ : %@",CommentBy,CommentString]];
+//            });
         }
         
         if(currentPage < totalPage)

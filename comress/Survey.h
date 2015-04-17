@@ -17,7 +17,7 @@
 
 - (NSArray *)fetchSurvey;
 
-- (NSArray *)surveyDetailForSegment:(NSInteger)segment forSurveyId:(NSNumber *)surveyId;
+- (NSArray *)surveyDetailForSegment:(NSInteger)segment forSurveyId:(NSNumber *)surveyId forClientSurveyId:(NSNumber *)clientSurveyId;
 
 - (NSDictionary *)surveyForId:(NSNumber *)surveyId forAddressType:(NSString *)addressType;
 

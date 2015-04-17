@@ -14,7 +14,7 @@
 
 @implementation SurveyDetailViewController
 
-@synthesize surveyId;
+@synthesize clientSurveyId,surveyId;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -26,8 +26,8 @@
     
     //get average rating of this survey
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select average_rating from su_survey where client_survey_id = ?",surveyId];
-        
+        FMResultSet *rs = [db executeQuery:@"select average_rating from su_survey where client_survey_id = ? or survey_id = ?",clientSurveyId,surveyId];
+
         int averageRating = 0;
         while ([rs next]) {
             averageRating = [rs intForColumn:@"average_rating"];
@@ -52,7 +52,14 @@
 
 - (IBAction)popResidentInfForThisSurvey:(id)sender
 {
-    [self performSegueWithIdentifier:@"modal_resident_info_edit" sender:surveyId];
+    NSNumber *theSurveyId = [NSNumber numberWithInt:0];
+    
+    if(surveyId > 0)
+        theSurveyId = surveyId;
+    else
+        theSurveyId = clientSurveyId;
+    
+    [self performSegueWithIdentifier:@"modal_resident_info_edit" sender:theSurveyId];
 }
 
 -(void) viewWillDisappear:(BOOL)animated
@@ -93,7 +100,14 @@
 
 - (void)fetchSurveyDetail
 {
-    self.dataArray = [survey surveyDetailForSegment:self.segment.selectedSegmentIndex forSurveyId:surveyId];
+    NSNumber *theSurveyId = [NSNumber numberWithInt:0];
+    
+    if(surveyId > 0)
+        theSurveyId = surveyId;
+    else
+        theSurveyId = clientSurveyId;
+    
+    self.dataArray = [survey surveyDetailForSegment:self.segment.selectedSegmentIndex forSurveyId:theSurveyId forClientSurveyId:clientSurveyId];
     
     [self.surveyDetailTableView reloadData];
 }

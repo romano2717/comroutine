@@ -37,6 +37,7 @@
 @property (nonatomic, weak) IBOutlet UITextField *residentAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *unitNoTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *contactNoTxFld;
+@property (nonatomic, weak) IBOutlet UITextField *otherContactNoTxFld;
 @property (nonatomic, weak) IBOutlet UITextField *emailTxFld;
 
 @property (nonatomic, weak) IBOutlet UIButton *ageBtn;

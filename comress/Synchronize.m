@@ -11,7 +11,7 @@
 
 @implementation Synchronize
 
-@synthesize syncKickstartTimerOutgoing,syncKickstartTimerIncoming,imagesArr,imageDownloadComplete,downloadIsTriggeredBySelf;
+@synthesize syncKickstartTimerOutgoing,syncKickstartTimerIncoming,imagesArr,imageDownloadComplete,downloadIsTriggeredBySelf,stop;
 
 -(id)init {
     if (self = [super init]) {
@@ -32,7 +32,8 @@
 
 - (void)kickStartSync
 {
-
+    stop = NO;
+    
     //outgoing
     //[self uploadPostFromSelf:YES];
     syncKickstartTimerOutgoing = [NSTimer scheduledTimerWithTimeInterval:30.0 target:self selector:@selector(uploadPost) userInfo:nil repeats:YES];
@@ -63,11 +64,11 @@
     //incoming
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         
-        __block NSDate *jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
+        //__block NSDate *jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
 
 
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-
+            NSDate *jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download post
             FMResultSet *rs = [db executeQuery:@"select date from post_last_request_date"];
             
@@ -79,6 +80,7 @@
             [self startDownloadPostForPage:1 totalPage:0 requestDate:jsonDate];
             
             
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download post image
             FMResultSet *rs2 = [db executeQuery:@"select date from post_image_last_request_date"];
             
@@ -90,6 +92,7 @@
             [self startDownloadPostImagesForPage:1 totalPage:0 requestDate:jsonDate];
             
             
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download comments
             FMResultSet *rs3 = [db executeQuery:@"select date from comment_last_request_date"];
             
@@ -100,6 +103,7 @@
             [self startDownloadCommentsForPage:1 totalPage:0 requestDate:jsonDate];
             
             
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download comment noti
             FMResultSet *rs4 = [db executeQuery:@"select date from comment_noti_last_request_date"];
             
@@ -110,6 +114,17 @@
             [self startDownloadCommentNotiForPage:1 totalPage:0 requestDate:jsonDate];
             
             
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
+            //download questions
+            FMResultSet *rs55 = [db executeQuery:@"select date from su_questions_last_req_date"];
+            
+            if([rs55 next])
+            {
+                jsonDate = (NSDate *)[rs55 dateForColumn:@"date"];
+            }
+            [self startDownloadQuestionsForPage:1 totalPage:0 requestDate:jsonDate];
+            
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download survey
             FMResultSet *rs5 = [db executeQuery:@"select date from su_survey_last_req_date"];
             
@@ -120,7 +135,7 @@
             [self startDownloadSurveyPage:1 totalPage:0 requestDate:jsonDate];
             
             
-            
+            jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download feedback issues list
             FMResultSet *rs6 = [db executeQuery:@"select date from su_feedback_issues_last_req_date"];
             
@@ -175,6 +190,7 @@
         
         
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_update_post_status] parameters:dict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            if(stop)return;
             
             NSDictionary *dict = (NSDictionary *) responseObject;
             NSArray *dictArr   = (NSArray *)[dict objectForKey:@"AckPostObj"];
@@ -206,6 +222,7 @@
 
             }
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            if(stop)return;
             
             DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
             
@@ -302,6 +319,7 @@
         
         
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_post_send] parameters:postListDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            if(stop)return;
             
             NSDictionary *dict = (NSDictionary *)responseObject;
             DDLogVerbose(@"uploadPost Ack %@",dict);
@@ -374,6 +392,8 @@
             }
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            if(stop)return;
+            
             DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
             if(thisSelf)
             {
@@ -454,6 +474,7 @@
         }
         
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_comment_send] parameters:dict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            if(stop)return;
             
             NSArray *arr = [responseObject objectForKey:@"AckCommentObj"];
             
@@ -492,6 +513,8 @@
             
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            if(stop)return;
+            
             DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
             if(thisSelf)
             {
@@ -530,6 +553,7 @@
     DDLogVerbose(@"comment noti to upload: %@",params);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_comment_noti] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *AckCommentNotiObj = (NSDictionary *)responseObject;
        
@@ -564,6 +588,8 @@
         }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         
         if(thisSelf)
@@ -661,6 +687,7 @@
     
     //send images
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_send_images] parameters:imagesDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         imagesInDb = nil;
         
@@ -692,6 +719,8 @@
             });
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         imagesInDb = nil;
         
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
@@ -733,6 +762,7 @@
         NSDictionary *inspDict = @{@"inspectionResultList":inspArr};
         DDLogVerbose(@"inspectionResultList to send %@",[myDatabase toJsonString:inspDict]);
        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_inspection_res] parameters:inspDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+           if(stop)return;
            
            NSDictionary *topDict = (NSDictionary *)responseObject;
            
@@ -770,6 +800,7 @@
            }
            
        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+           if(stop)return;
            
            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
            
@@ -815,6 +846,7 @@
             NSString *ResidentRace = [rsSurvey stringForColumn:@"resident_race"] ? [rsSurvey stringForColumn:@"resident_race"] : @"";
             int ClientResidentAddressId = [rsSurvey intForColumn:@"client_resident_address_id"];
             NSString *ResidentContact = [rsSurvey stringForColumn:@"resident_contact"] ? [rsSurvey stringForColumn:@"resident_contact"] : @"" ;
+            NSString *Resident2ndContact = [rsSurvey stringForColumn:@"other_contact"] ? [rsSurvey stringForColumn:@"other_contact"] : @"" ;
             NSString *ResidentEmail = [rsSurvey stringForColumn:@"resident_email"] ? [rsSurvey stringForColumn:@"resident_email"] : @"" ;
             NSNumber *DataProtection = [NSNumber numberWithInt:[rsSurvey intForColumn:@"data_protection"]];
             
@@ -827,6 +859,7 @@
             [surveyDict setObject:ResidentRace forKey:@"ResidentRace"];
             [surveyDict setObject:[NSNumber numberWithInt:ClientResidentAddressId] forKey:@"ClientResidentAddressId"];
             [surveyDict setObject:ResidentContact forKey:@"ResidentContact"];
+            [surveyDict setObject:ResidentContact forKey:@"Resident2ndContact"];
             [surveyDict setObject:ResidentEmail forKey:@"ResidentEmail"];
             [surveyDict setObject:DataProtection forKey:@"DataProtection"];
             
@@ -908,8 +941,9 @@
                 NSString *UnitNo = [rsAddressSurvey2 stringForColumn:@"unit_no"] ? [rsAddressSurvey2 stringForColumn:@"unit_no"] : @"";
                 NSString *SpecifyArea = [rsAddressSurvey2 stringForColumn:@"specify_area"] ? [rsAddressSurvey2 stringForColumn:@"specify_area"] : @"";
                 NSString *PostalCode = [rsAddressSurvey2 stringForColumn:@"postal_code"] ? [rsAddressSurvey2 stringForColumn:@"postal_code"] : @"0";
+                NSNumber *BlkId = [NSNumber numberWithInt:[rsAddressSurvey2 intForColumn:@"block_id"]];
                 
-                NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
+                NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode,@"BlkId":BlkId};
                 
                 [addressArray addObject:dictAddSurvey];
             }
@@ -956,7 +990,7 @@
             
             surveyContainer = @{@"surveyContainer":surveyDict};
             
-             DDLogVerbose(@"surveyContainer %@",[myDatabase toJsonString:surveyContainer]);
+
             
         } //end of while ([rsSurvey next])
         
@@ -973,7 +1007,12 @@
             return;
         }
         
+        DDLogVerbose(@"surveyContainer %@",[myDatabase toJsonString:surveyContainer]);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        DDLogVerbose(@"%@%@",myDatabase.api_url,api_upload_survey);
+        
         [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_survey] parameters:surveyContainer success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            if(stop)return;
             
             NSDictionary *topDict = (NSDictionary *)responseObject;
             
@@ -1080,6 +1119,7 @@
             }
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            if(stop)return;
             
             DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
             
@@ -1154,6 +1194,7 @@
     DDLogVerbose(@"guid %@",[myDatabase.userDictionary valueForKey:@"guid"]);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_resident_info_edit] parameters:surveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *topDict = (NSDictionary *)responseObject;
         
@@ -1179,7 +1220,101 @@
         
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error,THIS_FILE,THIS_METHOD);
+    }];
+}
+
+- (void)startDownloadQuestionsForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    __block Questions *questions = [[Questions alloc] init];
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadQuestionsForPage %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_fed_questions] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
+        
+        NSDictionary *dict = [responseObject objectForKey:@"QuestionContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        NSArray *dictArray = [dict objectForKey:@"QuestionList"];
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictList = [dictArray objectAtIndex:i];
+            NSString *CNQuestion = [dictList valueForKey:@"CNQuestion"];
+            NSString *ENQuestion = [dictList valueForKey:@"ENQuestion"];
+            NSString *INQuestion = [dictList valueForKey:@"INQuestion"];
+            NSString *MYQuestion = [dictList valueForKey:@"MYQuestion"];
+            NSNumber *QuestionId = [NSNumber numberWithInt:[[dictList valueForKey:@"QuestionId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rs = [theDb executeQuery:@"select question_id from su_questions where question_id = ?",QuestionId];
+                
+                if([rs next] == NO)//does not exist
+                {
+                    BOOL ins = [theDb executeUpdate:@"insert into su_questions (cn,en,my,ind,question_id) values (?,?,?,?,?)",CNQuestion,ENQuestion,MYQuestion,INQuestion,QuestionId];
+                    
+                    if(!ins)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+                
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadQuestionsForPage:currentPage totalPage:totalPage requestDate:LastRequestDate];
+        }
+        else
+        {
+            if(dictArray.count > 0)
+                [questions updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
+            
+            if(downloadIsTriggeredBySelf)
+            {
+                //start download again
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    
+                    NSDate *lrd = [self deserializeJsonDateString:[dict valueForKey:@"LastRequestDate"]];
+                    
+                    [self startDownloadQuestionsForPage:1 totalPage:0 requestDate:lrd];
+                });
+            }
+        }
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        if(downloadIsTriggeredBySelf)
+        {
+            //start download again
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(sync_interval * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                
+                NSDate *lrd = [self deserializeJsonDateString:jsonDate];
+                
+                [self startDownloadQuestionsForPage:1 totalPage:0 requestDate:lrd];
+            });
+        }
     }];
 }
 
@@ -1191,9 +1326,12 @@
     NSString *jsonDate = [self serializedStringDateJson:reqDate];
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
-    DDLogVerbose(@"Post params %@",params);
+    DDLogVerbose(@"Post params %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    DDLogVerbose(@"%@%@",myDatabase.api_url,api_download_feedback_issues);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_feedback_issues] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"FeedbackIssueContainer"];
         
@@ -1284,7 +1422,13 @@
         }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        DDLogVerbose(@"Post params %@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        DDLogVerbose(@"%@%@",myDatabase.api_url,api_download_feedback_issues);
         
         if(downloadIsTriggeredBySelf)
         {
@@ -1306,9 +1450,12 @@
     NSString *jsonDate = [self serializedStringDateJson:reqDate];
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
-    DDLogVerbose(@"Post params %@",[myDatabase toJson:params]);
+    DDLogVerbose(@"survey params %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    DDLogVerbose(@"%@%@",myDatabase.api_url,api_download_survey);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"ResturnSurveyContainer"];
         
@@ -1434,6 +1581,7 @@
             NSString *ResidentGender = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentGender"];
             NSString *ResidentName = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentName"];
             NSString *ResidentContact = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentContact"];
+            NSString *Resident2ndContact  = [[SurveyList objectAtIndex:i] valueForKey:@"Resident2ndContact"];
             NSString *ResidentEmail = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentEmail"];
             NSString *ResidentRace = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentRace"];
             NSNumber *SurveyAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyAddressId"] intValue]];
@@ -1447,7 +1595,7 @@
                 
                 if([rsCheck next] == NO)
                 {
-                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id,resident_contact,resident_email,data_protection) values (?,?,?,?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId,ResidentContact,ResidentEmail,DataProtection];
+                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id,resident_contact,resident_email,data_protection, other_contact) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId,ResidentContact,ResidentEmail,DataProtection, Resident2ndContact];
                     
                     if(!insAdd)
                     {
@@ -1516,7 +1664,12 @@
         }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        DDLogVerbose(@"Post params %@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        DDLogVerbose(@"%@%@",myDatabase.api_url,api_download_survey);
         
         if(downloadIsTriggeredBySelf)
         {
@@ -1535,6 +1688,7 @@
 #pragma mark - download new data from server
 - (void)startDownloadPostForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate
 {
+    
     __block int currentPage = page;
     NSString *jsonDate = [self serializedStringDateJson:reqDate];
     
@@ -1544,6 +1698,7 @@
     __block Post *post = [[Post alloc] init];
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_posts] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"PostContainer"];
         
@@ -1634,6 +1789,8 @@
         }
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         
         if(downloadIsTriggeredBySelf)
@@ -1660,6 +1817,7 @@
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
     DDLogVerbose(@"GetImages %@",[myDatabase toJsonString:params]);
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_images] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"ImageContainer"];
         DDLogVerbose(@"new images %@",responseObject);
@@ -1680,6 +1838,8 @@
         
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         
         if(downloadIsTriggeredBySelf)
@@ -1875,6 +2035,7 @@
     
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_comments] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"CommentContainer"];
         
@@ -1964,6 +2125,8 @@
             }
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         if(downloadIsTriggeredBySelf)
         {
@@ -1991,6 +2154,7 @@
     
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_comment_noti] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        if(stop)return;
         
         NSDictionary *dict = [responseObject objectForKey:@"CommentNotiContainer"];
         DDLogVerbose(@"comment noti %@",dict);
@@ -2049,6 +2213,8 @@
             }
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        if(stop)return;
+        
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         if(downloadIsTriggeredBySelf)
         {

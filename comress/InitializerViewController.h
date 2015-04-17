@@ -16,6 +16,7 @@
 #import "ImageOptions.h"
 #import "UIImageView+WebCache.h"
 #import "Client.h"
+#import "Questions.h"
 
 @interface InitializerViewController : UIViewController
 {
@@ -28,6 +29,7 @@
     PostImage *postImage;
     Comment_noti *comment_noti;
     Client *client;
+    Questions *questions;
     
 }
 @property (nonatomic, weak) IBOutlet UILabel *processLabel;

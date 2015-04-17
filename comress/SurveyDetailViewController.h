@@ -22,6 +22,7 @@
     Database *myDatabase;
     FPPopoverKeyboardResponsiveController *popover;    
 }
+@property (nonatomic, strong) NSNumber *clientSurveyId;
 @property (nonatomic, strong) NSNumber *surveyId;
 
 @property (nonatomic, weak) IBOutlet UITableView *surveyDetailTableView;

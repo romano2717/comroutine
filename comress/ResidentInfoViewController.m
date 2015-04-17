@@ -12,7 +12,9 @@
 #define kBgQueue dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
 
 @interface ResidentInfoViewController ()
-
+{
+    BOOL didAddFeedBack;
+}
 @end
 
 @implementation ResidentInfoViewController
@@ -111,7 +113,7 @@
     {
         self.residentAddressTxtFld.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
         
-        self.residentBlockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
+        residentBlockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
         self.residentPostalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
     }
 }
@@ -174,7 +176,7 @@
     else if([segue.identifier isEqualToString:@"push_survey_detail"])
     {
         SurveyDetailViewController *surveyDetail = [segue destinationViewController];
-        surveyDetail.surveyId = [NSNumber numberWithLongLong:currentSurveyId];
+        surveyDetail.clientSurveyId = [NSNumber numberWithLongLong:currentSurveyId];
         surveyDetail.pushFromResidentInfo = YES;
     }
 }
@@ -191,6 +193,11 @@
     [[UIDevice currentDevice] setValue:value forKey:@"orientation"];
     
     self.scrollView.contentSize = CGSizeMake(CGRectGetWidth(self.scrollView.frame), CGRectGetHeight(self.view.frame) * 1.5);
+    
+    if(didAddFeedBack)
+    {
+        [self action:self];
+    }
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -422,13 +429,12 @@
 //this method is replaced by - (IBAction)residentInfoAction:(id)sender
 - (IBAction)action:(id)sender
 {
-    if(didTakeActionOnDataPrivacyTerms == NO)
-        return;
-    
     //alert
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action" message:@"Select what to do next" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Add Feedback",@"Done", nil];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Action" message:@"Select what to do next" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"Add more feedback",@"Complete this survey", nil];
     
     [alert show];
+    
+    didAddFeedBack = NO; //so this alert will not show again when VC is popped
 }
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
@@ -466,6 +472,8 @@
 - (void)saveResidentAdressWithSegueToFeedback:(BOOL)goToFeedback forBtnAction:(NSString *)action
 {
 
+    didAddFeedBack = YES;
+    
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
         
         NSDate *survey_date = [NSDate date];
@@ -475,6 +483,7 @@
         NSString *resident_race = self.raceBtn.titleLabel.text;
         NSNumber *average_rating = averageRating;
         NSString *resident_contact = self.contactNoTxFld.text;
+        NSString *other_resident_contact = self.otherContactNoTxFld.text;
         NSString *resident_email = self.emailTxFld.text;
         
         BOOL up;
@@ -522,7 +531,7 @@
             NSNumber *client_survey_address_id = [NSNumber numberWithInt:[[surveyAddressDict valueForKey:@"client_address_id"] intValue]];
             NSNumber *client_resident_address_id = [NSNumber numberWithInt:[[residentAddressDict valueForKey:@"client_address_id"] intValue]];
             
-            up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?, resident_email = ? where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,resident_email,[NSNumber numberWithLongLong:currentSurveyId]];
+            up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, survey_date = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, average_rating = ?, resident_contact = ?, resident_email = ?,other_contact = ? where client_survey_id = ?",client_survey_address_id,survey_date,resident_name,resident_age_range,resident_gender,resident_race,client_resident_address_id,average_rating,resident_contact,resident_email,other_resident_contact,[NSNumber numberWithLongLong:currentSurveyId]];
 //        }
         if ([action isEqualToString:@"done"])
         {

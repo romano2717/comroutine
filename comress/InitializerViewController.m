@@ -31,6 +31,7 @@
     postImage       = [[PostImage alloc] init];
     comment_noti    = [[Comment_noti alloc] init];
     client          = [[Client alloc] init];
+    questions       = [[Questions alloc] init];
     
     imagesArr = [[NSMutableArray alloc] init];
     
@@ -993,6 +994,145 @@
             
             myDatabase.userBlocksInitComplete = 1;
             
+            [self checkQuestionsCount];
+        }
+        
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        [self checkQuestionsCount];
+        
+        [self initializingCompleteWithUi:NO];
+    }];
+}
+
+
+#pragma mark - check questions count
+- (void)checkQuestionsCount
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSDate *last_request_date = nil;
+        
+        FMResultSet *rs = [db executeQuery:@"select date from su_questions_last_req_date"];
+        while ([rs next]) {
+            last_request_date = [rs dateForColumn:@"date"];
+        }
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+        
+        NSString *jsonDate = @"/Date(1388505600000+0800)/";
+        
+        if(last_request_date != nil)
+        {
+            jsonDate = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [last_request_date timeIntervalSince1970],[formatter stringFromDate:last_request_date]];
+        }
+        
+        NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
+        DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_fed_questions] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *dict = [responseObject objectForKey:@"QuestionContainer"];
+            
+            int totalRows = [[dict valueForKey:@"TotalRows"] intValue];
+            __block BOOL needToDownloadBlocks = NO;
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rsBlockCount = [theDb executeQuery:@"select count(*) as total from su_questions"];
+                
+                while ([rsBlockCount next]) {
+                    int total = [rsBlockCount intForColumn:@"total"];
+                    
+                    if(total < totalRows)
+                    {
+                        needToDownloadBlocks = YES;
+                    }
+                }
+            }];
+            
+            if(needToDownloadBlocks)
+                [self startDownloadQuestionsForPage:1 totalPage:0 requestDate:nil withUi:YES];
+            else
+            {
+                [self checkPostCount];
+            }
+            
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            [self checkPostCount];
+        }];
+        
+    }];
+}
+
+
+- (void)startDownloadQuestionsForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading your survey questions... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadSpoSkedForPage %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_fed_questions] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"QuestionContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        NSArray *dictArray = [dict objectForKey:@"QuestionList"];
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictList = [dictArray objectAtIndex:i];
+            NSString *CNQuestion = [dictList valueForKey:@"CNQuestion"];
+            NSString *ENQuestion = [dictList valueForKey:@"ENQuestion"];
+            NSString *INQuestion = [dictList valueForKey:@"INQuestion"];
+            NSString *MYQuestion = [dictList valueForKey:@"MYQuestion"];
+            NSNumber *QuestionId = [NSNumber numberWithInt:[[dictList valueForKey:@"QuestionId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rs = [theDb executeQuery:@"select question_id from su_questions where question_id = ?",QuestionId];
+                
+                if([rs next] == NO)//does not exist
+                {
+                    BOOL ins = [theDb executeUpdate:@"insert into su_questions (cn,en,my,ind,question_id) values (?,?,?,?,?)",CNQuestion,ENQuestion,MYQuestion,INQuestion,QuestionId];
+                    
+                    if(!ins)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+                
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadQuestionsForPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:withUi];
+        }
+        else
+        {
+            if(dictArray.count > 0)
+                [questions updateLastRequestDateWithDate:[dict valueForKey:@"LastRequestDate"]];
+            
+            self.processLabel.text = @"Download complete";
+            
             [self checkPostCount];
         }
         
@@ -1000,12 +1140,9 @@
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         
-        [self initializingCompleteWithUi:NO];
+        [self checkPostCount];
     }];
 }
-
-
-
 
 
 

@@ -26,6 +26,7 @@
 @property (nonatomic) BOOL imageDownloadComplete;
 @property (nonatomic, strong) NSMutableArray *imagesArr;
 @property (nonatomic) BOOL downloadIsTriggeredBySelf;
+@property (nonatomic) BOOL stop;
 
 + (id)sharedManager;
 

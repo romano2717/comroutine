@@ -60,27 +60,25 @@
     return surveyArr;
 }
 
-- (NSArray *)surveyDetailForSegment:(NSInteger)segment forSurveyId:(NSNumber *)surveyId
+- (NSArray *)surveyDetailForSegment:(NSInteger)segment forSurveyId:(NSNumber *)surveyId forClientSurveyId:(NSNumber *)clientSurveyId
 {
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     
     if(segment == 0)
     {
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            FMResultSet *rs = [db executeQuery:@"select * from su_answers sa, su_questions sq where sa.client_survey_id = ? and sa.question_id = sq.question_id",surveyId];
+            FMResultSet *rs = [db executeQuery:@"select * from su_answers sa, su_questions sq where sa.client_survey_id = ? or sa.survey_id = ? and ( sa.question_id = sq.question_id)  group by sa.question_id",clientSurveyId,surveyId];
             
             while ([rs next]) {
                 [arr addObject:[rs resultDictionary]];
             }
         }];
-        
-        
     }
     
     else
     {
         [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-            FMResultSet *rs = [db executeQuery:@"select * from su_feedback where client_survey_id = ? order by client_feedback_id desc",surveyId];
+            FMResultSet *rs = [db executeQuery:@"select * from su_feedback where client_survey_id = ? or survey_id = ? order by client_feedback_id desc",clientSurveyId,surveyId];
             
             while ([rs next]) {
                 NSMutableDictionary *row = [[NSMutableDictionary alloc] init];
@@ -184,31 +182,40 @@
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ?",surveyId];
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ? or survey_id = ?",surveyId,surveyId];
         NSDictionary *surveyDict;
         NSDictionary *residentAddressDict;
         NSDictionary *surveyAddressDict;
         
+        int clientSurveyAddressId = 0;
+        int clientResidentAddressId = 0;
+        
         int surveyAddressId = 0;
         int residentAddressId = 0;
+        
+        
+        
         while ([rs next]) {
             surveyDict = [rs resultDictionary];
             
-            surveyAddressId = [rs intForColumn:@"client_survey_address_id"];
-            residentAddressId = [rs intForColumn:@"client_resident_address_id"];
+            clientSurveyAddressId = [rs intForColumn:@"client_survey_address_id"];
+            clientResidentAddressId = [rs intForColumn:@"client_resident_address_id"];
+            
+            surveyAddressId = [rs intForColumn:@"survey_address_id"];
+            residentAddressId = [rs intForColumn:@"resident_address_id"];
         }
         
         if(surveyDict != nil)
             [dict setObject:surveyDict forKey:@"survey"];
         
         
-            FMResultSet *rsAddress = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:surveyAddressId]];
+            FMResultSet *rsAddress = [db executeQuery:@"select * from su_address where client_address_id = ? or address_id = ?",[NSNumber numberWithInt:clientSurveyAddressId],[NSNumber numberWithInt:surveyAddressId]];
             
             while ([rsAddress next]) {
                 surveyAddressDict = [rsAddress resultDictionary];
             }
         
-            FMResultSet *rsAddress2 = [db executeQuery:@"select * from su_address where client_address_id = ?",[NSNumber numberWithInt:residentAddressId]];
+            FMResultSet *rsAddress2 = [db executeQuery:@"select * from su_address where client_address_id = ? or address_id = ?",[NSNumber numberWithInt:clientResidentAddressId],[NSNumber numberWithInt:residentAddressId]];
             
             while ([rsAddress2 next]) {
                 residentAddressDict = [rsAddress2 resultDictionary];

@@ -58,10 +58,12 @@
     if([segue.identifier isEqualToString:@"push_survey_detail_from_list"])
     {
         NSIndexPath *indexPath = (NSIndexPath *)sender;
-        int surveyId = [[[[surveyArray objectAtIndex:indexPath.row] objectForKey:@"survey"] valueForKey:@"client_survey_id"] intValue];
+        int clientSurveyId = [[[[surveyArray objectAtIndex:indexPath.row] objectForKey:@"survey"] valueForKey:@"client_survey_id"] intValue];
+        int surveyId = [[[[surveyArray objectAtIndex:indexPath.row] objectForKey:@"survey"] valueForKey:@"survey_id"] intValue];
         
         SurveyDetailViewController *sdvc = [segue destinationViewController];
         sdvc.surveyId = [NSNumber numberWithInt:surveyId];
+        sdvc.clientSurveyId = [NSNumber numberWithInt:clientSurveyId];
     }
 }
 

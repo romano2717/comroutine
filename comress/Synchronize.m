@@ -892,8 +892,9 @@
                 NSString *UnitNo = [rsAddressSurvey stringForColumn:@"unit_no"] ? [rsAddressSurvey stringForColumn:@"unit_no"] : @"";
                 NSString *SpecifyArea = [rsAddressSurvey stringForColumn:@"specify_area"] ? [rsAddressSurvey stringForColumn:@"specify_area"] : @"";
                 NSString *PostalCode = [rsAddressSurvey stringForColumn:@"postal_code"] ? [rsAddressSurvey stringForColumn:@"postal_code"] : @"0";
+                NSNumber *BlkId = [NSNumber numberWithInt:[rsAddressSurvey intForColumn:@"block_id"]];
                 
-                NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
+                NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode,@"BlkId":BlkId};
                 
                 [addressArray addObject:dictAddSurvey];
             }
@@ -1305,7 +1306,7 @@
     NSString *jsonDate = [self serializedStringDateJson:reqDate];
     
     NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
-    DDLogVerbose(@"Post params %@",params);
+    DDLogVerbose(@"Post params %@",[myDatabase toJson:params]);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
         
@@ -1321,6 +1322,7 @@
             NSString *SpecifyArea = [[AddressList objectAtIndex:i] valueForKey:@"SpecifyArea"];
             NSString *UnitNo = [[AddressList objectAtIndex:i] valueForKey:@"UnitNo"];
             NSString *PostalCode = [[AddressList objectAtIndex:i] valueForKey:@"PostalCode"];
+            NSNumber *BlkId = [NSNumber numberWithInt:[[[AddressList objectAtIndex:i] valueForKey:@"BlkId"] intValue]];
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 
@@ -1328,7 +1330,7 @@
                 
                 if([rsCheck next] == NO)
                 {
-                    BOOL insAdd = [db executeUpdate:@"insert into su_address(address_id,address,unit_no,specify_area,postal_code) values (?,?,?,?,?)",AddressId,Location,UnitNo,SpecifyArea,PostalCode];
+                    BOOL insAdd = [db executeUpdate:@"insert into su_address(address_id,address,unit_no,specify_area,postal_code,block_id) values (?,?,?,?,?,?)",AddressId,Location,UnitNo,SpecifyArea,PostalCode,BlkId];
                     
                     if(!insAdd)
                     {

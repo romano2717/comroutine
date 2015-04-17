@@ -9,6 +9,9 @@
 #import "FeedBackViewController.h"
 
 @interface FeedBackViewController ()
+{
+    BOOL didInterActWithOthersAddressTxtFld;
+}
 
 @property (nonatomic, strong) NSNumber *surveyAddressId;
 @property (nonatomic, strong) NSNumber *residentAddressId;
@@ -77,12 +80,6 @@
             defSurveyAddress = [rsGetAdd stringForColumn:@"address"];
             postalCode = [rsGetAdd stringForColumn:@"postal_code"];
         }
-        
-        //get the block id of this postal code
-        FMResultSet *rsGetBlockId = [db executeQuery:@"select * from blocks where postal_code = ?",postalCode];
-        while ([rsGetBlockId next]) {
-            blockId = [NSNumber numberWithInt:[rsGetBlockId intForColumn:@"block_id"]];
-        }
     }];
     self.othersAddTxtField.text = defSurveyAddress;
     
@@ -123,10 +120,11 @@
         btn.enabled = NO;
     }
     
-    //add border to the textview
-    [[self.feedBackTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
-    [[self.feedBackTextView layer] setBorderWidth:1];
-    [[self.feedBackTextView layer] setCornerRadius:15];
+    //disable the others address textfield until the user select Others address radio button
+    MPGTextField *othersTextField = (MPGTextField *)[self.view viewWithTag:300];
+    othersTextField.userInteractionEnabled = NO;
+    othersTextField.backgroundColor = [UIColor lightGrayColor];
+
     
     self.selectedFeeBackTypeArr = [[NSMutableArray alloc] init];
     self.selectedFeeBackTypeStringArr = [[NSMutableArray alloc] init];
@@ -161,13 +159,24 @@
     //move resident textfield up to give more space for auto suggest
     if(textField.tag == 300)
     {
+        didInterActWithOthersAddressTxtFld = YES;
+        
         CGRect residentTextFieldRect = textField.frame;
         CGRect scrollViewFrame = self.scrollView.frame;
         
         [self.scrollView scrollRectToVisible:CGRectMake(scrollViewFrame.origin.x, residentTextFieldRect.origin.y - 10, scrollViewFrame.size.width, scrollViewFrame.size.height) animated:YES];
         
         textField.text = @"";
+        
+        [textField becomeFirstResponder];
     }
+    else
+        didInterActWithOthersAddressTxtFld = NO;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField
+{
+    didInterActWithOthersAddressTxtFld = NO;
 }
 
 #pragma mark MPGTextField Delegate Methods
@@ -287,6 +296,11 @@
         self.segment.hidden = YES;
         self.title = @"New Feedback";
     }
+    
+    //add border to the textview
+    [[self.feedBackTextView layer] setBorderColor:[[UIColor lightGrayColor] CGColor]];
+    [[self.feedBackTextView layer] setBorderWidth:1];
+    [[self.feedBackTextView layer] setCornerRadius:15];
 }
 
 
@@ -299,7 +313,8 @@
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    [self.view endEditing:YES];
+    if(didInterActWithOthersAddressTxtFld == NO) // only dismiss the keyboard when interacting with others address textfield
+        [self.view endEditing:YES];
 }
 
 -(IBAction)toggleSegment:(id)sender
@@ -347,6 +362,10 @@
         }];
         self.othersAddTxtField.text = defSurveyAddress;
         
+        MPGTextField *othersTextField = (MPGTextField *)[self.view viewWithTag:300];
+        othersTextField.userInteractionEnabled = NO;
+        othersTextField.backgroundColor = [UIColor lightGrayColor];
+        
     }
     else if (tag == 12)
     {
@@ -378,6 +397,10 @@
         
         self.othersAddTxtField.text = defResidentAddress;
         
+        MPGTextField *othersTextField = (MPGTextField *)[self.view viewWithTag:300];
+        othersTextField.userInteractionEnabled = NO;
+        othersTextField.backgroundColor = [UIColor lightGrayColor];
+        
     }
     else if (tag == 13)
     {
@@ -389,6 +412,10 @@
         self.othersAddTxtField.text = @"";
         postalCode = @"-1";
         self.residentPostalCode = @"-1";
+        
+        MPGTextField *othersTextField = (MPGTextField *)[self.view viewWithTag:300];
+        othersTextField.userInteractionEnabled = YES;
+        othersTextField.backgroundColor = [UIColor whiteColor];
     }
 }
 
@@ -608,7 +635,7 @@
             
             
             //save the 'Others' address
-            BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area,postal_code) values (?,?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"],postalCode];
+            BOOL ins = [db executeUpdate:@"insert into su_address(address,unit_no,specify_area,postal_code,block_id) values (?,?,?,?,?)",self.othersAddTxtField.text,[dictAddInfo valueForKey:@"unit_no"],[dictAddInfo valueForKey:@"specify_area"],postalCode,blockId];
             
             if(!ins)
             {

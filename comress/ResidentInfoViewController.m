@@ -17,7 +17,7 @@
 
 @implementation ResidentInfoViewController
 
-@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didTakeActionOnDataPrivacyTerms,foundPlacesArray,blockId;
+@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didTakeActionOnDataPrivacyTerms,foundPlacesArray,blockId,residentBlockId;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -66,11 +66,13 @@
         [self.scrollView scrollRectToVisible:CGRectMake(scrollViewFrame.origin.x, residentTextFieldRect.origin.y - 10, scrollViewFrame.size.width, scrollViewFrame.size.height) animated:YES];
         
         textField.text = @"";
+        [textField becomeFirstResponder];
     }
     
     else if (textField.tag == 100) //survey address
     {
         textField.text = @"";
+        [textField becomeFirstResponder];
     }
 }
 
@@ -109,7 +111,7 @@
     {
         self.residentAddressTxtFld.text = [NSString stringWithFormat:@"%@ %@",[[result objectForKey:@"CustomObject"] valueForKey:@"block_no"],[[result objectForKey:@"CustomObject"] valueForKey:@"street_name"]];
         
-        blockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
+        self.residentBlockId = [[result objectForKey:@"CustomObject"] valueForKey:@"block_id"];
         self.residentPostalCode = [[result objectForKey:@"CustomObject"] valueForKey:@"postal_code"];
     }
 }
@@ -210,6 +212,8 @@
     self.residentAddressTxtFld.text = [topLocation valueForKey:@"street_name"];
     self.postalCode = [topLocation valueForKey:@"postal_code"];
     self.residentPostalCode = [topLocation valueForKey:@"postal_code"];
+    self.blockId = [topLocation valueForKey:@"block_id"];
+    self.residentBlockId = [topLocation valueForKey:@"block_id"];
     
     
     NearbyLocationsViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"NearbyLocationsViewController"];
@@ -476,7 +480,7 @@
         BOOL up;
 //        if([action isEqualToString:@"feedback"])
 //        {
-            BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area, postal_code) values (?,?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode];
+            BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area, postal_code, block_id) values (?,?,?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode, blockId];
             
             if(!insSurveyAddress)
             {
@@ -487,7 +491,7 @@
             long long lastSurveyAddressId = [db lastInsertRowId];
             
             
-            BOOL insResidentAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area,postal_code) values (?,?,?,?)",self.residentAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.residentPostalCode];
+            BOOL insResidentAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area,postal_code, block_id) values (?,?,?,?,?)",self.residentAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.residentPostalCode, residentBlockId];
             
             if(!insResidentAddress)
             {

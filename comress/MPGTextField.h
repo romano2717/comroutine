@@ -14,7 +14,7 @@
 @property (nonatomic, weak) id <MPGTextFieldDelegate, UITextFieldDelegate> delegate;
 
 //Set this to override the default color of suggestions popover. The default color is [UIColor colorWithWhite:0.8 alpha:0.9]
-@property (nonatomic) UIColor *backgroundColor;
+@property (nonatomic) UIColor *backgroundColorPopOver;
 
 //Set this to override the default frame of the suggestions popover that will contain the suggestions pertaining to the search query. The default frame will be of the same width as textfield, of height 200px and be just below the textfield.
 @property (nonatomic) CGRect popoverSize;

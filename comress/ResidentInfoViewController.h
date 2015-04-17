@@ -71,6 +71,7 @@
 @property (nonatomic, strong) NSMutableArray *addressArray;
 
 @property (nonatomic, strong) NSNumber *blockId;
+@property (nonatomic, strong) NSNumber *residentBlockId;
 
 -(void)selectedTableRow:(NSUInteger)rowNum;
 

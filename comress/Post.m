@@ -445,6 +445,7 @@ contract_type;
 - (BOOL)updatePostAsSeen:(NSNumber *)clientPostId serverPostId:(NSNumber *)serverPostId
 {
     __block BOOL ok = YES;
+    NSNumber *zero = [NSNumber numberWithInt:0];
     
     myDatabase = [Database sharedMyDbManager];
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
@@ -461,7 +462,7 @@ contract_type;
         }
         
         //set status = 2 of this post from comment noti
-        BOOL rmNoti = [db executeUpdate:@"update comment_noti set status = ? where post_id = ?",[NSNumber numberWithInt:2],serverPostId];
+        BOOL rmNoti = [db executeUpdate:@"update comment_noti set status = ? where post_id = ? and post_id != ?",[NSNumber numberWithInt:2],serverPostId,zero];
         
         if(!rmNoti)
         {

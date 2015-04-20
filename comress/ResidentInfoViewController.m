@@ -223,14 +223,25 @@
     self.residentBlockId = [topLocation valueForKey:@"block_id"];
     
     
-    NearbyLocationsViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"NearbyLocationsViewController"];
-    postInfoVc.delegate = self;
-    postInfoVc.foundPlacesArray = foundPlacesArray;
+//    NearbyLocationsViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"NearbyLocationsViewController"];
+//    postInfoVc.delegate = self;
+//    postInfoVc.foundPlacesArray = foundPlacesArray;
+//    
+//    popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
+//    popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
+//    popover.delegate = self;
+//    [popover presentPopoverFromView:self.navigationController.navigationBar];
     
-    popover = [[FPPopoverKeyboardResponsiveController alloc] initWithViewController:postInfoVc];
-    popover.contentSize = CGSizeMake(CGRectGetWidth(self.view.frame) * 0.90, CGRectGetHeight(self.view.frame) * 0.80);
-    popover.delegate = self;
-    [popover presentPopoverFromView:self.navigationController.navigationBar];
+    
+    NearbyLocationsViewController *postInfoVc = [self.storyboard instantiateViewControllerWithIdentifier:@"NearbyLocationsViewController"];
+
+    UIView *viewV = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 150, 160)];
+    [viewV setBackgroundColor:[UIColor clearColor]];
+    UIPopoverController *popOverController = [[UIPopoverController alloc] initWithContentViewController:postInfoVc];
+    popOverController.popoverContentSize = CGSizeMake(150, 160);
+    [popOverController setDelegate:self];
+    
+    [popOverController presentPopoverFromRect:self.navigationController.navigationBar.frame inView:self.view permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
 }
 
 - (void)popoverControllerDidDismissPopover:(FPPopoverController *)popoverController

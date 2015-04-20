@@ -113,7 +113,12 @@
         //set ui
         [mainImageView sd_setImageWithURL:imageUrl placeholderImage:[UIImage imageNamed:@"noImage"] options:SDWebImageProgressiveDownload];
         statusLabel.text = statusString;
+        
         statusProgressView.progress = progress;
+        
+        if(progress == 1.0)
+            statusProgressView.tintColor = [UIColor greenColor];
+        
         postTitleLabel.text = postTopic;
         addressLabel.text = [postDict valueForKey:@"address"] ? [postDict valueForKey:@"address"] : @"Address:";
         lastMessagByLabel.text = lastMsgBy;

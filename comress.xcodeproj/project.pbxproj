@@ -36,6 +36,11 @@
 		4D118AC11ABACE690062C129 /* CheckListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AC01ABACE690062C129 /* CheckListTableViewCell.m */; };
 		4D118AC91ABBF96D0062C129 /* CheckListHeader.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D118AC71ABBF96D0062C129 /* CheckListHeader.m */; };
 		4D1265C21AE0F8C200D9A512 /* comress.sqlite in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265C11AE0F8C200D9A512 /* comress.sqlite */; };
+		4D1265CA1AE2C7AF00D9A512 /* 1_03@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265C81AE2C7AF00D9A512 /* 1_03@2x.png */; };
+		4D1265CB1AE2C7AF00D9A512 /* 1_05@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265C91AE2C7AF00D9A512 /* 1_05@2x.png */; };
+		4D1265CE1AE2C83400D9A512 /* 1_13@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265CC1AE2C83400D9A512 /* 1_13@2x.png */; };
+		4D1265CF1AE2C83400D9A512 /* Routine_05@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265CD1AE2C83400D9A512 /* Routine_05@2x.png */; };
+		4D1265D11AE3533E00D9A512 /* status_bubble.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1265D01AE3533E00D9A512 /* status_bubble.png */; };
 		4D1FCE191ADB9C1E005381FA /* residentInfo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1FCE181ADB9C1E005381FA /* residentInfo.png */; };
 		4D1FCE1B1ADB9D18005381FA /* user@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D1FCE1A1ADB9D18005381FA /* user@2x.png */; };
 		4D2604FD1ADE169800C8E140 /* FeedBackInfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D2604FC1ADE169800C8E140 /* FeedBackInfoViewController.m */; };
@@ -111,7 +116,7 @@
 		4D91D5E91A8F37AF00A21DBA /* FPTouchView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D91D5E61A8F37AF00A21DBA /* FPTouchView.m */; };
 		4D91D5EF1A8FAA2500A21DBA /* PostStatusTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D91D5EE1A8FAA2500A21DBA /* PostStatusTableViewController.m */; };
 		4D91D5F21A906F5200A21DBA /* FPPopoverKeyboardResponsiveController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D91D5F11A906F5200A21DBA /* FPPopoverKeyboardResponsiveController.m */; };
-		4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D91D5F91A91927D00A21DBA /* status_bubble.png */; };
+		4D91D5FA1A91927D00A21DBA /* status_bubble_old.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D91D5F91A91927D00A21DBA /* status_bubble_old.png */; };
 		4D91D6041A91CA3C00A21DBA /* pin.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D91D6031A91CA3C00A21DBA /* pin.png */; };
 		4D91D6061A91CAA900A21DBA /* pin2.png in Resources */ = {isa = PBXBuildFile; fileRef = 4D91D6051A91CAA900A21DBA /* pin2.png */; };
 		4D99E7E51A80C430005EDDAE /* ImageOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D99E7E41A80C430005EDDAE /* ImageOptions.m */; };
@@ -313,6 +318,11 @@
 		4D118AC71ABBF96D0062C129 /* CheckListHeader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CheckListHeader.m; sourceTree = "<group>"; };
 		4D118AC81ABBF96D0062C129 /* CheckListHeader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CheckListHeader.h; sourceTree = "<group>"; };
 		4D1265C11AE0F8C200D9A512 /* comress.sqlite */ = {isa = PBXFileReference; lastKnownFileType = file; path = comress.sqlite; sourceTree = "<group>"; };
+		4D1265C81AE2C7AF00D9A512 /* 1_03@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1_03@2x.png"; sourceTree = "<group>"; };
+		4D1265C91AE2C7AF00D9A512 /* 1_05@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1_05@2x.png"; sourceTree = "<group>"; };
+		4D1265CC1AE2C83400D9A512 /* 1_13@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "1_13@2x.png"; sourceTree = "<group>"; };
+		4D1265CD1AE2C83400D9A512 /* Routine_05@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Routine_05@2x.png"; sourceTree = "<group>"; };
+		4D1265D01AE3533E00D9A512 /* status_bubble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status_bubble.png; sourceTree = "<group>"; };
 		4D1FCE181ADB9C1E005381FA /* residentInfo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = residentInfo.png; sourceTree = "<group>"; };
 		4D1FCE1A1ADB9D18005381FA /* user@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "user@2x.png"; sourceTree = "<group>"; };
 		4D2604FB1ADE169800C8E140 /* FeedBackInfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedBackInfoViewController.h; sourceTree = "<group>"; };
@@ -419,7 +429,7 @@
 		4D91D5EE1A8FAA2500A21DBA /* PostStatusTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PostStatusTableViewController.m; sourceTree = "<group>"; };
 		4D91D5F01A906F5200A21DBA /* FPPopoverKeyboardResponsiveController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FPPopoverKeyboardResponsiveController.h; sourceTree = "<group>"; };
 		4D91D5F11A906F5200A21DBA /* FPPopoverKeyboardResponsiveController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FPPopoverKeyboardResponsiveController.m; sourceTree = "<group>"; };
-		4D91D5F91A91927D00A21DBA /* status_bubble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status_bubble.png; sourceTree = "<group>"; };
+		4D91D5F91A91927D00A21DBA /* status_bubble_old.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = status_bubble_old.png; sourceTree = "<group>"; };
 		4D91D6031A91CA3C00A21DBA /* pin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pin.png; sourceTree = "<group>"; };
 		4D91D6051A91CAA900A21DBA /* pin2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = pin2.png; sourceTree = "<group>"; };
 		4D99E7E31A80C430005EDDAE /* ImageOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageOptions.h; sourceTree = "<group>"; };
@@ -816,6 +826,17 @@
 			name = Chat;
 			sourceTree = "<group>";
 		};
+		4D1265C71AE2C7A100D9A512 /* from design */ = {
+			isa = PBXGroup;
+			children = (
+				4D1265CC1AE2C83400D9A512 /* 1_13@2x.png */,
+				4D1265CD1AE2C83400D9A512 /* Routine_05@2x.png */,
+				4D1265C81AE2C7AF00D9A512 /* 1_03@2x.png */,
+				4D1265C91AE2C7AF00D9A512 /* 1_05@2x.png */,
+			);
+			name = "from design";
+			sourceTree = "<group>";
+		};
 		4D337D3E1ACBF97400F9C7AA /* FEEDBACK */ = {
 			isa = PBXGroup;
 			children = (
@@ -1169,6 +1190,7 @@
 		4DA2041A1A79CF7400C7E5C7 /* images */ = {
 			isa = PBXGroup;
 			children = (
+				4D1265C71AE2C7A100D9A512 /* from design */,
 				4D1FCE1A1ADB9D18005381FA /* user@2x.png */,
 				4D1FCE181ADB9C1E005381FA /* residentInfo.png */,
 				4D85E6AC1AD7930100170D66 /* threeOfThreeStars@2x.png */,
@@ -1230,7 +1252,8 @@
 				4D37BDB71A9C2271006B414A /* back.png */,
 				4D91D6051A91CAA900A21DBA /* pin2.png */,
 				4D91D6031A91CA3C00A21DBA /* pin.png */,
-				4D91D5F91A91927D00A21DBA /* status_bubble.png */,
+				4D91D5F91A91927D00A21DBA /* status_bubble_old.png */,
+				4D1265D01AE3533E00D9A512 /* status_bubble.png */,
 				4DAEA6AF1A83423300A6EFBE /* noImage.png */,
 				4DA2041B1A79CF8800C7E5C7 /* arrow.png */,
 				4DA2041C1A79CF8800C7E5C7 /* btn_large.png */,
@@ -1739,6 +1762,7 @@
 				4DA207E41A79DA0A00C7E5C7 /* JSQMessagesViewController.xib in Resources */,
 				4D8AC9721AAD91A4008F7652 /* bulb_off@2x.png in Resources */,
 				4D337D331ACBE8BC00F9C7AA /* radio_off@2x.png in Resources */,
+				4D1265CB1AE2C7AF00D9A512 /* 1_05@2x.png in Resources */,
 				4DA7E4891ACEF5F400C994E3 /* en@2x.png in Resources */,
 				4DA208041A79DA0A00C7E5C7 /* JSQMessagesTypingIndicatorFooterView.xib in Resources */,
 				4DE801A91AD26AAB008B0236 /* threestars@2x.png in Resources */,
@@ -1747,7 +1771,7 @@
 				4DE801A61AD26AAB008B0236 /* nostars@2x.png in Resources */,
 				4D118ABD1ABAA9AD0062C129 /* checked@2x.png in Resources */,
 				4D85E6B31AD7930100170D66 /* noThreeStars@2x.png in Resources */,
-				4D91D5FA1A91927D00A21DBA /* status_bubble.png in Resources */,
+				4D91D5FA1A91927D00A21DBA /* status_bubble_old.png in Resources */,
 				4D878D271AD4FBD1000CC3FC /* logo@2x.png in Resources */,
 				4D337D501ACBFFB200F9C7AA /* very_poor@2x.png in Resources */,
 				4D8AC95F1AAD8AE3008F7652 /* crm.png in Resources */,
@@ -1756,14 +1780,17 @@
 				4DA204221A79CF8800C7E5C7 /* btn_small.png in Resources */,
 				4D0717971AB016E00055191A /* crosshair@2x.png in Resources */,
 				4D1FCE191ADB9C1E005381FA /* residentInfo.png in Resources */,
+				4D1265D11AE3533E00D9A512 /* status_bubble.png in Resources */,
 				4DF666A81AA8596000C3B0FF /* newmsg.png in Resources */,
 				4DA208021A79DA0A00C7E5C7 /* JSQMessagesToolbarContentView.xib in Resources */,
 				4D91D6061A91CAA900A21DBA /* pin2.png in Resources */,
 				4DE801AB1AD26AAB008B0236 /* fivestars@2x.png in Resources */,
 				4DA203E91A79CBF900C7E5C7 /* Main.storyboard in Resources */,
 				4D1FCE1B1ADB9D18005381FA /* user@2x.png in Resources */,
+				4D1265CA1AE2C7AF00D9A512 /* 1_03@2x.png in Resources */,
 				4D8AC95A1AAD8AB3008F7652 /* settings.png in Resources */,
 				4DA7E48B1ACEF5F400C994E3 /* hi@2x.png in Resources */,
+				4D1265CE1AE2C83400D9A512 /* 1_13@2x.png in Resources */,
 				4D118ABE1ABAA9AD0062C129 /* check@2x.png in Resources */,
 				4DE801A71AD26AAB008B0236 /* onestar@2x.png in Resources */,
 				4D337D4F1ACBFFB200F9C7AA /* poor@2x.png in Resources */,
@@ -1775,6 +1802,7 @@
 				4DE801A81AD26AAB008B0236 /* twostars@2x.png in Resources */,
 				4DA207DA1A79DA0A00C7E5C7 /* JSQMessagesAssets.bundle in Resources */,
 				4D337D2F1ACBE10800F9C7AA /* rating@2x.png in Resources */,
+				4D1265CF1AE2C83400D9A512 /* Routine_05@2x.png in Resources */,
 				4D337D321ACBE8BC00F9C7AA /* radio_on@2x.png in Resources */,
 				4DA203D31A79CBA100C7E5C7 /* LaunchScreen.xib in Resources */,
 				4DA204211A79CF8800C7E5C7 /* btn_large.png in Resources */,

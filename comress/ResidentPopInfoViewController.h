@@ -19,6 +19,7 @@
     Blocks *blocks;
 }
 @property (nonatomic, strong) NSNumber *surveyId;
+@property (nonatomic, strong) NSNumber *clientSurveyId;
 
 @property (nonatomic, weak) IBOutlet MPGTextField *surveyAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *areaTxtFld;
@@ -29,6 +30,7 @@
 @property (nonatomic, weak) IBOutlet UITextField *residentAddressTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *unitNoTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *contactTxtFld;
+@property (nonatomic, weak) IBOutlet UITextField *otherContactTxtFld;
 @property (nonatomic, weak) IBOutlet UITextField *emailTxFld;
 
 @property (nonatomic, strong) NSString *selectedGender;

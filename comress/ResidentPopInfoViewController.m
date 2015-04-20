@@ -15,7 +15,7 @@
 
 @implementation ResidentPopInfoViewController
 
-@synthesize surveyId,blockId;
+@synthesize surveyId,blockId,clientSurveyId;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -28,7 +28,7 @@
     self.ageRangeArray = [NSArray arrayWithObjects:@"Above 70",@"50 to 70",@"30 to 50",@"18 to 30",@"below 18", nil];
     self.raceArray = [NSArray arrayWithObjects:@"Chinese",@"Malay",@"Indian",@"Other", nil];
     
-    NSDictionary *dict = [mySurvey surveDetailForId:surveyId];
+    NSDictionary *dict = [mySurvey surveDetailForId:surveyId forClientSurveyId:clientSurveyId];
     
     NSDictionary *surveyDict = [dict objectForKey:@"survey"];
     NSDictionary *residentAddressDict = [dict objectForKey:@"residentAddress"];
@@ -47,6 +47,7 @@
     NSString *residentAddress;
     NSString *unitNo;
     NSString *contact;
+    NSString *otherContact;
     NSString *email;
     
     if([surveyAddressDict valueForKey:@"address"] != [NSNull null] && [surveyAddressDict valueForKey:@"address"] != nil)
@@ -75,6 +76,9 @@
     
     if([surveyDict valueForKey:@"resident_contact"] != [NSNull null] && [surveyDict valueForKey:@"resident_contact"] != nil)
         contact = [surveyDict valueForKey:@"resident_contact"];
+    
+    if([surveyDict valueForKey:@"other_contact"] != [NSNull null] && [surveyDict valueForKey:@"other_contact"] != nil)
+        otherContact = [surveyDict valueForKey:@"other_contact"];
     
     if([surveyDict valueForKey:@"resident_email"] != [NSNull null] && [surveyDict valueForKey:@"resident_email"] != nil)
         email = [surveyDict valueForKey:@"resident_email"];
@@ -111,6 +115,7 @@
     self.residentAddressTxtFld.text = residentAddress;
     self.unitNoTxtFld.text = unitNo;
     self.contactTxtFld.text = contact;
+    self.otherContactTxtFld.text = otherContact;
     self.emailTxFld.text = email;
     
     DDLogVerbose(@"%@",dict);
@@ -238,6 +243,7 @@
 
         NSString *resident_contact = self.contactTxtFld.text;
         NSString *resident_email = self.emailTxFld.text;
+        NSString *other_contact = self.otherContactTxtFld.text;
         
         if(self.client_survey_address_id == 0)
         {
@@ -286,9 +292,13 @@
             }
         }
         
+        NSNumber *theSurveyId = [NSNumber numberWithInt:0];
+        if(clientSurveyId > 0)
+            theSurveyId = clientSurveyId;
+        else
+            theSurveyId = surveyId;
         
-        
-        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, resident_contact = ?, status = ?, resident_email = ? where client_survey_id = ?",[NSNumber numberWithLongLong:self.client_survey_address_id],resident_name,resident_age_range,resident_gender,resident_race,[NSNumber numberWithLongLong:self.client_resident_address_id],resident_contact,[NSNumber numberWithInt:1],resident_email,surveyId];
+        BOOL up = [db executeUpdate:@"update su_survey set client_survey_address_id = ?, resident_name = ?, resident_age_range = ?, resident_gender = ?, resident_race = ?, client_resident_address_id = ?, resident_contact = ?, status = ?, resident_email = ?, other_contact = ? where client_survey_id = ?",[NSNumber numberWithLongLong:self.client_survey_address_id],resident_name,resident_age_range,resident_gender,resident_race,[NSNumber numberWithLongLong:self.client_resident_address_id],resident_contact,[NSNumber numberWithInt:1],resident_email,other_contact,theSurveyId];
         
         if(!up)
         {
@@ -302,8 +312,14 @@
     }];
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSNumber *theSurveyId = [NSNumber numberWithInt:0];
+        if(clientSurveyId > 0)
+            theSurveyId = clientSurveyId;
+        else
+            theSurveyId = surveyId;
+        
         Synchronize *sync = [Synchronize sharedManager];
-        [sync uploadResidentInfoEditForSurveyId:surveyId];
+        [sync uploadResidentInfoEditForSurveyId:theSurveyId];
     });
 }
 

@@ -177,12 +177,12 @@
 }
 
 
-- (NSDictionary *)surveDetailForId:(NSNumber *)surveyId
+- (NSDictionary *)surveDetailForId:(NSNumber *)surveyId forClientSurveyId:(NSNumber *)clientSurveyId
 {
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
     
     [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
-        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ? or survey_id = ?",surveyId,surveyId];
+        FMResultSet *rs = [db executeQuery:@"select * from su_survey where client_survey_id = ? or survey_id = ?",clientSurveyId,surveyId];
         NSDictionary *surveyDict;
         NSDictionary *residentAddressDict;
         NSDictionary *surveyAddressDict;

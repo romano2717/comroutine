@@ -20,6 +20,8 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     
+
+    
     //-- Set Notification
 
     // iOS 8 Notifications
@@ -74,7 +76,6 @@
 //    self.wifiReachability = [Reachability reachabilityForLocalWiFi];
 //    [self.wifiReachability startNotifier];
 //    [self updateInterfaceWithReachability:self.wifiReachability];
-    
     return YES;
 }
 
@@ -210,7 +211,7 @@
     [application endBackgroundTask:bgTask];
     bgTask = UIBackgroundTaskInvalid;
     
-    [self downloadNewItems];
+    //[self downloadNewItems];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {

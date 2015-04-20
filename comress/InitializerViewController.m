@@ -1070,7 +1070,6 @@
     }];
 }
 
-
 - (void)startDownloadQuestionsForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
 {
     __block int currentPage = page;
@@ -1133,16 +1132,479 @@
             
             self.processLabel.text = @"Download complete";
             
-            [self checkPostCount];
+            [self checkFeedBackIssuesCount];
         }
         
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
         
-        [self checkPostCount];
+        [self checkFeedBackIssuesCount];
     }];
 }
+
+
+#pragma mark - check questions count
+- (void)checkFeedBackIssuesCount
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSDate *last_request_date = nil;
+        
+        FMResultSet *rs = [db executeQuery:@"select date from su_feedback_issues_last_req_date"];
+        while ([rs next]) {
+            last_request_date = [rs dateForColumn:@"date"];
+        }
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+        
+        NSString *jsonDate = @"/Date(1388505600000+0800)/";
+        
+        if(last_request_date != nil)
+        {
+            jsonDate = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [last_request_date timeIntervalSince1970],[formatter stringFromDate:last_request_date]];
+        }
+        
+        NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
+        DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_feedback_issues] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *dict = [responseObject objectForKey:@"FeedbackIssueContainer"];
+            
+            int totalRows = [[dict valueForKey:@"TotalRows"] intValue];
+            __block BOOL needToDownloadBlocks = NO;
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rsBlockCount = [theDb executeQuery:@"select count(*) as total from su_feedback_issue"];
+                
+                while ([rsBlockCount next]) {
+                    int total = [rsBlockCount intForColumn:@"total"];
+                    
+                    if(total < totalRows)
+                    {
+                        needToDownloadBlocks = YES;
+                    }
+                }
+            }];
+            
+            if(needToDownloadBlocks)
+                [self startDownloadFeedBackIssuesForPage:1 totalPage:0 requestDate:nil withUi:YES];
+            else
+            {
+                [self checkSurveyCount];
+            }
+            
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            [self checkSurveyCount];
+        }];
+        
+    }];
+}
+
+
+#pragma mark - download new data from server
+- (void)startDownloadFeedBackIssuesForPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading your survey... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadSpoSkedForPage %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_feedback_issues] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        NSDictionary *dict = [responseObject objectForKey:@"FeedbackIssueContainer"];
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        NSDate *LastRequestDate = [dict valueForKey:@"LastRequestDate"];
+        
+        //prepare to download the blocks!
+        NSArray *dictArray = [dict objectForKey:@"FeedbackIssueList"];
+        
+        
+        for (int i = 0; i < dictArray.count; i++) {
+            NSDictionary *dictPost = [dictArray objectAtIndex:i];
+            
+            NSNumber *FeedbackIssueId = [NSNumber numberWithInt:[[dictPost valueForKey:@"FeedbackIssueId"] intValue]];
+            NSNumber *Status = [NSNumber numberWithInt:[[dictPost valueForKey:@"Status"] intValue]];
+            
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                
+                FMResultSet *rsPost = [theDb executeQuery:@"select feedback_issue_id from su_feedback_issue where feedback_issue_id = ?",FeedbackIssueId];
+                if([rsPost next] == NO) //does not exist. insert
+                {
+                    BOOL qIns = [theDb executeUpdate:@"insert into su_feedback_issue (feedback_issue_id,status) values (?,?)",FeedbackIssueId,Status];
+                    
+                    if(!qIns)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadFeedBackIssuesForPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:YES];
+        }
+        else
+        {
+            if(dictArray.count > 0)
+            {
+                //update last request date
+                NSString *dateString = [dict valueForKey:@"LastRequestDate"];
+                NSInteger startPosition = [dateString rangeOfString:@"("].location + 1;
+                NSTimeInterval unixTime = [[dateString substringWithRange:NSMakeRange(startPosition, 13)] doubleValue] / 1000;
+                NSDate *date = [NSDate dateWithTimeIntervalSince1970:unixTime];
+                
+                [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                    FMResultSet *rs = [theDb executeQuery:@"select * from su_feedback_issues_last_req_date"];
+                    
+                    if(![rs next])
+                    {
+                        BOOL qIns = [theDb executeUpdate:@"insert into su_feedback_issues_last_req_date(date) values(?)",date];
+                        
+                        if(!qIns)
+                        {
+                            *rollback = YES;
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        BOOL qUp = [theDb executeUpdate:@"update su_feedback_issues_last_req_date set date = ? ",date];
+                        
+                        if(!qUp)
+                        {
+                            *rollback = YES;
+                            return;
+                        }
+                    }
+                }];
+                
+                self.processLabel.text = @"Download complete";
+                
+                [self checkSurveyCount];
+            }
+            
+            
+        }
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+
+        
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        
+        [self checkSurveyCount];
+    }];
+}
+
+
+- (void)checkSurveyCount
+{
+    [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        
+        NSDate *last_request_date = nil;
+        
+        FMResultSet *rs = [db executeQuery:@"select date from su_survey_last_req_date"];
+        while ([rs next]) {
+            last_request_date = [rs dateForColumn:@"date"];
+        }
+        
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"Z"]; //for getting the timezone part of the date only.
+        
+        NSString *jsonDate = @"/Date(1388505600000+0800)/";
+        
+        if(last_request_date != nil)
+        {
+            jsonDate = [NSString stringWithFormat:@"/Date(%.0f000%@)/", [last_request_date timeIntervalSince1970],[formatter stringFromDate:last_request_date]];
+        }
+        
+        NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:1], @"lastRequestTime" : jsonDate};
+        DDLogVerbose(@"%@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"%@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+            NSDictionary *dict = [responseObject objectForKey:@"ResturnSurveyContainer"];
+            
+            int totalRows = [[dict valueForKey:@"TotalRows"] intValue];
+            __block BOOL needToDownloadBlocks = NO;
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rsBlockCount = [theDb executeQuery:@"select count(*) as total from su_survey"];
+                
+                while ([rsBlockCount next]) {
+                    int total = [rsBlockCount intForColumn:@"total"];
+                    
+                    if(total < totalRows)
+                    {
+                        needToDownloadBlocks = YES;
+                    }
+                }
+            }];
+            
+            if(needToDownloadBlocks)
+                [self startDownloadSurveyPage:1 totalPage:0 requestDate:nil withUi:YES];
+            else
+            {
+                [self initializingCompleteWithUi:YES];
+            }
+            
+            
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+            
+            [self initializingCompleteWithUi:YES];
+        }];
+        
+    }];
+}
+
+#pragma mark - download survey
+- (void)startDownloadSurveyPage:(int)page totalPage:(int)totPage requestDate:(NSDate *)reqDate withUi:(BOOL)withUi
+{
+    __block int currentPage = page;
+    __block NSDate *requestDate = reqDate;
+    
+    NSString *jsonDate = @"/Date(1388505600000+0800)/";
+    
+    if(currentPage > 1)
+        jsonDate = [NSString stringWithFormat:@"%@",requestDate];
+    
+    self.processLabel.text = [NSString stringWithFormat:@"Downloading your survey... %d/%d",currentPage,totPage];
+    
+    NSDictionary *params = @{@"currentPage":[NSNumber numberWithInt:page], @"lastRequestTime" : jsonDate};
+    DDLogVerbose(@"startDownloadSpoSkedForPage %@",[myDatabase toJsonString:params]);
+    DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+    
+    [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_download_survey] parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        
+        NSDictionary *dict = [responseObject objectForKey:@"ResturnSurveyContainer"];
+        
+        DDLogVerbose(@"new survey %@",dict);
+        
+        //save address
+        NSArray *AddressList = [dict objectForKey:@"AddressList"];
+        for (int i = 0; i < AddressList.count; i++) {
+            NSNumber *AddressId = [NSNumber numberWithInt:[[[AddressList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
+            NSNumber *Location = [[AddressList objectAtIndex:i] valueForKey:@"Location"];
+            NSString *SpecifyArea = [[AddressList objectAtIndex:i] valueForKey:@"SpecifyArea"];
+            NSString *UnitNo = [[AddressList objectAtIndex:i] valueForKey:@"UnitNo"];
+            NSString *PostalCode = [[AddressList objectAtIndex:i] valueForKey:@"PostalCode"];
+            NSNumber *BlkId = [NSNumber numberWithInt:[[[AddressList objectAtIndex:i] valueForKey:@"BlkId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_address where address_id = ?",AddressId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_address(address_id,address,unit_no,specify_area,postal_code,block_id) values (?,?,?,?,?,?)",AddressId,Location,UnitNo,SpecifyArea,PostalCode,BlkId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save answers
+        NSArray *AnswerList = [dict objectForKey:@"AnswerList"];
+        for (int i = 0; i < AnswerList.count; i++) {
+            NSNumber *AnswerId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"AnswerId"] intValue]];
+            NSNumber *QuestionId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"QuestionId"] intValue]];
+            NSNumber *Rating = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"Rating"] intValue]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[AnswerList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_answers where answer_id = ?",AnswerId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_answers(answer_id,question_id,rating,survey_id) values (?,?,?,?)",AnswerId,QuestionId,Rating,SurveyId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save FeedbackIssueList
+        NSArray *FeedbackIssueList = [dict objectForKey:@"FeedbackIssueList"];
+        for (int i = 0; i < FeedbackIssueList.count; i++) {
+            
+            NSNumber *FeedbackId = [NSNumber numberWithInt:[[[FeedbackIssueList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
+            NSNumber *FeedbackIssueId = [NSNumber numberWithInt:[[[FeedbackIssueList objectAtIndex:i] valueForKey:@"FeedbackIssueId"] intValue]];
+            NSString *IssueDes = [[FeedbackIssueList objectAtIndex:i] valueForKey:@"IssueDes"];
+            
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_feedback_issue where feedback_issue_id = ?",FeedbackIssueId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_feedback_issue(feedback_id,feedback_issue_id,issue_des) values (?,?,?)",FeedbackId,FeedbackIssueId,IssueDes];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        //save FeedbackList
+        NSArray *FeedbackList = [dict objectForKey:@"FeedbackList"];
+        for (int i = 0; i < FeedbackList.count; i++) {
+            
+            NSNumber *AddressId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"AddressId"] intValue]];
+            NSString *Description = [[FeedbackList objectAtIndex:i] valueForKey:@"Description"];
+            NSNumber *FeedbackId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[FeedbackList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+            
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_feedback where feedback_id = ?",FeedbackId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_feedback(address_id,description,feedback_id,survey_id) values (?,?,?,?)",AddressId,Description,FeedbackId,SurveyId];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        
+        
+        //save Survey
+        NSArray *SurveyList = [dict objectForKey:@"SurveyList"];
+        for (int i = 0; i < SurveyList.count; i++) {
+            
+            NSNumber *AverageRating = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"AverageRating"] intValue]];
+            NSNumber *ResidentAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"AverageRating"] intValue]];
+            NSString *ResidentAgeRange = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentAgeRange"];
+            NSString *ResidentGender = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentGender"];
+            NSString *ResidentName = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentName"];
+            NSString *ResidentContact = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentContact"];
+            NSString *Resident2ndContact  = [[SurveyList objectAtIndex:i] valueForKey:@"Resident2ndContact"];
+            NSString *ResidentEmail = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentEmail"];
+            NSString *ResidentRace = [[SurveyList objectAtIndex:i] valueForKey:@"ResidentRace"];
+            NSNumber *SurveyAddressId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyAddressId"] intValue]];
+            NSDate *SurveyDate = [myDatabase createNSDateWithWcfDateString:[[SurveyList objectAtIndex:i] valueForKey:@"SurveyDate"]];
+            NSNumber *SurveyId = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"SurveyId"] intValue]];
+            NSNumber *DataProtection = [NSNumber numberWithInt:[[[SurveyList objectAtIndex:i] valueForKey:@"DataProtection"] intValue]];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
+                
+                FMResultSet *rsCheck = [db executeQuery:@"select * from su_survey where survey_id = ?",SurveyId];
+                
+                if([rsCheck next] == NO)
+                {
+                    BOOL insAdd = [db executeUpdate:@"insert into su_survey(average_rating,resident_address_id,resident_age_range,resident_gender,resident_name,resident_race,survey_address_id,survey_date,survey_id,resident_contact,resident_email,data_protection, other_contact) values (?,?,?,?,?,?,?,?,?,?,?,?,?)",AverageRating,ResidentAddressId,ResidentAgeRange,ResidentGender,ResidentName,ResidentRace,SurveyAddressId,SurveyDate,SurveyId,ResidentContact,ResidentEmail,DataProtection, Resident2ndContact];
+                    
+                    if(!insAdd)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+        }
+        
+        int totalPage = [[dict valueForKey:@"TotalPages"] intValue];
+        
+        NSDate *LastRequestDate = [myDatabase createNSDateWithWcfDateString:[dict valueForKey:@"LastRequestDate"]];
+        
+        
+        if(currentPage < totalPage)
+        {
+            currentPage++;
+            [self startDownloadSurveyPage:currentPage totalPage:totalPage requestDate:LastRequestDate withUi:YES];
+        }
+        else
+        {
+            
+            //update last request date
+            NSString *dateString = [dict valueForKey:@"LastRequestDate"];
+            NSInteger startPosition = [dateString rangeOfString:@"("].location + 1;
+            NSTimeInterval unixTime = [[dateString substringWithRange:NSMakeRange(startPosition, 13)] doubleValue] / 1000;
+            NSDate *date = [NSDate dateWithTimeIntervalSince1970:unixTime];
+            
+            [myDatabase.databaseQ inTransaction:^(FMDatabase *theDb, BOOL *rollback) {
+                FMResultSet *rs = [theDb executeQuery:@"select * from su_survey_last_req_date"];
+                
+                if(![rs next])
+                {
+                    BOOL qIns = [theDb executeUpdate:@"insert into su_survey_last_req_date(date) values(?)",date];
+                    
+                    if(!qIns)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+                else
+                {
+                    BOOL qUp = [theDb executeUpdate:@"update su_survey_last_req_date set date = ? ",date];
+                    
+                    if(!qUp)
+                    {
+                        *rollback = YES;
+                        return;
+                    }
+                }
+            }];
+            
+            
+            [self initializingCompleteWithUi:YES];
+        }
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+    
+        [self initializingCompleteWithUi:YES];
+        
+        DDLogVerbose(@"%@ [%@-%@]",error.localizedDescription,THIS_FILE,THIS_METHOD);
+        DDLogVerbose(@"Post params %@",[myDatabase toJsonString:params]);
+        DDLogVerbose(@"session %@",[myDatabase.userDictionary valueForKey:@"guid"]);
+        DDLogVerbose(@"%@%@",myDatabase.api_url,api_download_survey);
+    }];
+}
+
 
 
 

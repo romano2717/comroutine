@@ -9,21 +9,29 @@
 #import <UIKit/UIKit.h>
 #import "Database.h"
 #import "Feedback.h"
+#import "Contract_type.h"
 
-@interface FeedBackInfoViewController : UIViewController
+@interface FeedBackInfoViewController : UIViewController<UITableViewDataSource,UITableViewDelegate>
 {
     Database *myDatabase;
-    Feedback *feedback;
+    Contract_type *contract_type;
 }
 
 @property (nonatomic, weak) IBOutlet UILabel *locationLabel;
 @property (nonatomic, weak) IBOutlet UILabel *feedBackLabel;
-@property (nonatomic, weak) IBOutlet UILabel *statusLabel;
-@property (nonatomic, weak) IBOutlet UILabel *relatedContract;
+
+@property (nonatomic, weak) IBOutlet UILabel *issueTypeLabel;
+
+@property (nonatomic, weak) IBOutlet UITableView *tableView;
 
 
 @property (nonatomic, strong) NSNumber *feedbackId;
-@property (nonatomic, strong) NSDictionary *feedbackDict;
+@property (nonatomic, strong) NSNumber *clientfeedbackId;
 
+@property (nonatomic, strong) NSMutableDictionary *feedbackDict;
+
+@property (nonatomic, strong) NSMutableArray *dataArray;
+@property (nonatomic, strong) NSArray *issueStatus;
+@property (nonatomic, strong) NSArray *cmrStatus;
 
 @end

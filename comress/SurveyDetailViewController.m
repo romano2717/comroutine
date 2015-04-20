@@ -128,13 +128,18 @@
     {
         ResidentPopInfoViewController *rpvc = [segue destinationViewController];
         rpvc.surveyId = surveyId;
+        rpvc.clientSurveyId = clientSurveyId;
     }
     else if([segue.identifier isEqualToString:@"push_feedback_info"])
     {
         NSDictionary *dict = (NSDictionary *)sender;
         FeedBackInfoViewController *fivc = [segue destinationViewController];
-        NSNumber *feedBackId = [NSNumber numberWithInt:[[[dict objectForKey:@"feedback"] valueForKey:@"client_feedback_id"] intValue]];
+        
+        NSNumber *clientFeedBackId = [NSNumber numberWithInt:[[[dict objectForKey:@"feedback"] valueForKey:@"client_feedback_id"] intValue]];
+        NSNumber *feedBackId = [NSNumber numberWithInt:[[[dict objectForKey:@"feedback"] valueForKey:@"feedback_id"] intValue]];
+        
         fivc.feedbackId = feedBackId;
+        fivc.clientfeedbackId = clientFeedBackId;
     }
 }
 

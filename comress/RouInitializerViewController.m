@@ -7,6 +7,7 @@
 //
 
 #import "RouInitializerViewController.h"
+#import "Synchronize.h"
 
 @interface RouInitializerViewController ()
 
@@ -68,6 +69,11 @@
             {
                 *rollback = YES;
                 return;
+            }
+            else
+            {
+                Synchronize *sync = [Synchronize sharedManager];
+                sync.stop = NO;
             }
         }];
         //}

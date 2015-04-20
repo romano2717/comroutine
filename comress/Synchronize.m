@@ -124,6 +124,7 @@
             }
             [self startDownloadQuestionsForPage:1 totalPage:0 requestDate:jsonDate];
             
+            
             jsonDate = [self deserializeJsonDateString:@"/Date(1388505600000+0800)/"];
             //download survey
             FMResultSet *rs5 = [db executeQuery:@"select date from su_survey_last_req_date"];
@@ -859,7 +860,7 @@
             [surveyDict setObject:ResidentRace forKey:@"ResidentRace"];
             [surveyDict setObject:[NSNumber numberWithInt:ClientResidentAddressId] forKey:@"ClientResidentAddressId"];
             [surveyDict setObject:ResidentContact forKey:@"ResidentContact"];
-            [surveyDict setObject:ResidentContact forKey:@"Resident2ndContact"];
+            [surveyDict setObject:Resident2ndContact forKey:@"Resident2ndContact"];
             [surveyDict setObject:ResidentEmail forKey:@"ResidentEmail"];
             [surveyDict setObject:DataProtection forKey:@"DataProtection"];
             
@@ -961,9 +962,10 @@
                     NSString *Location = [rsAddFeedBack stringForColumn:@"address"] ? [rsAddFeedBack stringForColumn:@"address"] : @"";
                     NSString *UnitNo = [rsAddFeedBack stringForColumn:@"unit_no"] ? [rsAddFeedBack stringForColumn:@"unit_no"] : @"";
                     NSString *SpecifyArea = [rsAddFeedBack stringForColumn:@"specify_area"] ? [rsAddFeedBack stringForColumn:@"specify_area"] : @"";
-                    NSString *PostalCode = [rsAddressFeedback stringForColumn:@"PostalCode"] ? [rsAddFeedBack stringForColumn:@"PostalCode"] : @"0";
+                    NSString *PostalCode = [rsAddFeedBack stringForColumn:@"postal_code"] ? [rsAddFeedBack stringForColumn:@"postal_code"] : @"0";
+                    NSNumber *BlkId = [NSNumber numberWithInt:[rsAddFeedBack intForColumn:@"block_id"]];
                     
-                    NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode};
+                    NSDictionary *dictAddSurvey = @{@"ClientAddressId":ClientAddressId,@"Location":Location,@"UnitNo":UnitNo,@"SpecifyArea":SpecifyArea,@"PostalCode":PostalCode,@"BlkId":BlkId};
                     
                     [addressArray addObject:dictAddSurvey];
                 }
@@ -1041,7 +1043,7 @@
             for (int i = 0; i < AckAnswerList.count; i++) {
                 NSNumber *AnswerId = [NSNumber numberWithInt:[[[AckAnswerList objectAtIndex:i] valueForKey:@"AnswerId"] intValue]];
                 NSNumber *ClientAnswerId = [NSNumber numberWithInt:[[[AckAnswerList objectAtIndex:i] valueForKey:@"ClientAnswerId"] intValue]];
-                BOOL upAns = [db executeUpdate:@"update su_answers set answer_id = ? where client_answer_id = ?",AnswerId,ClientAnswerId];
+                BOOL upAns = [db executeUpdate:@"update su_answers set answer_id = ?, survey_id = ? where client_answer_id = ?",AnswerId,SurveyId,ClientAnswerId];
                 if(!upAns)
                 {
                     *rollback = YES;
@@ -1068,6 +1070,10 @@
                 //update survey_address_id and resident_address_id
                 BOOL upSuAdds = [db executeUpdate:@"update su_survey set survey_address_id = ? where client_survey_address_id = ?",AddressId,ClientAddressId];
                 BOOL upSuAdds2 = [db executeUpdate:@"update su_survey set resident_address_id = ? where client_resident_address_id = ?",AddressId,ClientAddressId];
+                
+                
+                //update feedback address_id
+                BOOL feedAddId = [db executeUpdate:@"update su_feedback set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
             }
             
             
@@ -1090,11 +1096,20 @@
             for (int i = 0; i < AckFeedbackList.count; i++) {
                 NSNumber *ClientFeedbackId = [NSNumber numberWithInt:[[[AckFeedbackList objectAtIndex:i] valueForKey:@"ClientFeedbackId"] intValue]];
                 NSNumber *FeedbackId = [NSNumber numberWithInt:[[[AckFeedbackList objectAtIndex:i] valueForKey:@"FeedbackId"] intValue]];
-                BOOL upAns = [db executeUpdate:@"update su_feedback set feedback_id = ? where client_feedback_id = ?",FeedbackId,ClientFeedbackId];
+                BOOL upAns = [db executeUpdate:@"update su_feedback set feedback_id = ?, survey_id = ? where client_feedback_id = ?",FeedbackId,SurveyId,ClientFeedbackId];
                 if(!upAns)
                 {
                     *rollback = YES;
                     massUpdateOk = NO;
+                    return;
+                }
+                
+                //update feedback_issue
+                BOOL upFbI = [db executeUpdate:@"update su_feedback_issue set feedback_id = ? where client_feedback_id = ?",FeedbackId,ClientFeedbackId];
+
+                if(!upFbI)
+                {
+                    *rollback = YES;
                     return;
                 }
             }
@@ -1152,6 +1167,7 @@
             NSString *ResidentGender = [rs stringForColumn:@"resident_gender"] ? [rs stringForColumn:@"resident_gender"] : @"";
             NSString *ResidentRace = [rs stringForColumn:@"resident_race"] ? [rs stringForColumn:@"resident_race"] : @"";
             NSString *ResidentContact = [rs stringForColumn:@"resident_contact"] ? [rs stringForColumn:@"resident_contact"] : @"";
+            NSString *Resident2ndContact = [rs stringForColumn:@"other_contact"] ? [rs stringForColumn:@"other_contact"] : @"";
             NSString *ResidentEmail = [rs stringForColumn:@"resident_email"] ? [rs stringForColumn:@"resident_email"] : @"";
             NSNumber *ClientResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"client_resident_address_id"]];
             NSNumber *ResidentAddressId = [NSNumber numberWithInt:[rs intForColumn:@"resident_address_id"]];
@@ -1163,9 +1179,11 @@
             [surveyContainer setObject:ResidentGender forKey:@"ResidentGender"];
             [surveyContainer setObject:ResidentRace forKey:@"ResidentRace"];
             [surveyContainer setObject:ResidentContact forKey:@"ResidentContact"];
+            [surveyContainer setObject:Resident2ndContact forKey:@"Resident2ndContact"];
             [surveyContainer setObject:ResidentEmail forKey:@"ResidentEmail"];
             [surveyContainer setObject:ClientResidentAddressId forKey:@"ClientResidentAddressId"];
             [surveyContainer setObject:ResidentAddressId forKey:@"ResidentAddressId"];
+            
             
             //get address
             FMResultSet *rsAddres = [db executeQuery:@"select * from su_address where client_address_id = ?",ClientResidentAddressId];
@@ -1194,7 +1212,7 @@
     DDLogVerbose(@"guid %@",[myDatabase.userDictionary valueForKey:@"guid"]);
     
     [myDatabase.AfManager POST:[NSString stringWithFormat:@"%@%@",myDatabase.api_url,api_upload_resident_info_edit] parameters:surveyDict success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        if(stop)return;
+
         
         NSDictionary *topDict = (NSDictionary *)responseObject;
         
@@ -1207,9 +1225,11 @@
             
             [myDatabase.databaseQ inTransaction:^(FMDatabase *db, BOOL *rollback) {
                 
+                BOOL upAddId;
                 
-                BOOL upAddId = [db executeUpdate:@"update su_address set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
-                
+                if([ClientAddressId intValue] > 0)
+                    upAddId = [db executeUpdate:@"update su_address set address_id = ? where client_address_id = ?",AddressId,ClientAddressId];
+
                 if(!upAddId)
                 {
                     *rollback = YES;
@@ -1220,7 +1240,6 @@
         
         
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        if(stop)return;
         
         DDLogVerbose(@"%@ [%@-%@]",error,THIS_FILE,THIS_METHOD);
     }];

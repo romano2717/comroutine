@@ -13,13 +13,13 @@
 
 @interface ResidentInfoViewController ()
 {
-    BOOL didAddFeedBack;
+
 }
 @end
 
 @implementation ResidentInfoViewController
 
-@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didTakeActionOnDataPrivacyTerms,foundPlacesArray,blockId,residentBlockId;
+@synthesize surveyId,currentLocation,currentSurveyId,averageRating,placemark,didTakeActionOnDataPrivacyTerms,foundPlacesArray,blockId,residentBlockId,didAddFeedBack;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -489,6 +489,9 @@
         BOOL up;
 //        if([action isEqualToString:@"feedback"])
 //        {
+        DDLogVerbose(@"self.postalCode %@",self.postalCode);
+        DDLogVerbose(@"self.residentPostalCode %@",self.residentPostalCode);
+        
             BOOL insSurveyAddress = [db executeUpdate:@"insert into su_address (address, unit_no, specify_area, postal_code, block_id) values (?,?,?,?,?)",self.surveyAddressTxtFld.text, self.unitNoTxtFld.text, self.areaTxtFld.text, self.postalCode, blockId];
             
             if(!insSurveyAddress)
@@ -543,6 +546,8 @@
                 Synchronize *sync = [Synchronize sharedManager];
                 [sync uploadSurveyFromSelf:NO];
             });
+            
+            didAddFeedBack = NO;
         }
         
         if(!up)

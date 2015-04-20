@@ -74,6 +74,8 @@
 @property (nonatomic, strong) NSNumber *blockId;
 @property (nonatomic, strong) NSNumber *residentBlockId;
 
+@property (nonatomic) BOOL didAddFeedBack;
+
 -(void)selectedTableRow:(NSUInteger)rowNum;
 
 -(void)closePopUpWithLocationReload:(BOOL) reload;

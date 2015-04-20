@@ -147,7 +147,7 @@
                 
                 
                 //stop sync
-                Synchronize *sync = [[Synchronize alloc] init];
+                Synchronize *sync = [Synchronize sharedManager];
                 sync.stop = YES;
                 
             }];

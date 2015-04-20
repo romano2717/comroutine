@@ -7,6 +7,7 @@
 //
 
 #import "LoginViewController.h"
+#import "Synchronize.h"
 
 @interface LoginViewController ()
 
@@ -51,6 +52,9 @@
     if(companyId != nil && userId != nil && password != nil && companyId.length > 0 && userId.length > 0 && password.length > 0)
     {
         //the sync might still be running, and some data might still be inserted, clear it first
+        Synchronize *sync = [Synchronize sharedManager];
+        sync.stop = YES;
+        
         [self resetTables];
         
         
